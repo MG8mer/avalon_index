@@ -98,3 +98,34 @@ __Let's break it down:__
    > Notice how pass has been replaced by the code written in the steps prior.
 
   And that is our breakthrough.
+
+  ## Development Process
+  > ### **Tasks**
+
+  - Inspired by the quote "Many hands make light work," we allowed everyone to contribute whever they were free as some of us were busy with other work and tests. Moreover, we made sure everyone had a role in the **V1** of __*Avalon Index*__.  We also set deadlines for each other on whatever task we were doing at that moment depending on how important that task if for the entire project to move on. Here is a table representing the tasks each of us has done and future tasks that we will contribute to...
+  >
+  |                |Tasks Done                        | Future Tasks |
+  |----------------|-------------------------------|---------------|
+  |**Po**            |`Embeds (Help Pages, Start Page, About Pages), Slash Commands, {TENOR} API Related Aspects, Debugging Code, Keeping the Bot Alive Using Uptime`|`Battle Command,  Leveling System, Activity System, Skill Points System, Touch-ups for Embeds`|
+  |**Hamzeus**          |`Setting up Database, Slash Commands, Debugging Code, Creating the Base Stats and Values for Classes, Creating Game Idea`         |`Battle Command, Activity System, Leveling System, Skill Points System`|
+  |**Avash**            |`Creating Game Idea, Creating the Base Stats and Values, Creating Custom Assets for Each Class, Debugging Code (On Hamzeus's Laptop), Slash Commands (was not able to get it to run successfully)`                                           |`Battle Command, Activity System, Leveling System, Skill Points System`|
+
+  ### Milestones
+  >For Milestones and Features that have a **``✘``** will be worked on after **V1** as we needed the basics setup such as the **DATABASE**
+
+  |**`Milestones and Features`**| **`Finished`** |  
+  |------------|----------------|
+  |<div align="center">Creating our 3 Classes|<div align="center">✔|
+  |<div align="center">Custom Assets For Three Classes|<div align="center">✔|
+  |<div align="center">User can enter ``/start`` in order to start|<div align="center">✔|
+  |<div align="center">User can enter ``/help`` in order to select 1 out of 2 pages of wise words|<div align="center">✔|
+  |<div align="center">User can enter ``/about`` in order to view info on the 1 out of 3 classes|<div align="center">✔|
+  |<div align="center">User can enter ``/pick`` in order to pick1 out of 3 classes|<div align="center">✔|
+  |<div align="center">User can enter ``/stats`` in order to view 1 out of 3 classes|<div align="center">✔|
+  |<div align="center">User can enter ``.gif <search_term>`` in order to receive a random gif related to the search term|<div align="center">✔|
+  |<div align="center">Embed Pages **`(Help Pages, About Pages, etc.)`**|<div align="center">✔|
+  |<div align="center">Database|<div align="center">✔|
+  |<div align="center">Small tutorial to show how mechanics work with a visual to show weaknesses **`(Tutorial Idea was scratched since we replaced it with /help)`**|<div align="center">✘|
+  |<div align="center">Show skill tree and evolutions of each class in order to let user truly select their preference **`(Skill Tree System was not acheivable till we had the database setup)`**|<div align="center">✘|
+  |<div align="center">Basic Mechanics **`(Gameplay was not acheivable till we had the database setup)`**|<div align="center">✘|
+  |||
