@@ -123,7 +123,7 @@ __Let's break it down:__
   |<div align="center">User can enter ``/pick`` in order to pick1 out of 3 classes|<div align="center">✓|
   |<div align="center">User can enter ``/stats`` in order to view 1 out of 3 classes|<div align="center">✓|
   |<div align="center">User can enter ``.gif <search_term>`` in order to receive a random gif related to the search term|<div align="center">✓|
-  |<div align="center">Embed Pages **`(Help Pages, About Pages, etc.)`**|<div align="center">✔|
+  |<div align="center">Embed Pages **`(Help Pages, About Pages, etc.)`**|<div align="center">✓|
   |<div align="center">Database|<div align="center">✓|
   |<div align="center">Small tutorial to show how mechanics work with a visual to show weaknesses **`(Tutorial Idea was scratched since we replaced it with /help)`**|<div align="center">✗|
   |<div align="center">Show skill tree and evolutions of each class in order to let user truly select their preference **`(Skill Tree System was not acheivable till we had the database setup)`**|<div align="center">✗|
