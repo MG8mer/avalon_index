@@ -124,6 +124,7 @@ async def start(interaction: Interaction):    #/start command, to start the game
 # Button implementation for reset command and reset command implementation from https://www.youtube.com/watch?v=y3TqSUSOprs&ab_channel=Glowstik
 
 # The class below creates the interaction buttons that are present in the message sent by the bot when /reset is used.
+
 class ConfirmDeny(nextcord.ui.View):
   def __init__(self):
     super().__init__()
