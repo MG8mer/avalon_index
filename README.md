@@ -129,3 +129,16 @@ __Let's break it down:__
   |<div align="center">Show skill tree and evolutions of each class in order to let user truly select their preference **`(Skill Tree System was not acheivable till we had the database setup)`**|<div align="center">✗|
   |<div align="center">Basic Mechanics **`(Gameplay was not acheivable till we had the database setup)`**|<div align="center">✗|
   |||
+
+## Avalon Index Description
+The purpose of **__Avalon Index__** is to provide entertainment for its users through a turn based class rpg, and it falls under the rpg/roguelike genre. The idea came to life during the brainstorming process where things like currency converters and other discord bots were brought up. It was created for Hamzeus, Po, and Avash’s semester project. 
+
+## Avalon Index Summary
+> ### Fundamentals
+The bot has a variety of commands that are used in order to create an rpg/roguelike turn based fighting game. The bot can be initiated using `/start` which prompts the user to pick their first class! They are greeted with an introduction that describes the roles of each class. It also gives them the option to use `/help` in order to get a list of commands they can use, and the option to use `/about` to dive into the depths of each class! After this process, the user is able to use `/pick` in order to pick their class from the list given to them (Knight, Archer, and Mage).
+
+> ### Advanced
+As the bot has not yet been completed, it is still lacking some commands that will be implemented in the near future. These commands will include `/battle` which will let a user challenge another user to a duel where they will be able to use `/move` in order to select an attack. The battle feature will include the `/stats` command which can be used to check the hp, speed, attack, defense, and other aspects of one’s class/character. In case someone has accidentally entered a battle, the command `/ff` will also be implemented to forfeit/cancel the duel. If a user has gotten bored of their current class, they may use `/reset` in order to **__completely__** wipe their data with **__no way to recover it.__**
+
+> ### Finals
+Towards the completion of this project, a few more features will be added in order to polish the user experience. This will include a skill tree to level up current attacks and abilities, an evolution path to strengthen classes/characters to their final forms, and level scaling (xp through chat and battles). None of this will be possible until the **Advanced** steps are completed and will be heavily dependent on the database.
