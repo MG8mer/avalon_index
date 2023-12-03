@@ -121,6 +121,18 @@ async def start(interaction: Interaction):    #/start command, to start the game
         await start_page.start(interaction, botName, bot_avatar_url)
     await db.commit()
 
+# @client.slash_command(name = "battle", description = "Battle an opponent!") #Po testing battle here...
+# async def battle(interaction: Interaction, member: nextcord.Member):
+#   async with aiosqlite.connect("main.db") as db:
+#     async with db.cursor() as cursor:
+#       await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
+#       start_value = await cursor.fetchone()
+#       if start_value == (1,):
+#          await interaction.response.send_message("You can battle")
+#       else:
+#         await interaction.response.send_message("You can't battle, please use the /start command to start the game first.")
+  
+
 # Button implementation for reset command and reset command implementation from https://www.youtube.com/watch?v=y3TqSUSOprs&ab_channel=Glowstik
 
 # The class below creates the interaction buttons that are present in the message sent by the bot when /reset is used.
@@ -188,6 +200,39 @@ async def pck(interaction: Interaction, number: int = SlashOption(name="class", 
           elif number == 3:
             await interaction.response.send_message("You picked the Mage class! This is the class you will use during battles. To pick a new class, you must reset your stats or die three times in three consecutive battles.") 
     await db.commit()
+
+@client.slash_command(name = "battle", description = "Battle an opponent of your choice!")   
+# gotten from: https://stackoverflow.com/questions/68646719/discord-py-set-user-id-as-an-
+async def battle(interaction: Interaction, member: nextcord.Member):    #.battle command, request battles to other users
+  async with aiosqlite.connect("main.db") as db:
+    async with db.cursor() as cursor:
+      if member.id == interaction.user.id:
+        await interaction.response.send_message("You cannot battle yourself!")
+      await cursor.execute('SELECT class FROM users WHERE user_id = ?', (interaction.user.id,))
+      class_value = await cursor.fetchone()
+      if class_value != (1,) and class_value != (2,) and class_value and (3,):
+         await interaction.response.send_message("Please use /pick and try again.")
+      else:
+        await cursor.execute('SELECT class FROM users WHERE user_id = ?', (member.id,))
+        class_value = await cursor.fetchone()
+        if class_value != (1,) and class_value != (2,) and class_value != (3,):
+            await interaction.response.send_message("Cannot battle user who has not picked a class! Try again.")
+        else:
+            await interaction.response.defer()
+            await interaction.followup.send(f"Before you fight {member.mention}, they must consent to your worthy request! \n{member.mention}, would you like to fight, {interaction.user.mention}? Respond `yes` to confirm, respond anything else to cancel.")
+            try:
+              msg = await client.wait_for("message", timeout=60, check=lambda message: message.author.id == member.id)
+            except asyncio.TimeoutError:
+              await interaction.followup.send("User took too long to respond. Use /battle to try again.")
+              return
+
+            if msg.content == "yes":
+              await interaction.followup.send("okie dokie!")
+          # TODO
+            else:
+              await interaction.followup.send("Battle request cancelled.")
+    await db.commit()
+      #argument and https://youtu.be/xLBOs0_i-c8
 
 # The stats command diplays the stats of a user that is mentioned, for now displaying the user's class only. The function checks that the start value is one for the user so stats can be actually displayed for the user. Then the value of the class column for that user is checked to display their class, which is then proceeded to deferring the need to respond to the interaction and then following up by sending the embed for the user's stats, which is for now only their class. If the user has not used the pick function yet, the class displayed will simply be N/A.
 @client.slash_command(name = "stats", description = "Displays stats of your character")
