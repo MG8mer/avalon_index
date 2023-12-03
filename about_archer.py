@@ -4,7 +4,7 @@ import nextcord
 from nextcord.embeds import Embed
 import nextcord.interactions
 
-# The function below creates the about page for the archer class in an embed for the about command, giving a description of the class, its stats, attacks, and who its strong/weak against, with a field for each respectively.
+# The function below creates the about page for the archer class in an embed for the about command, giving a description of the class, its stats, attacks, and who its strong or weak against, with a field for each respectively.
 
 async def about(interaction):
     embed_archer = Embed(   
