@@ -35,11 +35,100 @@ import help_page
 import help_pageTWO
 import start_page
 
-
 active() # from https://docs.replit.com/tutorials/python/build-basic-discord-bot-python
 
 client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all())   #from https://youtu.be/ksAtGCFxrP8#si=A89Nokdcqfsy_tGZ
 client.remove_command('help') # Removing the built in help command 
+
+health = {
+  1: 150,
+  2: 75,
+  3: 100
+}
+
+evaluation = {
+  "11": "Normal",
+  "22": "Normal",
+  "33": "Normal",
+  "12": "Weak",
+  "13": "Strong",
+  "21": "Strong",
+  "23": "Weak",
+  "31": "Weak",
+  "32": "Strong",
+}
+
+attacks = {
+  1: {
+    "Sword Jab": {
+      "Weak": -5,
+      "Normal": -10,
+      "Strong": -15
+    },
+    "Sword Slash": {
+      "Weak": -10,
+      "Normal": -20,
+      "Strong": -30
+    },
+    "Dual Sword Attack": {
+      "Weak": -40,
+      "Nomral": -45,
+      "Strong": -50,
+    },
+    "Sliced and Diced": {
+      "Weak": -60,
+      "Normal": -65,
+      "Strong": -70,
+    }
+  },
+  2: {
+    "Weak Arrow": {
+      "Weak": -7,
+      "Normal": -12,
+      "Strong": -15
+    },
+    "Piercing Shot": {
+      "Weak": -20,
+      "Normal": -25,
+      "Strong": -35
+    },
+    "Triple Shot": {
+      "Weak": -45,
+      "Nomral": -50,
+      "Strong": -60,
+    },
+    "Make it Rain": {
+      "Weak": -80,
+      "Normal": -90,
+      "Strong": -100,
+    }
+  },
+  3: {
+  "Zap": {
+    "Weak": -6,
+    "Normal": -11,
+    "Strong": -14
+  },
+  "Fireball": {
+    "Weak": -15,
+    "Normal": -25,
+    "Strong": -32
+  },
+  "Arcane Mania": {
+    "Weak": -42,
+    "Nomral": -47,
+    "Strong": -55,
+  },
+  "Biden Blast": {
+    "Weak": -70,
+    "Normal": -75,
+    "Strong": -80,
+  }
+}
+}
+
+
+
 
 
 @client.command()
@@ -92,6 +181,10 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
     async with db.cursor() as cursor:
       await cursor.execute('CREATE TABLE IF NOT EXISTS users(user_id INTEGER, guild_id INTEGER, class INTEGER, start INTEGER)')
     await db.commit()
+    async with aiosqlite.connect("main.db") as db:
+      async with db.cursor() as cursor:
+        await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id INTEGER, starter_hp INTEGER, reciever_id INTEGER, reciever_hp INTEGER, evaluation STRING)')
+      await db.commit()
   print(f"{len(client.guilds)}")
   print(f"{client.guilds[0].id}")
 
@@ -120,22 +213,6 @@ async def start(interaction: Interaction):    #/start command, to start the game
         await cursor.execute('INSERT INTO users (user_id, guild_id, start) VALUES (?, ?, ?)', (interaction.user.id,client.guilds[0].id, 1))
         await start_page.start(interaction, botName, bot_avatar_url)
     await db.commit()
-
-# @client.slash_command(name = "battle", description = "Battle an opponent!") #Po testing battle here...
-# async def battle(interaction: Interaction, member: nextcord.Member):
-#   async with aiosqlite.connect("main.db") as db:
-#     async with db.cursor() as cursor:
-#       await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
-#       start_value = await cursor.fetchone()
-#       if start_value == (1,):
-#          await interaction.response.send_message("You can battle")
-#       else:
-#         await interaction.response.send_message("You can't battle, please use the /start command to start the game first.")
-  
-
-# Button implementation for reset command and reset command implementation from https://www.youtube.com/watch?v=y3TqSUSOprs&ab_channel=Glowstik
-
-# The class below creates the interaction buttons that are present in the message sent by the bot when /reset is used.
 
 class ConfirmDeny(nextcord.ui.View):
   def __init__(self):
@@ -184,6 +261,7 @@ async def pck(interaction: Interaction, number: int = SlashOption(name="class", 
     async with db.cursor() as cursor:
       await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
       start_value = await cursor.fetchone()
+      print(start_value[0])
       if start_value != (1,):
         await interaction.response.send_message("Cannot pick class when /start has not been initialized!")
       else:
@@ -227,7 +305,8 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
               return
 
             if msg.content == "yes":
-              await interaction.followup.send("okie dokie!")
+              await interaction.followup.send("Starting battle...")
+              
           # TODO
             else:
               await interaction.followup.send("Battle request cancelled.")
