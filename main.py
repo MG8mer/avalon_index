@@ -219,12 +219,42 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
     await db.commit()
       #argument and https://youtu.be/xLBOs0_i-c8
 
-@client.slash_command(name = "ff", description = "Run away from a battle")
+class RunStay(nextcord.ui.View):
+  def __init__(self):
+    super().__init__()
+    self.value = None
+
+  @nextcord.ui.button(label = 'Yes', style=nextcord.ButtonStyle.green)
+  async def y(self, button: nextcord.ui.Button, interaction: Interaction):
+    async with aiosqlite.connect("main.db") as db:
+      async with db.cursor() as cursor:
+        await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
+        await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle!", ephemeral=False) 
+      await db.commit()
+    self.value = True
+    self.stop()
+
+  @nextcord.ui.button(label = 'No', style=nextcord.ButtonStyle.red)
+  async def n(self, button: nextcord.ui.Button, interaction: Interaction):
+    await interaction.response.send_message('The battle continues!', ephemeral=True)
+    self.value = False
+    self.stop()
+    
+@client.slash_command(name = "ff", description = "Run away from a battle!")
 async def ff(interaction: Interaction):    #.pick command, to pick a class users must type this command
+  view = ConfirmDeny()
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
-      
+      await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
+      battle_value = await cursor.fetchone()
+      if battle_value == (1,):
+         await interaction.response.send_message("Are you sure you want to flee this battle?", view=view, ephemeral=True)
+         await view.wait()
+      else:
+         await interaction.response.send_message("No, you can't runaway from the voices in your head...", ephemeral=True)
     await db.commit()
+  if view.value is None:
+    return
 
 # The stats command diplays the stats of a user that is mentioned, for now displaying the user's class only. The function checks that the start value is one for the user so stats can be actually displayed for the user. Then the value of the class column for that user is checked to display their class, which is then proceeded to deferring the need to respond to the interaction and then following up by sending the embed for the user's stats, which is for now only their class. If the user has not used the pick function yet, the class displayed will simply be N/A.
 @client.slash_command(name = "stats", description = "Displays stats of your character")
