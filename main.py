@@ -34,101 +34,12 @@ import about_mage
 import help_page
 import help_pageTWO
 import start_page
+import battle
 
 active() # from https://docs.replit.com/tutorials/python/build-basic-discord-bot-python
 
 client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all())   #from https://youtu.be/ksAtGCFxrP8#si=A89Nokdcqfsy_tGZ
 client.remove_command('help') # Removing the built in help command 
-
-health = {
-  1: 150,
-  2: 75,
-  3: 100
-}
-
-evaluation = {
-  "11": "Normal",
-  "22": "Normal",
-  "33": "Normal",
-  "12": "Weak",
-  "13": "Strong",
-  "21": "Strong",
-  "23": "Weak",
-  "31": "Weak",
-  "32": "Strong",
-}
-
-attacks = {
-  1: {
-    "Sword Jab": {
-      "Weak": -5,
-      "Normal": -10,
-      "Strong": -15
-    },
-    "Sword Slash": {
-      "Weak": -10,
-      "Normal": -20,
-      "Strong": -30
-    },
-    "Dual Sword Attack": {
-      "Weak": -40,
-      "Nomral": -45,
-      "Strong": -50,
-    },
-    "Sliced and Diced": {
-      "Weak": -60,
-      "Normal": -65,
-      "Strong": -70,
-    }
-  },
-  2: {
-    "Weak Arrow": {
-      "Weak": -7,
-      "Normal": -12,
-      "Strong": -15
-    },
-    "Piercing Shot": {
-      "Weak": -20,
-      "Normal": -25,
-      "Strong": -35
-    },
-    "Triple Shot": {
-      "Weak": -45,
-      "Nomral": -50,
-      "Strong": -60,
-    },
-    "Make it Rain": {
-      "Weak": -80,
-      "Normal": -90,
-      "Strong": -100,
-    }
-  },
-  3: {
-  "Zap": {
-    "Weak": -6,
-    "Normal": -11,
-    "Strong": -14
-  },
-  "Fireball": {
-    "Weak": -15,
-    "Normal": -25,
-    "Strong": -32
-  },
-  "Arcane Mania": {
-    "Weak": -42,
-    "Nomral": -47,
-    "Strong": -55,
-  },
-  "Biden Blast": {
-    "Weak": -70,
-    "Normal": -75,
-    "Strong": -80,
-  }
-}
-}
-
-
-
 
 
 @client.command()
@@ -180,11 +91,8 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
       await cursor.execute('CREATE TABLE IF NOT EXISTS users(user_id INTEGER, guild_id INTEGER, class INTEGER, start INTEGER)')
+      await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id INTEGER, starter_hp INTEGER, reciever_id INTEGER, reciever_hp INTEGER, evaluation STRING)')
     await db.commit()
-    async with aiosqlite.connect("main.db") as db:
-      async with db.cursor() as cursor:
-        await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id INTEGER, starter_hp INTEGER, reciever_id INTEGER, reciever_hp INTEGER, evaluation STRING)')
-      await db.commit()
   print(f"{len(client.guilds)}")
   print(f"{client.guilds[0].id}")
 
@@ -303,15 +211,20 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
             except asyncio.TimeoutError:
               await interaction.followup.send("User took too long to respond. Use /battle to try again.")
               return
-
             if msg.content == "yes":
               await interaction.followup.send("Starting battle...")
-              
           # TODO
             else:
               await interaction.followup.send("Battle request cancelled.")
     await db.commit()
       #argument and https://youtu.be/xLBOs0_i-c8
+
+@client.slash_command(name = "ff", description = "Run away from a battle")
+async def ff(interaction: Interaction):    #.pick command, to pick a class users must type this command
+  async with aiosqlite.connect("main.db") as db:
+    async with db.cursor() as cursor:
+      
+    await db.commit()
 
 # The stats command diplays the stats of a user that is mentioned, for now displaying the user's class only. The function checks that the start value is one for the user so stats can be actually displayed for the user. Then the value of the class column for that user is checked to display their class, which is then proceeded to deferring the need to respond to the interaction and then following up by sending the embed for the user's stats, which is for now only their class. If the user has not used the pick function yet, the class displayed will simply be N/A.
 @client.slash_command(name = "stats", description = "Displays stats of your character")
