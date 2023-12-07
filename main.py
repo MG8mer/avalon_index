@@ -27,6 +27,7 @@ from nextcord.application_command import SlashOption # from https://www.youtube.
 from nextcord.embeds import Embed # from https://www.youtube.com/watch?v=wn7NIqSSgas&list=PL-7Dfw57ZZVRB4N7VWPjmT0Q-2FIMNBMP&index=16&ab_channel=JamesS
 from nextcord.ext import commands # from https://www.youtube.com/watch?v=wn7NIqSSgas&list=PL-7Dfw57ZZVRB4N7VWPjmT0Q-2FIMNBMP&index=16&ab_channel=JamesS
 from nextcord.ext.commands import context    #from https://docs.replit.com/tutorialsb/python/build-basic-discord-bot- python and # from https://www.youtube.com/watch?v=wn7NIqSSgas&list=PL-7Dfw57ZZVRB4N7VWPjmT0Q-2FIMNBMP&index=16&ab_channel=JamesS
+# import wavelink
 from active import active  
 import about_archer
 import about_knight
@@ -34,13 +35,12 @@ import about_mage
 import help_page
 import help_pageTWO
 import start_page
-import battle
+import battle_command
 
 active() # from https://docs.replit.com/tutorials/python/build-basic-discord-bot-python
 
 client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all())   #from https://youtu.be/ksAtGCFxrP8#si=A89Nokdcqfsy_tGZ
 client.remove_command('help') # Removing the built in help command 
-
 
 @client.command()
 async def gif(ctx, *args): #prefix command to grab gif based on arg
@@ -91,10 +91,29 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
       await cursor.execute('CREATE TABLE IF NOT EXISTS users(user_id INTEGER, guild_id INTEGER, class INTEGER, start INTEGER)')
-      await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id INTEGER, starter_hp INTEGER, reciever_id INTEGER, reciever_hp INTEGER, evaluation STRING)')
+      await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id INTEGER, starter_hp INTEGER, reciever_id INTEGER, reciever_hp INTEGER, evaluation_starter STRING, evaluation_reciever STRING)')
+      await cursor.execute('CREATE TABLE IF NOT EXISTS moves(weak STRING, weak_damage INTEGER, normal STRING, normal_damage INTEGER, special_attack STRING, special_damage INTEGER, avalon_blessing STRING, avalon_damage INTEGER)')
     await db.commit()
+  # client.loop.create_task(node_connect())
   print(f"{len(client.guilds)}")
   print(f"{client.guilds[0].id}")
+
+# @client.event
+# async def on_wavelink_node_ready(node: wavelink.Node):
+#   print(f"Node {node.identifier} is ready!")
+
+# async def node_connect():
+#   await client.wait_until_ready()
+#   await wavelink.Node
+
+# @client.command
+# async def play(ctx, *args):
+#   if not ctx.voice_client:
+#     vc: wavelink.Player = await ctx.author.voice.channel.connect(cls=wavelink.Player)
+#   else:
+#     vc: wavelink.Player = ctx.voice_client
+#   search = wavelink.TrackSource(arg[0]).YouTube
+#   vc.play(search)
 
 @client.slash_command(name = "help", description = "Are you confused?") #slash command to print out help pages
 async def help(interaction: Interaction, number: int = SlashOption(name="page", choices={"#1": 1, "#2": 2})):
@@ -169,7 +188,6 @@ async def pck(interaction: Interaction, number: int = SlashOption(name="class", 
     async with db.cursor() as cursor:
       await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
       start_value = await cursor.fetchone()
-      print(start_value[0])
       if start_value != (1,):
         await interaction.response.send_message("Cannot pick class when /start has not been initialized!")
       else:
@@ -185,24 +203,29 @@ async def pck(interaction: Interaction, number: int = SlashOption(name="class", 
             await interaction.response.send_message("You picked the Archer class! This is the class you will use during battles. To pick a new class, you must reset your stats or die three times in three consecutive battles.") 
           elif number == 3:
             await interaction.response.send_message("You picked the Mage class! This is the class you will use during battles. To pick a new class, you must reset your stats or die three times in three consecutive battles.") 
-    await db.commit()
+    await db.commit() 
 
 @client.slash_command(name = "battle", description = "Battle an opponent of your choice!")   
 # gotten from: https://stackoverflow.com/questions/68646719/discord-py-set-user-id-as-an-
 async def battle(interaction: Interaction, member: nextcord.Member):    #.battle command, request battles to other users
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
-      if member.id == interaction.user.id:
-        await interaction.response.send_message("You cannot battle yourself!")
+      await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
+      start_value = await cursor.fetchone()
       await cursor.execute('SELECT class FROM users WHERE user_id = ?', (interaction.user.id,))
       class_value = await cursor.fetchone()
-      if class_value != (1,) and class_value != (2,) and class_value and (3,):
-         await interaction.response.send_message("Please use /pick and try again.")
+      print(class_value)
+      if start_value != (1,):
+        await interaction.response.send_message("Please use /start and try again.")
+      elif class_value != (1,) and class_value != (2,) and class_value != (3,):
+       await interaction.response.send_message("Please use /pick and try again.")
+      elif member.id == interaction.user.id:
+        await interaction.response.send_message("You cannot battle yourself!")
       else:
         await cursor.execute('SELECT class FROM users WHERE user_id = ?', (member.id,))
         class_value = await cursor.fetchone()
         if class_value != (1,) and class_value != (2,) and class_value != (3,):
-            await interaction.response.send_message("Cannot battle user who has not picked a class! Try again.")
+            await interaction.response.send_message("Cannot battle user who has not picked a class!")
         else:
             await interaction.response.defer()
             await interaction.followup.send(f"Before you fight {member.mention}, they must consent to your worthy request! \n{member.mention}, would you like to fight, {interaction.user.mention}? Respond `yes` to confirm, respond anything else to cancel.")
@@ -213,7 +236,7 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
               return
             if msg.content == "yes":
               await interaction.followup.send("Starting battle...")
-          # TODO
+              await battle_command.battle(interaction, member)
             else:
               await interaction.followup.send("Battle request cancelled.")
     await db.commit()
@@ -242,12 +265,14 @@ class RunStay(nextcord.ui.View):
     
 @client.slash_command(name = "ff", description = "Run away from a battle!")
 async def ff(interaction: Interaction):    #.pick command, to pick a class users must type this command
-  view = ConfirmDeny()
+  view = RunStay()
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
       await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
-      battle_value = await cursor.fetchone()
-      if battle_value == (1,):
+      battle_check_one = await cursor.fetchone()
+      await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
+      battle_check_two = await cursor.fetchone()
+      if battle_check_one == (1,) or battle_check_two == (1,):
          await interaction.response.send_message("Are you sure you want to flee this battle?", view=view, ephemeral=True)
          await view.wait()
       else:
