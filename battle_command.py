@@ -92,6 +92,10 @@ attacks = {
 
 }
 
+class_evaluation_reciever = None
+class_evaluation_starter = None
+class_value_reciever = None
+class_value_starter = None
 battle_value = None
 starter_hp_value = None
 reciever_hp_value = None
@@ -105,18 +109,17 @@ async def battle(interaction: Interaction, member: nextcord.Member):
       class_value_reciever = await cursor.fetchone()
       class_evaluation_starter = str(class_value_starter[0]) + str(class_value_reciever[0])
       class_evaluation_reciever = str(class_value_reciever[0]) + str(class_value_starter[0])
-      await cursor.execute('INSERT INTO battles (battle, starter_id, starter_hp, reciever_id, reciever_hp, evaluation_starter, evaluation_reciever) VALUES (?, ?, ?, ?, ?, ?, ?)', (1, interaction.user.id, health[class_value_starter[0]], member.id, health[class_value_reciever[0]], evaluation[class_evaluation_starter], evaluation[class_evaluation_reciever]))
-      await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
-      starter_battle_value = await cursor.fetchone()
-      await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (member.id,))
-      reciever_battle_value = await cursor.fetchone()
+      await cursor.execute('UPDATE battles SET battle = ?, starter_hp = ?, reciever_hp = ?, evaluation_starter = ?, evaluation_reciever = ? WHERE starter_id = ? AND reciever_id = ?', (1, health[class_value_starter[0]], health[class_value_reciever[0]], evaluation[class_evaluation_starter], evaluation[class_evaluation_reciever], interaction.user.id, member.id,))
       await cursor.execute('SELECT starter_hp FROM battles WHERE starter_id = ?', (interaction.user.id,))
       starter_hp_value = await cursor.fetchone()
       await cursor.execute('SELECT reciever_hp FROM battles WHERE reciever_id = ?', (member.id,))
       reciever_hp_value = await cursor.fetchone()
     await db.commit()
   while starter_hp_value[0] >= 0 and reciever_hp_value[0] >= 0:
-    pass
+     async with aiosqlite.connect("main.db") as db:
+       async with db.cursor() as cursor:
+         await cursor.execute('SELECT starter_hp FROM battles WHERE starter_id = ?', (interaction.user.id,))
+       await db.commit()
 
 async def get_move(interaction: Interaction, member: nextcord.Member):
   pass

@@ -134,7 +134,13 @@ async def start(interaction: Interaction):    #/start command, to start the game
     async with db.cursor() as cursor:
       await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
       start_value = await cursor.fetchone()
-      if start_value == (1,):
+      await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
+      check_battle_one = await cursor.fetchone()
+      await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
+      check_battle_two = await cursor.fetchone()
+      if check_battle_one == (1,) or check_battle_two == (1,):
+        await interaction.response.send_message("Cannot start the game when you're playing the game! Like dude just make a move... Wait until the battle ends or flee the battle!")
+      elif start_value == (1,):
          await interaction.response.send_message("You have already used start! If you would like to reset your stats, please use the /reset command.")
       else:
         await cursor.execute('INSERT INTO users (user_id, guild_id, start) VALUES (?, ?, ?)', (interaction.user.id,client.guilds[0].id, 1))
@@ -170,13 +176,20 @@ async def re(interaction: Interaction):
   view = ConfirmDeny()
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
-      await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
-      start_value = await cursor.fetchone()
-      if start_value == (1,):
-         await interaction.response.send_message("Hold up! Once you reset your stats, you cannot go back, are you sure you want to proceed?", view=view, ephemeral=True)
-         await view.wait()
+      await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
+      battle_check_one = await cursor.fetchone()
+      await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
+      battle_check_two = await cursor.fetchone()
+      if battle_check_one == (1,) or battle_check_two == (1,):
+         await interaction.response.send_message("You cannot use /reset during battle! Wait until the battle ends or flee the battle!")
       else:
-         await interaction.response.send_message("Cannot erase stats that don't exist!", ephemeral=True)
+        await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
+        start_value = await cursor.fetchone()
+        if start_value == (1,):
+           await interaction.response.send_message("Hold up! Once you reset your stats, you cannot go back, are you sure you want to proceed?", view=view, ephemeral=True)
+           await view.wait()
+        else:
+           await interaction.response.send_message("Cannot erase stats that don't exist!", ephemeral=True)
       await db.commit()
   if view.value is None:
     return
@@ -188,8 +201,14 @@ async def pck(interaction: Interaction, number: int = SlashOption(name="class", 
     async with db.cursor() as cursor:
       await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
       start_value = await cursor.fetchone()
+      await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
+      check_battle_one = await cursor.fetchone()
+      await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
+      check_battle_two = await cursor.fetchone()
       if start_value != (1,):
         await interaction.response.send_message("Cannot pick class when /start has not been initialized!")
+      elif check_battle_one == (1,) or check_battle_two == (1,):
+        await interaction.response.send_message("Cannot pick a class during a battle! Wait until the battle ends or flee the battle!")
       else:
         await cursor.execute('SELECT class FROM users WHERE user_id = ?', (interaction.user.id,))
         class_value = await cursor.fetchone()
@@ -205,6 +224,17 @@ async def pck(interaction: Interaction, number: int = SlashOption(name="class", 
             await interaction.response.send_message("You picked the Mage class! This is the class you will use during battles. To pick a new class, you must reset your stats or die three times in three consecutive battles.") 
     await db.commit() 
 
+
+start_value = None
+class_value_initial = None
+class_value_final = None
+check_battle_one = None
+check_battle_two = None
+check_battle_three = None
+check_battle_four = None
+battle_requested = None
+requested_battle = None
+
 @client.slash_command(name = "battle", description = "Battle an opponent of your choice!")   
 # gotten from: https://stackoverflow.com/questions/68646719/discord-py-set-user-id-as-an-
 async def battle(interaction: Interaction, member: nextcord.Member):    #.battle command, request battles to other users
@@ -213,33 +243,66 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
       await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
       start_value = await cursor.fetchone()
       await cursor.execute('SELECT class FROM users WHERE user_id = ?', (interaction.user.id,))
-      class_value = await cursor.fetchone()
-      print(class_value)
-      if start_value != (1,):
-        await interaction.response.send_message("Please use /start and try again.")
-      elif class_value != (1,) and class_value != (2,) and class_value != (3,):
-       await interaction.response.send_message("Please use /pick and try again.")
-      elif member.id == interaction.user.id:
-        await interaction.response.send_message("You cannot battle yourself!")
-      else:
-        await cursor.execute('SELECT class FROM users WHERE user_id = ?', (member.id,))
-        class_value = await cursor.fetchone()
-        if class_value != (1,) and class_value != (2,) and class_value != (3,):
-            await interaction.response.send_message("Cannot battle user who has not picked a class!")
-        else:
-            await interaction.response.defer()
-            await interaction.followup.send(f"Before you fight {member.mention}, they must consent to your worthy request! \n{member.mention}, would you like to fight, {interaction.user.mention}? Respond `yes` to confirm, respond anything else to cancel.")
-            try:
-              msg = await client.wait_for("message", timeout=60, check=lambda message: message.author.id == member.id)
-            except asyncio.TimeoutError:
-              await interaction.followup.send("User took too long to respond. Use /battle to try again.")
-              return
-            if msg.content == "yes":
-              await interaction.followup.send("Starting battle...")
-              await battle_command.battle(interaction, member)
-            else:
-              await interaction.followup.send("Battle request cancelled.")
+      class_value_initial = await cursor.fetchone()
+      await cursor.execute('SELECT class FROM users WHERE user_id = ?', (member.id,))
+      class_value_final = await cursor.fetchone()
+      await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
+      check_battle_one = await cursor.fetchone()
+      await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
+      check_battle_two = await cursor.fetchone()
+      await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (member.id,))
+      check_battle_three = await cursor.fetchone()
+      await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (member.id,))
+      check_battle_four = await cursor.fetchone()
+      await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
+      battle_requested = await cursor.fetchone()
+      await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
+      requesting_battle = await cursor.fetchone()
+      await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (member.id,))
+      requested_battle = await cursor.fetchone()
     await db.commit()
+  if start_value != (1,):
+    await interaction.response.send_message("Please use /start and try again.")
+  elif class_value_initial != (1,) and class_value_initial != (2,) and class_value_initial != (3,):
+    await interaction.response.send_message("Please use /pick and try again.")
+  elif battle_requested == (0,) or requesting_battle == (0,):
+    await interaction.response.send_message("You have already requested or been requested for a battle! Please await for your request to timeout or be accepted/rejected or accept/reject your request to try again.")
+  elif check_battle_one == (1,) or check_battle_two == (1,):
+    await interaction.response.send_message("Cannot initiate another battle during a battle! Wait until the battle ends or flee the battle!")
+  elif check_battle_three == (1,) or check_battle_four == (1,) or requested_battle == (0,):
+    await interaction.response.send_message("Cannot battle someone who is already in a battle or has requested for a battle! Try again later.")
+  elif member.id == interaction.user.id:
+    await interaction.response.send_message("You cannot battle yourself!")
+  elif class_value_final != (1,) and class_value_final != (2,) and class_value_final != (3,):
+    await interaction.response.send_message("Cannot battle user who has not picked a class!")
+  else:
+    async with aiosqlite.connect("main.db") as db:
+      async with db.cursor() as cursor:
+        await cursor.execute('INSERT INTO battles (battle, starter_id, reciever_id) VALUES (?, ?, ?)', (0, interaction.user.id, member.id,))
+      await db.commit()
+    await interaction.response.defer()
+    await interaction.followup.send(f"Before you fight {member.mention}, they must consent to your worthy request! \n{member.mention}, would you like to fight, {interaction.user.mention}? Respond `yes` to confirm, respond anything else to cancel.")   
+    if battle_requested != (0,):
+      try:
+        msg = await client.wait_for("message", timeout=60, check=lambda message: message.author.id == member.id)
+      except asyncio.TimeoutError:
+        await interaction.followup.send("User took too long to respond. Use /battle to try again.")
+        async with aiosqlite.connect("main.db") as db:
+          async with db.cursor() as cursor:
+            await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
+          await db.commit()
+          return      
+      if msg.content == "yes":
+        await interaction.followup.send("Starting battle...")
+        await battle_command.battle(interaction, member)
+      else:
+        async with aiosqlite.connect("main.db") as db:
+          async with db.cursor() as cursor:
+            await interaction.followup.send("Battle request cancelled.")
+            await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
+          await db.commit()
+    else:
+      return
       #argument and https://youtu.be/xLBOs0_i-c8
 
 class RunStay(nextcord.ui.View):
@@ -251,7 +314,14 @@ class RunStay(nextcord.ui.View):
   async def y(self, button: nextcord.ui.Button, interaction: Interaction):
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
-        await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
+        await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
+        battle_check_one = await cursor.fetchone()
+        await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
+        battle_check_two = await cursor.fetchone()
+        if battle_check_one == (1,):
+          await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
+        elif battle_check_two == (1,):
+           await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (interaction.user.id,))
         await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle!", ephemeral=False) 
       await db.commit()
     self.value = True
