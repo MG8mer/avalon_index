@@ -120,10 +120,9 @@ async def battle(interaction: Interaction, member: nextcord.Member):
        async with db.cursor() as cursor:
          await cursor.execute('SELECT starter_hp FROM battles WHERE starter_id = ?', (interaction.user.id,))
        await db.commit()
-
+ 
 async def get_move(interaction: Interaction, member: nextcord.Member):
-  pass
+  global current_move
   
-
 def get_battle_state():
   pass

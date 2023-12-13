@@ -23,12 +23,13 @@ from nextcord import Interaction # from https://www.youtube.com/watch?v=zvVziW2q
 import nextcord # from https://www.youtube.com/watch?v=wn7NIqSSgas&list=PL-7Dfw57ZZVRB4N7VWPjmT0Q-2FIMNBMP&index=16&ab_channel=JamesS
 import asyncio # from https://docs.python.org/3/library/asyncio.html
 import aiosqlite # from https://www.youtube.com/watch?v=aBm8OVxpJno&ab_channel=Glowstik
-from nextcord.application_command import SlashOption # from https://www.youtube.com/watch?v=gtSbqUJLpvM&t=238s&ab_channel=Civo
+from nextcord.application_command import ClientCog, SlashOption # from https://www.youtube.com/watch?v=gtSbqUJLpvM&t=238s&ab_channel=Civo
 from nextcord.embeds import Embed # from https://www.youtube.com/watch?v=wn7NIqSSgas&list=PL-7Dfw57ZZVRB4N7VWPjmT0Q-2FIMNBMP&index=16&ab_channel=JamesS
 from nextcord.ext import commands # from https://www.youtube.com/watch?v=wn7NIqSSgas&list=PL-7Dfw57ZZVRB4N7VWPjmT0Q-2FIMNBMP&index=16&ab_channel=JamesS
 from nextcord.ext.commands import context    #from https://docs.replit.com/tutorialsb/python/build-basic-discord-bot- python and # from https://www.youtube.com/watch?v=wn7NIqSSgas&list=PL-7Dfw57ZZVRB4N7VWPjmT0Q-2FIMNBMP&index=16&ab_channel=JamesS
 # import wavelink
 from active import active  
+import wavelinkcord as wavelink
 import about_archer
 import about_knight
 import about_mage
@@ -36,6 +37,7 @@ import help_page
 import help_pageTWO
 import start_page
 import battle_command
+import random
 
 active() # from https://docs.replit.com/tutorials/python/build-basic-discord-bot-python
 
@@ -126,6 +128,7 @@ async def help(interaction: Interaction, number: int = SlashOption(name="page", 
 
 # The start command essentially starts the game for the user that uses the command and allows them to use commands such as stats, battle, pick, and so on. It does this by creating a new section in the users table and setting the start value column to one. Additionally, the other functions rely on this value by checking if the start value is one, or in other words if the user used the start command, if the user did not use the command, the user won't be able to use the other functions. Additionally, if the user already used start, the command will not work by checking the start value. The command also sends an embed explaining the game and hot to get started.
 # Start command implementation code from https://www.youtube.com/watch?v=aBm8OVxpJno&ab_channel=Glowstik
+
 @client.slash_command(name = "start", description = "Starts the game!")
 async def start(interaction: Interaction):    #/start command, to start the game users must type this first
   botName = client.user.name
@@ -222,19 +225,8 @@ async def pck(interaction: Interaction, number: int = SlashOption(name="class", 
             await interaction.response.send_message("You picked the Archer class! This is the class you will use during battles. To pick a new class, you must reset your stats or die three times in three consecutive battles.") 
           elif number == 3:
             await interaction.response.send_message("You picked the Mage class! This is the class you will use during battles. To pick a new class, you must reset your stats or die three times in three consecutive battles.") 
-    await db.commit() 
-
-
-start_value = None
-class_value_initial = None
-class_value_final = None
-check_battle_one = None
-check_battle_two = None
-check_battle_three = None
-check_battle_four = None
-battle_requested = None
-requested_battle = None
-
+    await db.commit()     
+  
 @client.slash_command(name = "battle", description = "Battle an opponent of your choice!")   
 # gotten from: https://stackoverflow.com/questions/68646719/discord-py-set-user-id-as-an-
 async def battle(interaction: Interaction, member: nextcord.Member):    #.battle command, request battles to other users
@@ -293,8 +285,10 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
           await db.commit()
           return      
       if msg.content == "yes":
+        start_rand = random.choice([1,2])
+        print(start_value)
         await interaction.followup.send("Starting battle...")
-        await battle_command.battle(interaction, member)
+        await battle_command.battle(interaction, member, start_rand)
       else:
         async with aiosqlite.connect("main.db") as db:
           async with db.cursor() as cursor:
@@ -309,7 +303,7 @@ class RunStay(nextcord.ui.View):
   def __init__(self):
     super().__init__()
     self.value = None
-
+  
   @nextcord.ui.button(label = 'Yes', style=nextcord.ButtonStyle.green)
   async def y(self, button: nextcord.ui.Button, interaction: Interaction):
     async with aiosqlite.connect("main.db") as db:
@@ -423,6 +417,8 @@ async def on_member_remove(member):    #server notification on member leave
   channel = client.get_channel(1173135610605740082)
   if isinstance(channel, nextcord.TextChannel): 
     await channel.send(f'We are sorry to see you go @{member.name} :sob:')
+
+
 
 # Below from https://docs.replit.com/tutorials/python/build-basic discord-bot-python
 my_secret = os.environ['DISCORD_BOT_SECRET']    
