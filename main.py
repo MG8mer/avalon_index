@@ -133,23 +133,18 @@ async def help(interaction: Interaction, number: int = SlashOption(name="page", 
 async def start(interaction: Interaction):    #/start command, to start the game users must type this first
   botName = client.user.name
   bot_avatar_url = client.user.avatar.url
-  async with aiosqlite.connect("main.db") as db:
-    async with db.cursor() as cursor:
-      await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
-      start_value = await cursor.fetchone()
-      await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
-      check_battle_one = await cursor.fetchone()
-      await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
-      check_battle_two = await cursor.fetchone()
-      if check_battle_one == (1,) or check_battle_two == (1,):
-        await interaction.response.send_message("Cannot start the game when you're playing the game! Like dude just make a move... Wait until the battle ends or flee the battle!")
-      elif start_value == (1,):
-         await interaction.response.send_message("You have already used start! If you would like to reset your stats, please use the /reset command.")
-      else:
+  start_value, check_battle_one, check_battle_two, user_count = await start_page.check_assign(interaction)
+  if check_battle_one == (1,) or check_battle_two == (1,):
+      await interaction.response.send_message("Cannot start the game when you're playing the game! Like dude just make a move... Wait until the battle ends or flee the battle!")
+  elif start_value == (1,):
+      await interaction.response.send_message("You have already used start! If you would like to reset your stats, please use the /reset command.")
+  else:
+    async with aiosqlite.connect("main.db") as db:
+      async with db.cursor() as cursor:
         await cursor.execute('INSERT INTO users (user_id, guild_id, start) VALUES (?, ?, ?)', (interaction.user.id,client.guilds[0].id, 1))
-        await start_page.start(interaction, botName, bot_avatar_url)
-    await db.commit()
-
+      await db.commit()
+    await start_page.start(interaction, botName, bot_avatar_url)
+  
 class ConfirmDeny(nextcord.ui.View):
   def __init__(self):
     super().__init__()

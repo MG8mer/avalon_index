@@ -6,7 +6,7 @@ from pprint import pprint
 
 def randgif(ARG):
   arg = ARG
-  print (f"{arg}")
+  #print (f"{arg}")
   search_term = arg
   lim = 1
   media_filter = "gif, tinygif"
@@ -20,9 +20,9 @@ def randgif(ARG):
   print(r.status_code)
   if r.status_code == 200:
     data = r.json()
-    pprint(data)
+    #pprint(data)
     url = data["results"][0]["media_formats"]["gif"]["url"]
-    print(url)
+    #print(url)
     return url
   else:
     data = None
