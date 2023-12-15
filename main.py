@@ -156,6 +156,7 @@ class ConfirmDeny(nextcord.ui.View):
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
         await cursor.execute('DELETE FROM users WHERE user_id = ?', (interaction.user.id,))
+        await cursor.execute('DELETE FROM levels WHERE user_id = ?', (interaction.user.id,))
         await interaction.response.send_message('Stats successfully deleted. You may use /start to get started again!', ephemeral=True) # Ephermeral makes the message only visible to the user that used the command.
       await db.commit()
     self.value = True
@@ -353,42 +354,26 @@ async def st(interaction: Interaction, member: nextcord.Member):    #.stats comm
       else:
         await cursor.execute('SELECT class FROM users WHERE user_id = ?', (member.id,))
         class_value = await cursor.fetchone()
-        if class_value == (1,):
-          embed_stk = Embed(   
-            title = "Stats:", 
-            color = nextcord.Color.blue())
-          embed_stk.add_field(    
-              name="Class:", 
-              value="Knight",)
-          await interaction.response.defer()
-          await interaction.followup.send(embed=embed_stk)
-        elif class_value == (2,):
-          embed_sta = Embed(   
-            title = "Stats:", 
-            color = nextcord.Color.blue())
-          embed_sta.add_field(    
-              name="Class:", 
-              value="Archer",)
-          await interaction.response.defer()
-          await interaction.followup.send(embed=embed_sta)
-        elif class_value == (3,):
-          embed_stm = Embed(   
-            title = "Stats:", 
-            color = nextcord.Color.blue())
-          embed_stm.add_field(    
-            name="Class:", 
-            value="Mage",)
-          await interaction.response.defer()
-          await interaction.followup.send(embed=embed_stm)
-        else:
-          embed_stn = Embed(   
-            title = "Stats:", 
-            color = nextcord.Color.blue())
-          embed_stn.add_field(    
-            name="Class:", 
-            value="N/A",)
-          await interaction.response.defer()
-          await interaction.followup.send(embed=embed_stn)
+        await cursor.execute('SELECT level FROM levels WHERE user_id = ?', (member.id,))
+        level = await cursor.fetchone()
+        level_value = None
+        if level != None:
+           level_value = level[0]
+        classing = None
+        if class_value != None:
+             classing = class_value[0]
+        embed_st = Embed(   
+          title = "Stats:", 
+          color = nextcord.Color.blue())
+        embed_st.add_field(    
+          name="Class:", 
+          value=str(classing),)
+        embed_st.add_field(    
+          name="Level:", 
+          value=str(level_value),
+          inline = False,)
+        await interaction.response.defer()
+        await interaction.followup.send(embed=embed_st)
     await db.commit()
 
 
@@ -413,7 +398,11 @@ async def on_member_remove(member):    #server notification on member leave
   if isinstance(channel, nextcord.TextChannel): 
     await channel.send(f'We are sorry to see you go @{member.name} :sob:')
 
+# Below from https://stackoverflow.com/questions/73488299/how-can-i-import-a-cog-into-my-main-py-file
+cog_files = ["levels"]
 
+for file in cog_files:
+    client.load_extension(f"cogs.{file}")
 
 # Below from https://docs.replit.com/tutorials/python/build-basic discord-bot-python
 my_secret = os.environ['DISCORD_BOT_SECRET']    

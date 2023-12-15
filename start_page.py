@@ -17,22 +17,16 @@ async def check_assign(interaction: Interaction):
       check_battle_one = await cursor.fetchone()
       await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
       check_battle_two = await cursor.fetchone()
-      print(f"Data: {user_data}")
       user_count = 0
       archive_i = 0
       user_data_concatenated = ()
       if user_data != None:
         for j in range(len(user_data)):
           user_data_concatenated += user_data[j]
-        print(f"Final data tuple: {user_data_concatenated}")
         for i in range(len(user_data_concatenated)):
-          print(f"Iteration Value: {i}")
-          print(f"Distance between i and stored i: {i - archive_i}")
-          print(f"What's being checked: {user_data_concatenated[i]}")
           if i == 3 or i - archive_i == 4:
             user_count += 1
             archive_i = i
-            print(user_count)
       return start_value, check_battle_one, check_battle_two, user_count
     await db.commit()
 
