@@ -1,10 +1,56 @@
-# Avalon_Index (Version No. 1) Documentation
+# Avalon_Index Documentation
 
-## Video
-[Video of our `code` running](https://drive.google.com/file/d/1C7DjG1G48Ax7haQWrtKugGJpwkQQn6zK/view?usp=sharing)
+  ## Development Process
+> ### **Tasks**
+> #### V2.0
+
+- Inspired by the quote "Many hands make light work," we allowed everyone to contribute whenever they were free as some of us were busy with other work and tests since this was the last week of school before winter break. Moreover, we made sure everyone had a role in the **V2** of __*Avalon Index*__.  Here is a table representing the tasks each of us has done and future tasks that we will contribute to...
+>
+|                |Tasks Done                        | Future Tasks |
+|----------------|-------------------------------|---------------|
+|**Po**            |`Embeds (Battle Embeds/Pages), Slash Commands, Music (Wavelink API, etc.), Debugging Code, Battle Command, Image Merging Feature (Pillow), Picking Moves Feature `|`Battle Command, Activity System, Touch-ups for Embeds`|
+|**Hamzeus**          |`Database (Editing and Creating Tables), Debugging, Slash Commands, Debugging Code, Battle Command, /ff Command, /reset Command, /pick Command`         |`Battle Command, Leveling System, Activity System`|
+|**Avash**            |`Creating Custom Assets for Battle Embeds (Battlefield, Health Bars, and Characters), Debugging Code, Slash Commands, Music (Wavelink API, etc.), Leveling System`                                           |`Activity System, Leveling System, Music (Wavelink API, etc.)`|
+
+>### Milestones
+> #### V2.0
+- For Milestones and Features that have a **``✘``** will be worked on after **V2**
+
+|**`Milestones and Features`**| **`Finished`** |  
+|------------|----------------|
+|<div align="center">Setting up database|<div align="center">✔|
+|<div align="center">Custom assets for battlefield and embeds|<div align="center">✔|
+|<div align="center">User can enter ``/ff`` in order to forfeit a battle|<div align="center">✔|
+|<div align="center">Some fixes with ``/pick``|<div align="center">✔|
+|<div align="center">User can enter ``/reset`` in order to reset their progress and start over|<div align="center">✔|
+|<div align="center">User can enter ``/battle`` in order to battle another user|<div align="center">✔|
+|<div align="center">Created more embed pages relating to ``/battle``|<div align="center">✔|
+|<div align="center">Show skill tree and evolutions of each class in order to let user truly select their preference **`(Skill Tree System was not acheivable till we had the database setup)`**|<div align="center">✘|
+|<div align="center">Basic Mechanics and Gameplay **`(This feature is underway and is 50% done)`**|<div align="center">✘|
+|<div align="center">Image Merging Function-->**``For Battle Embeds``**-->**`(This feature is finished, however, it will be implemented with the basic battle gameplay)`**|<div align="center">✔|
+|<div align="center">Music **`(Was touched upon but haven't been able to get it to work)`**|<div align="center">✘|
+|<div align="center">Leveling System**`(Was touched upon but haven't been able to get it to work)`**|<div align="center">✘|
+|||
+
+## Avalon Index Description
+The purpose of **__Avalon Index__** is to provide entertainment for its users through a turn based class rpg, and it falls under the rpg/roguelike genre. The idea came to life during the brainstorming process where things like currency converters and other discord bots were brought up. It was created for Hamzeus, Po, and Avash’s semester project. 
+
+## Avalon Index Summary
+> ### Fundamentals
+The bot has a variety of commands that are used in order to create an rpg/roguelike turn based fighting game. The bot can be initiated using `/start` which prompts the user to pick their first class! They are greeted with an introduction that describes the roles of each class. It also gives them the option to use `/help` in order to get a list of commands they can use, and the option to use `/about` to dive into the depths of each class! After this process, the user is able to use `/pick` in order to pick their class from the list given to them (Knight, Archer, and Mage).
+
+> ### Advanced
+As the bot has not yet been completed, it is still lacking some commands that will be implemented in the near future. These commands will mainly be `/battle`, which will let a user challenge another user to a duel. The battle feature will include the `/stats` command which can be used to check the hp, speed, attack, defense, and other aspects of one’s class/character. In case someone has accidentally entered a battle, the command `/ff` will also be implemented to forfeit/cancel the duel. If a user has gotten bored of their current class, they may use `/reset` in order to **__completely__** wipe their data with **__no way to recover it.__**
+
+> ### Finals
+Towards the completion of this project, a few more features will be added in order to polish the user experience. This will include a skill tree to level up current attacks and abilities, an evolution path to strengthen classes/characters to their final forms, and level scaling (xp through chat and battles). None of this will be possible until the **Advanced** steps are completed and will be heavily dependent on the database.
+
+## Dev Videos
+### 2.0
+[Video of our `code` for 2.0 running](https://drive.google.com/file/d/1bur8lZBiWbA6VDd5jkkbC6R1Y-j6rNH_/view?usp=sharing)
 
 ## Breakthough Moment 
-I would say our development team's breakthrough moment (Me, Avash, and Po) is when we figured out the `aiosqlite` portion of our version #1.
+I would say one of our development team's breakthrough moments (Me, Avash, and Po) is when we figured out the `aiosqlite` portion of our version #1.
 > In other words, when we figured out how to implement tables.
 
 The first part of this breakthrough is when we actually made the table when we ran the bot *if no table existed already*, and we implemented it as follows:
@@ -98,47 +144,3 @@ __Let's break it down:__
    > Notice how pass has been replaced by the code written in the steps prior.
 
   And that is our breakthrough.
-
-  ## Development Process
-  > ### **Tasks**
-
-  - Inspired by the quote "Many hands make light work," we allowed everyone to contribute whever they were free as some of us were busy with other work and tests. Moreover, we made sure everyone had a role in the **V1** of __*Avalon Index*__.  We also set deadlines for each other on whatever task we were doing at that moment depending on how important that task is for the entire project to move on. Here is a table representing the tasks each of us has done and future tasks that we will contribute to...
-  >
-  |                |Tasks Done                        | Future Tasks |
-  |----------------|-------------------------------|---------------|
-  |**Po**            |`Embeds (Help Pages, Start Page, About Pages), Slash Commands, {TENOR} API Related Aspects, Debugging Code, Keeping the Bot Alive Using Uptime, Initially Planned to Work on Database (The task was put upon Hamzeus as Po had SATs)`|`Battle Command,  Leveling System, Activity System, Skill Points System, Touch-ups for Embeds`|
-  |**Hamzeus**          |`Setting up Database, Slash Commands, Debugging Code, Creating the Base Stats and Values for Classes, Creating Game Idea`         |`Battle Command, Activity System, Leveling System, Skill Points System`|
-  |**Avash**            |`Creating Game Idea, Creating the Base Stats and Values, Creating Custom Assets for Each Class, Debugging Code (On Hamzeus's Laptop), Slash Commands (was not able to get it to run successfully)`                                           |`Battle Command, Activity System, Leveling System, Skill Points System`|
-
-  ### Milestones
-  >For Milestones and Features that have a **``✘``** will be worked on after **V1** as we needed the basics setup such as the **DATABASE**
-
-  |**`Milestones and Features`**| **`Finished`** |  
-  |------------|----------------|
-  |<div align="center">Creating our 3 Classes|<div align="center">✓|
-  |<div align="center">Custom Assets For Three Classes|<div align="center">✓|
-  |<div align="center">User can enter ``/start`` in order to start|<div align="center">✓|
-  |<div align="center">User can enter ``/help`` in order to select 1 out of 2 pages of wise words|<div align="center">✓|
-  |<div align="center">User can enter ``/about`` in order to view info on the 1 out of 3 classes|<div align="center">✓|
-  |<div align="center">User can enter ``/pick`` in order to pick1 out of 3 classes|<div align="center">✓|
-  |<div align="center">User can enter ``/stats`` in order to view 1 out of 3 classes|<div align="center">✓|
-  |<div align="center">User can enter ``.gif <search_term>`` in order to receive a random gif related to the search term|<div align="center">✓|
-  |<div align="center">Embed Pages **`(Help Pages, About Pages, etc.)`**|<div align="center">✓|
-  |<div align="center">Database|<div align="center">✓|
-  |<div align="center">Small tutorial to show how mechanics work with a visual to show weaknesses **`(Tutorial Idea was scratched since we replaced it with /help)`**|<div align="center">✗|
-  |<div align="center">Show skill tree and evolutions of each class in order to let user truly select their preference **`(Skill Tree System was not acheivable till we had the database setup)`**|<div align="center">✗|
-  |<div align="center">Basic Mechanics **`(Gameplay was not acheivable till we had the database setup)`**|<div align="center">✗|
-  |||
-
-## Avalon Index Description
-The purpose of **__Avalon Index__** is to provide entertainment for its users through a turn based class rpg, and it falls under the rpg/roguelike genre. The idea came to life during the brainstorming process where things like currency converters and other discord bots were brought up. It was created for Hamzeus, Po, and Avash’s semester project. 
-
-## Avalon Index Summary
-> ### Fundamentals
-The bot has a variety of commands that are used in order to create an rpg/roguelike turn based fighting game. The bot can be initiated using `/start` which prompts the user to pick their first class! They are greeted with an introduction that describes the roles of each class. It also gives them the option to use `/help` in order to get a list of commands they can use, and the option to use `/about` to dive into the depths of each class! After this process, the user is able to use `/pick` in order to pick their class from the list given to them (Knight, Archer, and Mage).
-
-> ### Advanced
-As the bot has not yet been completed, it is still lacking some commands that will be implemented in the near future. These commands will include `/battle` which will let a user challenge another user to a duel where they will be able to use `/move` in order to select an attack. The battle feature will include the `/stats` command which can be used to check the hp, speed, attack, defense, and other aspects of one’s class/character. In case someone has accidentally entered a battle, the command `/ff` will also be implemented to forfeit/cancel the duel. If a user has gotten bored of their current class, they may use `/reset` in order to **__completely__** wipe their data with **__no way to recover it.__**
-
-> ### Finals
-Towards the completion of this project, a few more features will be added in order to polish the user experience. This will include a skill tree to level up current attacks and abilities, an evolution path to strengthen classes/characters to their final forms, and level scaling (xp through chat and battles). None of this will be possible until the **Advanced** steps are completed and will be heavily dependent on the database.

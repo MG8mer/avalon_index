@@ -5,6 +5,7 @@ from nextcord.embeds import Embed
 import nextcord.interactions
 import randGIF
 
+      
 # Below is the first page from the help function, which lists the first few important commands in the Avalon Index in case the user is confused.
 
 async def help(interaction, bot_name, bot_avatar_url):
@@ -16,7 +17,7 @@ async def help(interaction, bot_name, bot_avatar_url):
     description = f"All necessary commands to play the game to your heart's content! {interaction.user.mention}", 
     color = nextcord.Color.blue())
   embed.set_author(    #author field
-    name=botName, 
+    name=botName,
     icon_url=bot_avatar_url)
   embed.add_field(    #.start embed
     name="> /start", 
