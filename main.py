@@ -34,6 +34,7 @@ import about_archer
 import about_knight
 import about_mage
 import help_page
+import pick_move
 import help_pageTWO
 import start_page
 import battle_command
@@ -93,7 +94,7 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
       await cursor.execute('CREATE TABLE IF NOT EXISTS users(user_id INTEGER, guild_id INTEGER, class INTEGER, start INTEGER)')
-      await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id INTEGER, starter_hp INTEGER, reciever_id INTEGER, reciever_hp INTEGER, evaluation_starter STRING, evaluation_reciever STRING)')
+      await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id INTEGER, starter_hp INTEGER, reciever_id INTEGER, reciever_hp INTEGER, channel_id INTEGER, evaluation_starter STRING, evaluation_reciever STRING)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS moves(weak STRING, weak_damage INTEGER, normal STRING, normal_damage INTEGER, special_attack STRING, special_damage INTEGER, avalon_blessing STRING, avalon_damage INTEGER)')
     await db.commit()
   # client.loop.create_task(node_connect())
@@ -141,9 +142,11 @@ async def start(interaction: Interaction):    #/start command, to start the game
   else:
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
-        await cursor.execute('INSERT INTO users (user_id, guild_id, start) VALUES (?, ?, ?)', (interaction.user.id,client.guilds[0].id, 1))
+        await cursor.execute('INSERT INTO users (user_id, guild_id, start) VALUES (?, ?, ?)', (interaction.user.id, interaction.guild_id, 1))
       await db.commit()
     await start_page.start(interaction, botName, bot_avatar_url)
+
+
   
 class ConfirmDeny(nextcord.ui.View):
   def __init__(self):
@@ -266,7 +269,7 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
   else:
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
-        await cursor.execute('INSERT INTO battles (battle, starter_id, reciever_id) VALUES (?, ?, ?)', (0, interaction.user.id, member.id,))
+        await cursor.execute('INSERT INTO battles (battle, starter_id, reciever_id, channel_id) VALUES (?, ?, ?, ?)', (0, interaction.user.id, member.id, interaction.channel_id))
       await db.commit()
     await interaction.response.defer()
     await interaction.followup.send(f"Before you fight {member.mention}, they must consent to your worthy request! \n{member.mention}, would you like to fight, {interaction.user.mention}? Respond `yes` to confirm, respond anything else to cancel.")   
@@ -282,7 +285,6 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
           return      
       if msg.content == "yes":
         start_rand = random.choice([1,2])
-        print(start_value)
         await interaction.followup.send("Starting battle...")
         await battle_command.battle(interaction, member, start_rand)
       else:
@@ -332,9 +334,15 @@ async def ff(interaction: Interaction):    #.pick command, to pick a class users
       battle_check_one = await cursor.fetchone()
       await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
       battle_check_two = await cursor.fetchone()
+      await cursor.execute('SELECT channel_id FROM battles WHERE channel_id = ?', (interaction.channel_id,))
+      battle_check_three = await cursor.fetchone()
       if battle_check_one == (1,) or battle_check_two == (1,):
-         await interaction.response.send_message("Are you sure you want to flee this battle?", view=view, ephemeral=True)
-         await view.wait()
+        if battle_check_three != None:
+          if interaction.channel_id == battle_check_three[0]:
+            await interaction.response.send_message("Are you sure you want to flee this battle?", view=view, ephemeral=True)
+            await view.wait()
+        else:
+           await interaction.response.send_message("Plese flee the battle in the channel where you started the battle.", ephemeral=True)
       else:
          await interaction.response.send_message("No, you can't runaway from the voices in your head...", ephemeral=True)
     await db.commit()
@@ -358,7 +366,7 @@ async def st(interaction: Interaction, member: nextcord.Member):    #.stats comm
         level = await cursor.fetchone()
         level_value = None
         if level != None:
-           level_value = level[0]
+           level_value = int(level[0] // 1)
         classing = None
         if class_value != None:
              classing = class_value[0]

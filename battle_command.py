@@ -1,7 +1,9 @@
 import nextcord
+import random
 from nextcord.embeds import Embed
 from nextcord import Interaction
 import asyncio
+import pick_move
 import aiosqlite
 
 health = {
@@ -100,7 +102,7 @@ battle_value = None
 starter_hp_value = None
 reciever_hp_value = None
 
-async def battle(interaction: Interaction, member: nextcord.Member):
+async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
       await cursor.execute('SELECT class FROM users WHERE user_id = ?', (interaction.user.id,))
@@ -115,11 +117,19 @@ async def battle(interaction: Interaction, member: nextcord.Member):
       await cursor.execute('SELECT reciever_hp FROM battles WHERE reciever_id = ?', (member.id,))
       reciever_hp_value = await cursor.fetchone()
     await db.commit()
+  switch = None
+  switch_value = None
+  turn = 0
   while starter_hp_value[0] >= 0 and reciever_hp_value[0] >= 0:
-     async with aiosqlite.connect("main.db") as db:
-       async with db.cursor() as cursor:
-         await cursor.execute('SELECT starter_hp FROM battles WHERE starter_id = ?', (interaction.user.id,))
-       await db.commit()
+    # Below https://stackoverflow.com/questions/21837208/check-if-a-number-is-odd-or-even-in-python
+    if turn == 0 or turn % 2 == 0:
+      switch_value = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, switch)
+    else:
+      switch = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, switch_value)
+
+    if switch_value or switch == None:
+      break
+    turn += 1
  
 async def get_move(interaction: Interaction, member: nextcord.Member):
   global current_move
