@@ -49,7 +49,7 @@ Towards the completion of this project, a few more features will be added in ord
 ### 1.0
 [Video of our `code` for 1.0 running](https://drive.google.com/file/d/1C7DjG1G48Ax7haQWrtKugGJpwkQQn6zK/view?usp=sharing)
 ### 2.0
-To be implemented...
+[Video of our `code` for 2.0 running](https://drive.google.com/file/d/1bur8lZBiWbA6VDd5jkkbC6R1Y-j6rNH_/view?usp=sharing)
 
 ## Breakthough Moment 
 I would say one of our development team's breakthrough moments (Me, Avash, and Po) is when we figured out the `aiosqlite` portion of our version #1.
