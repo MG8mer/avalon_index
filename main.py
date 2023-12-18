@@ -100,23 +100,7 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
   # client.loop.create_task(node_connect())
   print(f"{len(client.guilds)}")
   print(f"{client.guilds[0].id}")
-
-# @client.event
-# async def on_wavelink_node_ready(node: wavelink.Node):
-#   print(f"Node {node.identifier} is ready!")
-
-# async def node_connect():
-#   await client.wait_until_ready()
-#   await wavelink.Node
-
-# @client.command
-# async def play(ctx, *args):
-#   if not ctx.voice_client:
-#     vc: wavelink.Player = await ctx.author.voice.channel.connect(cls=wavelink.Player)
-#   else:
-#     vc: wavelink.Player = ctx.voice_client
-#   search = wavelink.TrackSource(arg[0]).YouTube
-#   vc.play(search)
+  
 
 @client.slash_command(name = "help", description = "Are you confused?") #slash command to print out help pages
 async def help(interaction: Interaction, number: int = SlashOption(name="page", choices={"#1": 1, "#2": 2})):
@@ -146,8 +130,6 @@ async def start(interaction: Interaction):    #/start command, to start the game
       await db.commit()
     await start_page.start(interaction, botName, bot_avatar_url)
 
-
-  
 class ConfirmDeny(nextcord.ui.View):
   def __init__(self):
     super().__init__()
@@ -225,133 +207,142 @@ async def pck(interaction: Interaction, number: int = SlashOption(name="class", 
           elif number == 3:
             await interaction.response.send_message("You picked the Mage class! This is the class you will use during battles. To pick a new class, you must reset your stats or die three times in three consecutive battles.") 
     await db.commit()     
-  
+
+
 @client.slash_command(name = "battle", description = "Battle an opponent of your choice!")   
 # gotten from: https://stackoverflow.com/questions/68646719/discord-py-set-user-id-as-an-
 async def battle(interaction: Interaction, member: nextcord.Member):    #.battle command, request battles to other users
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
+      # Various 'select' queries to check various conditions.
       await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
-      start_value = await cursor.fetchone()
+      start_value = await cursor.fetchone() # If start has been initialized.
       await cursor.execute('SELECT class FROM users WHERE user_id = ?', (interaction.user.id,))
-      class_value_initial = await cursor.fetchone()
+      class_value_initial = await cursor.fetchone() # If the starter has used /pick.
       await cursor.execute('SELECT class FROM users WHERE user_id = ?', (member.id,))
-      class_value_final = await cursor.fetchone()
+      class_value_final = await cursor.fetchone()  # If the reciever has used /pick.
       await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
-      check_battle_one = await cursor.fetchone()
+      check_battle_one = await cursor.fetchone() # If the starter is currently is already in a battle as a starter.
       await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
-      check_battle_two = await cursor.fetchone()
+      check_battle_two = await cursor.fetchone() # If the starter is currently is already in a battle as a reciever.
       await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (member.id,))
-      check_battle_three = await cursor.fetchone()
+      check_battle_three = await cursor.fetchone() # If the reciever is currently is already in a battle as a starter.
       await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (member.id,))
-      check_battle_four = await cursor.fetchone()
+      check_battle_four = await cursor.fetchone() # If the starter is currently is already in a battle as a reciever.
       await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
-      battle_requested = await cursor.fetchone()
+      battle_requested = await cursor.fetchone() # To check if the starter has already requested for a battle.
       await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
-      requesting_battle = await cursor.fetchone()
-      await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (member.id,))
+      requesting_battle = await cursor.fetchone() # To check if the starter has been requested for a battle.
+      await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (member.id,)) # To check if the reciever has alraeady been requested for a battle.
       requested_battle = await cursor.fetchone()
     await db.commit()
-  if start_value != (1,):
+  if start_value != (1,): # Has the user used start?
     await interaction.response.send_message("Please use /start and try again.")
-  elif class_value_initial != (1,) and class_value_initial != (2,) and class_value_initial != (3,):
+  elif class_value_initial != (1,) and class_value_initial != (2,) and class_value_initial != (3,): # Has the starter picked a class?
     await interaction.response.send_message("Please use /pick and try again.")
-  elif battle_requested == (0,) or requesting_battle == (0,):
+  elif battle_requested == (0,) or requesting_battle == (0,): # Has the starter requested or been requested for a battle?
     await interaction.response.send_message("You have already requested or been requested for a battle! Please await for your request to timeout or be accepted/rejected or accept/reject your request to try again.")
-  elif check_battle_one == (1,) or check_battle_two == (1,):
+  elif check_battle_one == (1,) or check_battle_two == (1,): # Is the user in a battle?
     await interaction.response.send_message("Cannot initiate another battle during a battle! Wait until the battle ends or flee the battle!")
-  elif check_battle_three == (1,) or check_battle_four == (1,) or requested_battle == (0,):
+  elif check_battle_three == (1,) or check_battle_four == (1,) or requested_battle == (0,): # Is the reciever in a battle or has been requested for one already?
     await interaction.response.send_message("Cannot battle someone who is already in a battle or has requested for a battle! Try again later.")
-  elif member.id == interaction.user.id:
+  elif member.id == interaction.user.id: # Is the starter attempting to battle himself?
     await interaction.response.send_message("You cannot battle yourself!")
-  elif class_value_final != (1,) and class_value_final != (2,) and class_value_final != (3,):
+  elif class_value_final != (1,) and class_value_final != (2,) and class_value_final != (3,): # Has the reciever picked a class?
     await interaction.response.send_message("Cannot battle user who has not picked a class!")
-  else:
+  else: # If the conditions have been met and none of the players are in a battle or have requested for one are requesting one, then battle can start being initialized.
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
-        await cursor.execute('INSERT INTO battles (battle, starter_id, reciever_id, channel_id) VALUES (?, ?, ?, ?)', (0, interaction.user.id, member.id, interaction.channel_id))
+        await cursor.execute('INSERT INTO battles (battle, starter_id, reciever_id, channel_id) VALUES (?, ?, ?, ?)', (0, interaction.user.id, member.id, interaction.channel_id)) # Insert these temporary values, in which 0 as the battle value means both the starter (interaction.user.id), and the reciever (member.id) are in a battle request state. Also, interaction.channel_id ensures that a command such as /ff can only be used in the channel where the battle between these users was started.
       await db.commit()
     await interaction.response.defer()
-    await interaction.followup.send(f"Before you fight {member.mention}, they must consent to your worthy request! \n{member.mention}, would you like to fight, {interaction.user.mention}? Respond `yes` to confirm, respond anything else to cancel.")   
-    if battle_requested != (0,):
+    await interaction.followup.send(f"Before you fight {member.mention}, they must consent to your worthy request! \n{member.mention}, would you like to fight, {interaction.user.mention}? Respond `yes` to confirm, respond anything else to cancel.") # Send a message to inform both users of the battle and ask the reciever for their consent to the battle.  
+    if battle_requested != (0,): # If the starter has not started a battle request or has been requested for a battle then do what is below.
+      # Below from https://www.youtube.com/watch?v=zamNFx3L7oA&t=2s&ab_channel=Dannycademy
       try:
-        msg = await client.wait_for("message", timeout=60, check=lambda message: message.author.id == member.id)
-      except asyncio.TimeoutError:
+        msg = await client.wait_for("message", timeout=60, check=lambda message: message.author.id == member.id) # Await for a message from the reciever.
+      except asyncio.TimeoutError: # If 60 seconds have passed and the reciever hasn't responded, inform that the reciever took too long to respond and cancel the battle.
         await interaction.followup.send("User took too long to respond. Use /battle to try again.")
-        async with aiosqlite.connect("main.db") as db:
+      # Above from https://www.youtube.com/watch?v=zamNFx3L7oA&t=2s&ab_channel=Dannycademy
+        async with aiosqlite.connect("main.db") as db: # Delete that battle row instance between both users as a result of the cancellation of the battle.
           async with db.cursor() as cursor:
             await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
           await db.commit()
           return      
-      if msg.content == "yes":
-        start_rand = random.choice([1,2])
-        await interaction.followup.send("Starting battle...")
-        await battle_command.battle(interaction, member, start_rand)
-      else:
+      if msg.content == "yes": # However, if the reciever strictly says "yes", do what is below.
+        start_rand = random.choice([1,2]) #currently, we are deciding the person who gets first move by random
+        await interaction.followup.send("Starting battle...") # Inform the users that the battle is starting.
+        await battle_command.battle(interaction, member, start_rand) # Call the battle function in the battle_command file and proceed.
+      else: # If the reciever responds with anything else, cancel the battle.
         async with aiosqlite.connect("main.db") as db:
           async with db.cursor() as cursor:
             await interaction.followup.send("Battle request cancelled.")
-            await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
+            await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,)) # Delete that battle instance row in the table as a result of the cancellation of the battle.
           await db.commit()
     else:
       return
-      #argument and https://youtu.be/xLBOs0_i-c8
 
+# The /ff function below for if either the starter or the reciever want to run away.
+
+# Create a class for two buttons (yes and no) like /reset.
 class RunStay(nextcord.ui.View):
   def __init__(self):
     super().__init__()
     self.value = None
-  
-  @nextcord.ui.button(label = 'Yes', style=nextcord.ButtonStyle.green)
+
+  # For yes, delete the battle instance as a result of one of the belligerents running away.
+  @nextcord.ui.button(label = 'Yes', style=nextcord.ButtonStyle.green) #yes button for ff
   async def y(self, button: nextcord.ui.Button, interaction: Interaction):
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
         await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
-        battle_check_one = await cursor.fetchone()
+        battle_check_one = await cursor.fetchone() # Check if the starter is the one who used /ff
         await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
-        battle_check_two = await cursor.fetchone()
-        if battle_check_one == (1,):
+        battle_check_two = await cursor.fetchone() # Check if the reciever is the one who used /ff
+        if battle_check_one == (1,): # If the starter used /ff, use their id to delete the battle instance row.
           await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
-        elif battle_check_two == (1,):
+        elif battle_check_two == (1,):  # If the reciever used /ff, use their id to delete the battle instance row.
            await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (interaction.user.id,))
-        await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle!", ephemeral=False) 
+        await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle!", ephemeral=False) # Inform both users that the person who used /ff ranaway from the bottle because ephemeral is false, so everyone sees the message, unlike when ephemeral is true and only the person who performed the interaction sees the message.
       await db.commit()
-    self.value = True
-    self.stop()
+    self.value = True # Allow for the button to do something.
+    self.stop() # After the button is pressed, stop the interaction.
 
-  @nextcord.ui.button(label = 'No', style=nextcord.ButtonStyle.red)
+  # TODO
+  @nextcord.ui.button(label = 'No', style=nextcord.ButtonStyle.red) #no button for ff
   async def n(self, button: nextcord.ui.Button, interaction: Interaction):
-    await interaction.response.send_message('The battle continues!', ephemeral=True)
-    self.value = False
-    self.stop()
-    
+    await interaction.response.send_message('The battle continues!', ephemeral=True) # Inform the user that the battle continues.
+    self.value = False # This button being pressed will be as though nothing happened.
+    self.stop() # After the button is pressed, stop the interaction.
+
+  # TODO
 @client.slash_command(name = "ff", description = "Run away from a battle!")
-async def ff(interaction: Interaction):    #.pick command, to pick a class users must type this command
+async def ff(interaction: Interaction):    #/ff command which is to stop the battle and flee
   view = RunStay()
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
       await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
-      battle_check_one = await cursor.fetchone()
+      battle_check_one = await cursor.fetchone() # Check that the user is in a battle where they are the starter.
       await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
-      battle_check_two = await cursor.fetchone()
+      battle_check_two = await cursor.fetchone() # Or check that the user is in a battle where they are the reciever.
       await cursor.execute('SELECT channel_id FROM battles WHERE channel_id = ?', (interaction.channel_id,))
-      battle_check_three = await cursor.fetchone()
-      if battle_check_one == (1,) or battle_check_two == (1,):
+      battle_check_three = await cursor.fetchone() # Check that /ff is used in the same channel where /battle was used.
+      if battle_check_one == (1,) or battle_check_two == (1,): # If the user is in a battle where he is a starter or reciever and /ff is used in the same channel where /battle was used for that user (i.e the value for its checking isn't none), ask for confirmation with the two buttons with the class in the variable view, in which they can only see this interaction with ephermeral = True, then respond accordingly.
         if battle_check_three != None:
           if interaction.channel_id == battle_check_three[0]:
             await interaction.response.send_message("Are you sure you want to flee this battle?", view=view, ephemeral=True)
-            await view.wait()
-        else:
+            await view.wait() # Await for the user to press one of the buttons made by the class RunStay.
+        else: # If /ff is used not in the place where /battle was used such as the bot's dms, send that you must use ff in the channel where you used /battle.
            await interaction.response.send_message("Plese flee the battle in the channel where you started the battle.", ephemeral=True)
-      else:
+      else: # If /ff is used when no battle exists for that user, simply respond only ot that user that you can't runaway from a nonexistent battle, or in other words the voices in your head.
          await interaction.response.send_message("No, you can't runaway from the voices in your head...", ephemeral=True)
     await db.commit()
-  if view.value is None:
+  if view.value is None: # If the user dosen't press any button after a while, invalidate the interaction.
     return
 
 # The stats command diplays the stats of a user that is mentioned, for now displaying the user's class only. The function checks that the start value is one for the user so stats can be actually displayed for the user. Then the value of the class column for that user is checked to display their class, which is then proceeded to deferring the need to respond to the interaction and then following up by sending the embed for the user's stats, which is for now only their class. If the user has not used the pick function yet, the class displayed will simply be N/A.
 @client.slash_command(name = "stats", description = "Displays stats of your character")
-async def st(interaction: Interaction, member: nextcord.Member):    #.stats command, displays the stats of user's chosen class
+async def st(interaction: Interaction, member: nextcord.Member):    #.stats command, displays the stats of user's chosen class in an embed
   # member: nextcord.Member arg gotten from https://stackoverflow.com/questions/68646719/discord-py-set-user-id-as-an-argument
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:

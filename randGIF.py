@@ -20,9 +20,7 @@ def randgif(ARG):
   print(r.status_code)
   if r.status_code == 200:
     data = r.json()
-    #pprint(data)
     url = data["results"][0]["media_formats"]["gif"]["url"]
-    #print(url)
     return url
   else:
     data = None

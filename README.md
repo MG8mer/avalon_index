@@ -1,36 +1,36 @@
 # Avalon_Index Documentation
 
-  ## Development Process 
-  > ### **Tasks**
+  ## Development Process
+> ### **Tasks**
+> #### V2.0
 
-  - Inspired by the quote "Many hands make light work," we allowed everyone to contribute whever they were free as some of us were busy with other work and tests. Moreover, we made sure everyone had a role in the **Version 1.0** of __*Avalon Index*__.  We also set deadlines for each other on whatever task we were doing at that moment depending on how important that task is for the entire project to move on. Here is a table representing the tasks each of us has done and future tasks that we will contribute to...
-  >
-  |                |Tasks Done                        | Future Tasks |
-  |----------------|-------------------------------|---------------|
-  |**Po**            |`Embeds (Help Pages, Start Page, About Pages), Slash Commands, {TENOR} API Related Aspects, Debugging Code, Keeping the Bot Alive Using Uptime, Initially Planned to Work on Database (The task was put upon Hamzeus as Po had SATs)`|`Battle Command,  Leveling System, Activity System, Skill Points System, Touch-ups for Embeds`|
-  |**Hamzeus**          |`Setting up Database, Slash Commands, Debugging Code, Creating the Base Stats and Values for Classes, Creating Game Idea`         |`Battle Command, Activity System, Leveling System, Skill Points System`|
-  |**Avash**            |`Creating Game Idea, Creating the Base Stats and Values, Creating Custom Assets for Each Class, Debugging Code (On Hamzeus's Laptop), Slash Commands (was not able to get it to run successfully)`                                           |`Battle Command, Activity System, Leveling System, Skill Points System`|
+- Inspired by the quote "Many hands make light work," we allowed everyone to contribute whenever they were free as some of us were busy with other work and tests since this was the last week of school before winter break. Moreover, we made sure everyone had a role in the **V2** of __*Avalon Index*__.  Here is a table representing the tasks each of us has done and future tasks that we will contribute to...
+>
+|                |Tasks Done                        | Future Tasks |
+|----------------|-------------------------------|---------------|
+|**Po**            |`Embeds (Battle Embeds/Pages), Slash Commands, Music (Wavelink API, etc.), Debugging Code, Battle Command, Image Merging Feature (Pillow), Picking Moves Feature `|`Battle Command, Activity System, Touch-ups for Embeds`|
+|**Hamzeus**          |`Database (Editing and Creating Tables), Debugging, Slash Commands, Debugging Code, Battle Command, /ff Command, /reset Command, /pick Command`         |`Battle Command, Leveling System, Activity System`|
+|**Avash**            |`Creating Custom Assets for Battle Embeds (Battlefield, Health Bars, and Characters), Debugging Code, Slash Commands, Music (Wavelink API, etc.), Leveling System`                                           |`Activity System, Leveling System, Music (Wavelink API, etc.)`|
 
-  ### Version Patch Notes (Milestones)
-  #### 1.0
-  >For Milestones and Features that have a **``✘``** will be worked on after **Version 1.0** as we needed the basics setup such as the **DATABASE**
+>### Milestones
+> #### V2.0
+- For Milestones and Features that have a **``✘``** will be worked on after **V2**
 
-  |**`Milestones and Features`**| **`Finished`** |  
-  |------------|----------------|
-  |<div align="center">Creating our 3 Classes|<div align="center">✓|
-  |<div align="center">Custom Assets For Three Classes|<div align="center">✓|
-  |<div align="center">User can enter ``/start`` in order to start|<div align="center">✓|
-  |<div align="center">User can enter ``/help`` in order to select 1 out of 2 pages of wise words|<div align="center">✓|
-  |<div align="center">User can enter ``/about`` in order to view info on the 1 out of 3 classes|<div align="center">✓|
-  |<div align="center">User can enter ``/pick`` in order to pick1 out of 3 classes|<div align="center">✓|
-  |<div align="center">User can enter ``/stats`` in order to view 1 out of 3 classes|<div align="center">✓|
-  |<div align="center">User can enter ``.gif <search_term>`` in order to receive a random gif related to the search term|<div align="center">✓|
-  |<div align="center">Embed Pages **`(Help Pages, About Pages, etc.)`**|<div align="center">✓|
-  |<div align="center">Database|<div align="center">✓|
-  |<div align="center">Small tutorial to show how mechanics work with a visual to show weaknesses **`(Tutorial Idea was scratched since we replaced it with /help)`**|<div align="center">✗|
-  |<div align="center">Show skill tree and evolutions of each class in order to let user truly select their preference **`(Skill Tree System was not acheivable till we had the database setup)`**|<div align="center">✗|
-  |<div align="center">Basic Mechanics **`(Gameplay was not acheivable till we had the database setup)`**|<div align="center">✗|
-  |||
+|**`Milestones and Features`**| **`Finished`** |  
+|------------|----------------|
+|<div align="center">Setting up database|<div align="center">✔|
+|<div align="center">Custom assets for battlefield and embeds|<div align="center">✔|
+|<div align="center">User can enter ``/ff`` in order to forfeit a battle|<div align="center">✔|
+|<div align="center">Some fixes with ``/pick``|<div align="center">✔|
+|<div align="center">User can enter ``/reset`` in order to reset their progress and start over|<div align="center">✔|
+|<div align="center">User can enter ``/battle`` in order to battle another user|<div align="center">✔|
+|<div align="center">Created more embed pages relating to ``/battle``|<div align="center">✔|
+|<div align="center">Show skill tree and evolutions of each class in order to let user truly select their preference **`(Skill Tree System was not acheivable till we had the database setup)`**|<div align="center">✘|
+|<div align="center">Basic Mechanics and Gameplay **`(This feature is underway and is 50% done)`**|<div align="center">✘|
+|<div align="center">Image Merging Function-->**``For Battle Embeds``**-->**`(This feature is finished, however, it will be implemented with the basic battle gameplay)`**|<div align="center">✔|
+|<div align="center">Music **`(Was touched upon but haven't been able to get it to work)`**|<div align="center">✘|
+|<div align="center">Leveling System**`(Was touched upon but haven't been able to get it to work)`**|<div align="center">✘|
+|||
 
 ## Avalon Index Description
 The purpose of **__Avalon Index__** is to provide entertainment for its users through a turn based class rpg, and it falls under the rpg/roguelike genre. The idea came to life during the brainstorming process where things like currency converters and other discord bots were brought up. It was created for Hamzeus, Po, and Avash’s semester project. 
