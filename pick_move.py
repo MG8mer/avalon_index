@@ -57,6 +57,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
             await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
             check_deleted = await cursor.fetchone() # Check if /ff was used. 
           await db.commit()
+        print(check_deleted)
         if check_deleted == None:
           return
         else: 
