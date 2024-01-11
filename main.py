@@ -268,7 +268,8 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
           async with db.cursor() as cursor:
             await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
           await db.commit()
-          return      
+          return 
+          
       if msg.content == "yes": # However, if the reciever strictly says "yes", do what is below.
         start_rand = random.choice([1,2]) #currently, we are deciding the person who gets first move by random
         await interaction.followup.send("Starting battle...") # Inform the users that the battle is starting.

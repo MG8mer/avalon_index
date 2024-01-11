@@ -137,10 +137,19 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
   while starter_hp_value[0] > 0 and reciever_hp_value[0] > 0:
     # Below https://stackoverflow.com/questions/21837208/check-if-a-number-is-odd-or-even-in-python
     if turn == 0 or turn % 2 == 0: # if turn is even, define switch_value, insertting switch into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
-      switch_value = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, switch)
+      try:
+        switch_value, dmg = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, class_evaluation_starter, class_evaluation_reciever, switch)
+        await on_message(message)
+      except TypeError:
+        return
+      print(dmg)
     else:  # if turn is odd, define switch, insertting switch_value into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
-      switch = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, switch_value)
-
+      print("odd")
+      try:
+        switch, dmg = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, class_evaluation_starter, class_evaluation_reciever, switch_value)
+      except TypeError:
+        return
+      print(dmg)
     if switch_value or switch == None: # If the row has been deleted in pick_move, making these value none due to returning nothing, break the loop, ending the battle. 
       break
     turn += 1 # Add 1 to the turn count to cycle through the loop another time if its condition is still true, being that both players' health points are above 0.

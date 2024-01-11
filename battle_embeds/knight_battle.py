@@ -125,7 +125,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch)
     await db.commit()
   embed = Embed( # Title and description, indicating user to pick a move.
     title = "Moves",
-     description = "Pick from the avaliable moves!",
+     description = "",
     color = nextcord.Color.dark_gray())
   embed.add_field( # Field that shows hp.   
     name="HP:", 
