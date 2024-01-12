@@ -95,7 +95,7 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
     async with db.cursor() as cursor:
       await cursor.execute('CREATE TABLE IF NOT EXISTS users(user_id INTEGER, guild_id INTEGER, class INTEGER, start INTEGER)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id INTEGER, starter_hp INTEGER, reciever_id INTEGER, reciever_hp INTEGER, channel_id INTEGER, evaluation_starter STRING, evaluation_reciever STRING)')
-      await cursor.execute('CREATE TABLE IF NOT EXISTS moves(weak STRING, weak_damage INTEGER, normal STRING, normal_damage INTEGER, special_attack STRING, special_damage INTEGER, avalon_blessing STRING, avalon_damage INTEGER)')
+      await cursor.execute('CREATE TABLE IF NOT EXISTS moves(user_id INTEGER, opponent_id INTEGER, move_used STRING, turn_num INTEGER)')
     await db.commit()
   # client.loop.create_task(node_connect())
   print(f"{len(client.guilds)}")
@@ -304,6 +304,9 @@ class RunStay(nextcord.ui.View):
           await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
         elif battle_check_two == (1,):  # If the reciever used /ff, use their id to delete the battle instance row.
            await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (interaction.user.id,))
+          
+        await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
+        await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
         await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle!", ephemeral=False) # Inform both users that the person who used /ff ranaway from the bottle because ephemeral is false, so everyone sees the message, unlike when ephemeral is true and only the person who performed the interaction sees the message.
       await db.commit()
     self.value = True # Allow for the button to do something.
@@ -385,6 +388,7 @@ async def about(interaction: Interaction, number: int = SlashOption(name = "clas
         await (about_archer.about(interaction))
     elif number == 3: 
         await (about_mage.about(interaction))
+
 
 @client.event    #from https://youtu.be/ksAtGCFxrP8?si=A89Nokdcqfsy_tGZ
 async def on_member_join(member):  #server notification on member join

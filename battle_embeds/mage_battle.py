@@ -107,7 +107,64 @@ attacks = {
 }
 
 # Function to send an embed to the user when they use battle if they picked mage.
-async def battle_embd(interaction: Interaction, member: nextcord.Member, switch):
+async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn):
+  class ChooseFour(nextcord.ui.View):
+    def __init__(self):
+      super().__init__()
+      self.value = None
+
+    @nextcord.ui.button(label = 'Zap', style=nextcord.ButtonStyle.blurple)
+    async def weak(self, button: nextcord.ui.Button, interaction: Interaction):
+      move = 'Zap'
+      async with aiosqlite.connect("main.db") as db:
+        async with db.cursor() as cursor:
+          if switch == False:
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (interaction.user.id, member.id, move, turn,))
+          elif switch == True:
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, interaction.user.id, move, turn,))
+        await db.commit()
+      self.value = True
+      self.stop()
+
+    @nextcord.ui.button(label = 'Fireball', style=nextcord.ButtonStyle.blurple)
+    async def normal(self, button: nextcord.ui.Button, interaction: Interaction):
+      move = 'Fireball'
+      async with aiosqlite.connect("main.db") as db:
+        async with db.cursor() as cursor:
+          if switch == False:
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (interaction.user.id, member.id, move, turn,))
+          elif switch == True:
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, interaction.user.id, move, turn,))
+        await db.commit()
+      self.value = True
+      self.stop()
+
+    @nextcord.ui.button(label = 'Arcane Mania', style=nextcord.ButtonStyle.blurple)
+    async def special(self, button: nextcord.ui.Button, interaction: Interaction):
+      move = 'Arcane Mania'
+      async with aiosqlite.connect("main.db") as db:
+        async with db.cursor() as cursor:
+          if switch == False:
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (interaction.user.id, member.id, move, turn,))
+          elif switch == True:
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, interaction.user.id, move, turn,))
+        await db.commit()
+      self.value = True
+      self.stop()
+
+    @nextcord.ui.button(label = 'Biden Blast', style=nextcord.ButtonStyle.blurple)
+    async def blessing(self, button: nextcord.ui.Button, interaction: Interaction):
+      move = 'Biden Blast'
+      async with aiosqlite.connect("main.db") as db:
+        async with db.cursor() as cursor:
+          if switch == False:
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (interaction.user.id, member.id, move, turn,))
+          elif switch == True:
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, interaction.user.id, move, turn,))
+        await db.commit()
+      self.value = True
+      self.stop()
+  view = ChooseFour()
   hp = None # Define hp
   evaluation = None # Define evaluation
   async with aiosqlite.connect("main.db") as db:
@@ -149,6 +206,22 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch)
     inline=False)
   embed.set_thumbnail(url="https://i.imgur.com/0DpJe0b.png")  # Shows image of mage.
   if switch == False: # If it's the starter's turn, send the embed in their dm.
-    await interaction.user.send(embed=embed)
+    await interaction.user.send(embed=embed, view=view)
+    await view.wait()
+    async with aiosqlite.connect("main.db") as db:
+      async with db.cursor() as cursor:
+        await cursor.execute(f"SELECT move_used FROM moves WHERE turn_num = {turn} AND user_id = {interaction.user.id}")
+        move = await cursor.fetchone()
+      await db.commit()
+    return move
   elif switch == True: # If it's the reciever's turn, send the embed in their dm.
-    await member.send(embed=embed)
+    await member.send(embed=embed, view=view)
+    await view.wait()
+    async with aiosqlite.connect("main.db") as db:
+      async with db.cursor() as cursor:
+        await cursor.execute(f"SELECT move_used FROM moves WHERE turn_num = {turn} AND user_id = {member.id}")
+        move = await cursor.fetchone()
+      await db.commit()
+    return move
+  if view.value is None:
+    return

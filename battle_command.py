@@ -116,6 +116,7 @@ battle_value = None # If battle has been initiated
 starter_hp_value = None # hp of starter
 reciever_hp_value = None # hp of reciever
 
+
 async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
@@ -138,19 +139,20 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
     # Below https://stackoverflow.com/questions/21837208/check-if-a-number-is-odd-or-even-in-python
     if turn == 0 or turn % 2 == 0: # if turn is even, define switch_value, insertting switch into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
-        switch_value, dmg = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, class_evaluation_starter, class_evaluation_reciever, switch)
-        await on_message(message)
+        switch_value, dmg = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, class_evaluation_starter, class_evaluation_reciever, switch, turn)
       except TypeError:
         return
-      print(dmg)
+      else:
+        turn += 1
     else:  # if turn is odd, define switch, insertting switch_value into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
-      print("odd")
       try:
-        switch, dmg = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, class_evaluation_starter, class_evaluation_reciever, switch_value)
+        switch, dmg = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, class_evaluation_starter, class_evaluation_reciever, switch_value, turn)
       except TypeError:
         return
-      print(dmg)
-    if switch_value or switch == None: # If the row has been deleted in pick_move, making these value none due to returning nothing, break the loop, ending the battle. 
+      else:
+        turn += 1
+        
+    if starter_hp_value[0] == None or reciever_hp_value[0] == None: # If the row has been deleted in pick_move, making these value none due to returning nothing, break the loop, ending the battle. 
       break
-    turn += 1 # Add 1 to the turn count to cycle through the loop another time if its condition is still true, being that both players' health points are above 0.
+ # Add 1 to the turn count to cycle through the loop another time if its condition is still true, being that both players' health points are above 0.
  # Battle will be implemented further in the final version...
