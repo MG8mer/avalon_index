@@ -107,7 +107,7 @@ attacks = {
 }
 
 # Function to send an embed to the user when they use battle if they picked mage.
-async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn):
+async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn, starter_hp_value, reciever_hp_value):
   class ChooseFour(nextcord.ui.View):
     def __init__(self):
       super().__init__()

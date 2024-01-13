@@ -109,7 +109,7 @@ attacks = {
 
 
 # Function to send an embed to the user when they use battle if they picked knight.
-async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn):
+async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn, starter_hp_value, reciever_hp_value):
   class ChooseFour(nextcord.ui.View):
     def __init__(self):
       super().__init__()
@@ -189,11 +189,11 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
   embed.add_field( # Field that shows hp.   
     name="HP:", 
     value=str(hp[0]),
-    inline=True)
+    inline=False)
   embed.add_field( # Field that shows the weak attack for that class and damage according the value of that user's evaluation.
     name="Sword Jab(Weak)",
     value=str(attacks[1]["Sword Jab"][evaluation[0]]),
-    inline=True)
+    inline=False)
   embed.add_field( # Field that shows the normal attack for that class and damage according the value of that user's evaluation.
     name="Sword Slash (Normal)",
     value=str(attacks[1]["Sword Slash"][evaluation[0]]),

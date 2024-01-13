@@ -135,24 +135,55 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
   switch = None # Define turns
   switch_value = None # Define another variable for turns
   turn = 0 # Turn num
-  while starter_hp_value[0] > 0 and reciever_hp_value[0] > 0:
+  hp_starter = starter_hp_value[0] 
+  hp_reciever = reciever_hp_value[0]
+  while hp_starter > 0 and hp_reciever > 0:
     # Below https://stackoverflow.com/questions/21837208/check-if-a-number-is-odd-or-even-in-python
     if turn == 0 or turn % 2 == 0: # if turn is even, define switch_value, insertting switch into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
-        switch_value, dmg = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, class_evaluation_starter, class_evaluation_reciever, switch, turn)
+        switch_value, dmg = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn)
       except TypeError:
         return
       else:
+        async with aiosqlite.connect("main.db") as db:
+          async with db.cursor() as cursor:
+            if switch_value == True:
+              hp_reciever += (dmg)
+              await cursor.execute(f'UPDATE battles SET reciever_hp = {hp_reciever}') 
+            elif switch_value == False:
+              hp_starter += (dmg)
+              await cursor.execute(f'UPDATE battles SET starter_hp = {hp_starter}') 
+              starter_hp_test = await cursor.fetchone()
+          await db.commit()
         turn += 1
     else:  # if turn is odd, define switch, insertting switch_value into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
-        switch, dmg = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, class_evaluation_starter, class_evaluation_reciever, switch_value, turn)
+        switch, dmg = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch_value, turn)
       except TypeError:
         return
       else:
+        async with aiosqlite.connect("main.db") as db:
+          async with db.cursor() as cursor:
+            if switch == True:
+              hp_reciever += (dmg)
+              await cursor.execute(f'UPDATE battles SET reciever_hp = {hp_reciever}') 
+            elif switch == False:
+              hp_starter += (dmg)
+              await cursor.execute(f'UPDATE battles SET starter_hp = {hp_starter}') 
+              starter_hp_test = await cursor.fetchone()
+          await db.commit()
         turn += 1
         
     if starter_hp_value[0] == None or reciever_hp_value[0] == None: # If the row has been deleted in pick_move, making these value none due to returning nothing, break the loop, ending the battle. 
       break
  # Add 1 to the turn count to cycle through the loop another time if its condition is still true, being that both players' health points are above 0.
- # Battle will be implemented further in the final version...
+  async with aiosqlite.connect("main.db") as db:
+    async with db.cursor() as cursor:
+      await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
+      await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
+      await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+    await db.commit()
+  if hp_starter <= 0:
+    await interaction.followup.send(f"The battle has concluded and {member.mention} has won!")
+  elif hp_reciever <= 0:
+    await interaction.followup.send(f"The battle has concluded and {interaction.user.mention} has won!")

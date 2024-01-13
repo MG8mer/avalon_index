@@ -107,7 +107,7 @@ attacks = {
 
 
 # Function to send an embed to the user when they use battle if they picked archer.
-async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn):
+async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn, starter_hp_value, reciever_hp_value):
   class ChooseFour(nextcord.ui.View):
     def __init__(self):
       super().__init__()
@@ -115,11 +115,11 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
 
     @nextcord.ui.button(label = 'Weak Arrow', style=nextcord.ButtonStyle.blurple)
     async def weak(self, button: nextcord.ui.Button, interaction: Interaction):
-      move = 'Weak Arrow'
+      move = "Weak Arrow"
       async with aiosqlite.connect("main.db") as db:
         async with db.cursor() as cursor:
           if switch == False:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (interaction.user.id, member.id, move, turn,))
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (interaction.user.id, member.id, move, turn,)) 
           elif switch == True:
             await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, interaction.user.id, move, turn,))
         await db.commit()
@@ -128,7 +128,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
 
     @nextcord.ui.button(label = 'Piercing Shot', style=nextcord.ButtonStyle.blurple)
     async def normal(self, button: nextcord.ui.Button, interaction: Interaction):
-      move = 'Piercing Shot'
+      move = "Piercing Shot"
       async with aiosqlite.connect("main.db") as db:
         async with db.cursor() as cursor:
           if switch == False:
@@ -141,7 +141,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
 
     @nextcord.ui.button(label = 'Triple Shot', style=nextcord.ButtonStyle.blurple)
     async def special(self, button: nextcord.ui.Button, interaction: Interaction):
-      move = 'Triple Shot'
+      move = "Triple Shot"
       async with aiosqlite.connect("main.db") as db:
         async with db.cursor() as cursor:
           if switch == False:
@@ -154,7 +154,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
 
     @nextcord.ui.button(label = 'Make it Rain', style=nextcord.ButtonStyle.blurple)
     async def blessing(self, button: nextcord.ui.Button, interaction: Interaction):
-      move = 'Make it Rain'
+      move = "Make it Rain"
       async with aiosqlite.connect("main.db") as db:
         async with db.cursor() as cursor:
           if switch == False:
@@ -187,11 +187,11 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
   embed.add_field( # Field that shows hp.
     name="HP:", 
     value=str(hp[0]),
-    inline=True)
+    inline=False)
   embed.add_field( # Field that shows the weak attack for that class and damage according the value of that user's evaluation.
     name="Weak Arrow (Weak)",
     value=str(attacks[2]["Weak Arrow"][evaluation[0]]),
-    inline=True)
+    inline=False)
   embed.add_field( # Field that shows the normal attack for that class and damage according the value of that user's evaluation.
     name="Piercing Shot (Normal)",
     value=str(attacks[2]["Piercing Shot"][evaluation[0]]),

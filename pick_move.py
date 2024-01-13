@@ -9,7 +9,6 @@ from battle_embeds import knight_battle
 from nextcord.ext import commands
 
 
-
 client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # Define client.
       
 # Dicts to store class info:
@@ -116,7 +115,7 @@ attacks = {
 
 # Move function that returns what turn it is, taking the arguments interaction for who used battle, member for who recieved battle, start_rand for who starts in the battle, the class of the starter, and the class of the reciever.
 
-async def move(interaction: Interaction, member: nextcord.Member, start_rand, class_value_starter, class_value_reciever, class_evaluation_starter, class_evaluation_reciever, switch, turn):
+async def move(interaction: Interaction, member: nextcord.Member, start_rand, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn):
   if switch == None:
     if start_rand == 1:
       switch = False
@@ -126,7 +125,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
   # There is alot of repitition, so the code below will be explained with the first example as a sample. 
   if switch == False: # If it's the starter's turn.
     if class_value_starter[0] == 1: # If the class of the starter is the knight.
-        move = await knight_battle.battle_embd(interaction, member, switch, turn) # Send respective embed depending on class and whosever turn it is.     
+        move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value) # Send respective embed depending on class and whosever turn it is.     
         check_deleted = None
       # Sample Explanation (applicable for rest)
         async with aiosqlite.connect("main.db") as db:        
@@ -149,54 +148,54 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
           dmg = attacks[class_value_starter[0]][move[0]][evaluation[class_evaluation_starter]]
     
     elif class_value_starter[0] == 2: # If the class of the starter is the archer.
-      move = await archer_battle.battle_embd(interaction, member, switch, turn)
+      move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
       check_deleted = None
       async with aiosqlite.connect("main.db") as db:           
           async with db.cursor() as cursor:
               await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
               check_deleted = await cursor.fetchone() # Check if /ff was used. 
           await db.commit()
-        if check_deleted == None:
-            return
-        elif move is None: 
-            await interaction.followup.send("Request timed out...Ending battle.")
-            async with aiosqlite.connect("main.db") as db:     
-                async with db.cursor() as cursor:
-                    await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,)) # If it times out after 60 seconds and /ff was not used, send a message saying the request timed out, delete the row for the starter and reciever in the battles table, ending the battle. 
-                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
-                    await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
-                await db.commit() 
-                return
-        else:
-          dmg = attacks[class_value_starter[0]][move[0]][evaluation[class_evaluation_starter]]
+      if check_deleted == None:
+          return
+      elif move is None: 
+          await interaction.followup.send("Request timed out...Ending battle.")
+          async with aiosqlite.connect("main.db") as db:     
+              async with db.cursor() as cursor:
+                  await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,)) # If it times out after 60 seconds and /ff was not used, send a message saying the request timed out, delete the row for the starter and reciever in the battles table, ending the battle. 
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+              await db.commit() 
+              return
+      else:
+        dmg = attacks[class_value_starter[0]][move[0]][evaluation[class_evaluation_starter]]
 
           
     elif class_value_starter[0] == 3: # If the class of the starter is the mage.
-      move = await mage_battle.battle_embd(interaction, member, switch, turn)
+      move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
       check_deleted = None
-        async with aiosqlite.connect("main.db") as db:         
+      async with aiosqlite.connect("main.db") as db:         
           async with db.cursor() as cursor:
-            await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
-            check_deleted = await cursor.fetchone() # Check if /ff was used. 
+              await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
+              check_deleted = await cursor.fetchone() # Check if /ff was used. 
           await db.commit()
-        if check_deleted == None:
-            return
-        elif move is None: 
-            await interaction.followup.send("Request timed out...Ending battle.")
-            async with aiosqlite.connect("main.db") as db:     
-                async with db.cursor() as cursor:
-                    await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,)) # If it times out after 60 seconds and /ff was not used, send a message saying the request timed out, delete the row for the starter and reciever in the battles table, ending the battle. 
-                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
-                    await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
-                await db.commit() 
-                return
-        else:
+      if check_deleted == None:
+          return
+      elif move is None: 
+          await interaction.followup.send("Request timed out...Ending battle.")
+          async with aiosqlite.connect("main.db") as db:     
+              async with db.cursor() as cursor:
+                  await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,)) # If it times out after 60 seconds and /ff was not used, send a message saying the request timed out, delete the row for the starter and reciever in the battles table, ending the battle. 
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+              await db.commit() 
+              return
+      else:
           dmg = attacks[class_value_starter[0]][move[0]][evaluation[class_evaluation_starter]]
     switch = True
     
   elif switch == True: # Else if it's the reciever's turn.
     if class_value_reciever[0] == 1: # If the class of the reciever is the knight.
-      move = await knight_battle.battle_embd(interaction, member, switch, turn)
+      move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
       check_deleted = None
       async with aiosqlite.connect("main.db") as db:           
           async with db.cursor() as cursor:
@@ -218,7 +217,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
           dmg = attacks[class_value_reciever[0]][move[0]][evaluation[class_evaluation_reciever]]
         
     elif class_value_reciever[0] == 2: # If the class of the reciever is the archer.
-      move = await archer_battle.battle_embd(interaction, member, switch, turn)
+      move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
       check_deleted = None
       async with aiosqlite.connect("main.db") as db:           
           async with db.cursor() as cursor:
@@ -241,7 +240,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
             
     elif class_value_reciever[0] == 3: 
       # If the class of the reciever is the mage.
-        move = await mage_battle.battle_embd(interaction, member, switch, turn)
+        move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
         check_deleted = None
         async with aiosqlite.connect("main.db") as db:         
             async with db.cursor() as cursor:
