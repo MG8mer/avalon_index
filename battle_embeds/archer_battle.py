@@ -49,7 +49,7 @@ attacks = {
     },
     "Dual Sword Attack": {
       "Weak": -40,
-      "Nomral": -45,
+      "Normal": -45,
       "Strong": -50,
     },
     "Sliced and Diced": {
@@ -71,7 +71,7 @@ attacks = {
     },
     "Triple Shot": {
       "Weak": -45,
-      "Nomral": -50,
+      "Normal": -50,
       "Strong": -60,
     },
     "Make it Rain": {
@@ -93,7 +93,7 @@ attacks = {
   },
   "Arcane Mania": {
     "Weak": -42,
-    "Nomral": -47,
+    "Normal": -47,
     "Strong": -55,
   },
   "Biden Blast": {
@@ -108,6 +108,7 @@ attacks = {
 
 # Function to send an embed to the user when they use battle if they picked archer.
 async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn, starter_hp_value, reciever_hp_value):
+  id_user = interaction.user.id
   class ChooseFour(nextcord.ui.View):
     def __init__(self):
       super().__init__()
@@ -119,9 +120,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       async with aiosqlite.connect("main.db") as db:
         async with db.cursor() as cursor:
           if switch == False:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (interaction.user.id, member.id, move, turn,)) 
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn)) 
           elif switch == True:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, interaction.user.id, move, turn,))
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
         await db.commit()
       self.value = True
       self.stop()
@@ -132,9 +133,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       async with aiosqlite.connect("main.db") as db:
         async with db.cursor() as cursor:
           if switch == False:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (interaction.user.id, member.id, move, turn,))
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn))
           elif switch == True:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, interaction.user.id, move, turn,))
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
         await db.commit()
       self.value = True
       self.stop()
@@ -145,9 +146,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       async with aiosqlite.connect("main.db") as db:
         async with db.cursor() as cursor:
           if switch == False:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (interaction.user.id, member.id, move, turn,))
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn))
           elif switch == True:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, interaction.user.id, move, turn,))
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
         await db.commit()
       self.value = True
       self.stop()
@@ -158,9 +159,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       async with aiosqlite.connect("main.db") as db:
         async with db.cursor() as cursor:
           if switch == False:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (interaction.user.id, member.id, move, turn,))
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn))
           elif switch == True:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, interaction.user.id, move, turn,))
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
         await db.commit()
       self.value = True
       self.stop()
@@ -213,17 +214,17 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
         await cursor.execute(f"SELECT move_used FROM moves WHERE turn_num = {turn} AND user_id = {interaction.user.id}")
-        move = await cursor.fetchone()
+        move_final = await cursor.fetchone()
       await db.commit()
-    return move
+      return move_final
   elif switch == True: # If it's the reciever's turn, send the embed in their dm.
     await member.send(embed=embed, view=view)
     await view.wait()
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
         await cursor.execute(f"SELECT move_used FROM moves WHERE turn_num = {turn} AND user_id = {member.id}")
-        move = await cursor.fetchone()
+        move_final = await cursor.fetchone()
       await db.commit()
-    return move
+      return move_final
   if view.value is None:
     return

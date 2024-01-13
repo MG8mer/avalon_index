@@ -11,7 +11,7 @@ from nextcord.ext import commands
 
 client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # Define client.
       
-# Dicts to store class info:
+# Dicts to store classx info:
 
 # Class health
 health = {
@@ -54,7 +54,7 @@ attacks = {
     },
     "Dual Sword Attack": {
       "Weak": -40,
-      "Nomral": -45,
+      "Normal": -45,
       "Strong": -50,
     },
     "Sliced and Diced": {
@@ -76,7 +76,7 @@ attacks = {
     },
     "Triple Shot": {
       "Weak": -45,
-      "Nomral": -50,
+      "Normal": -50,
       "Strong": -60,
     },
     "Make it Rain": {
@@ -98,7 +98,7 @@ attacks = {
   },
   "Arcane Mania": {
     "Weak": -42,
-    "Nomral": -47,
+    "Normal": -47,
     "Strong": -55,
   },
   "Biden Blast": {
@@ -109,6 +109,7 @@ attacks = {
 }
 
 }
+
 
 #start_value of 1 is the starter
 #start_value of 2 is the reciever
@@ -140,8 +141,8 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
             async with aiosqlite.connect("main.db") as db:     
                 async with db.cursor() as cursor:
                     await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,)) # If it times out after 60 seconds and /ff was not used, send a message saying the request timed out, delete the row for the starter and reciever in the battles table, ending the battle. 
-                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
-                    await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
+                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
                 await db.commit() 
                 return
         else:
@@ -162,8 +163,8 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
           async with aiosqlite.connect("main.db") as db:     
               async with db.cursor() as cursor:
                   await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,)) # If it times out after 60 seconds and /ff was not used, send a message saying the request timed out, delete the row for the starter and reciever in the battles table, ending the battle. 
-                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
-                  await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
               await db.commit() 
               return
       else:
@@ -185,8 +186,8 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
           async with aiosqlite.connect("main.db") as db:     
               async with db.cursor() as cursor:
                   await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,)) # If it times out after 60 seconds and /ff was not used, send a message saying the request timed out, delete the row for the starter and reciever in the battles table, ending the battle. 
-                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
-                  await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
               await db.commit() 
               return
       else:
@@ -209,8 +210,8 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
           async with aiosqlite.connect("main.db") as db:      
               async with db.cursor() as cursor:
                   await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (member.id,)) 
-                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id}")
-                  await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {member.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
               await db.commit()  
               return
       else:
@@ -231,8 +232,8 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
           async with aiosqlite.connect("main.db") as db:      
               async with db.cursor() as cursor:
                   await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (member.id,)) 
-                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id}")
-                  await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {member.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
               await db.commit()  
               return
       else:
@@ -254,8 +255,8 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
             async with aiosqlite.connect("main.db") as db:     
                 async with db.cursor() as cursor:
                     await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (member.id,)) 
-                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id}")
-                    await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {member.id}")
+                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
+                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
                 await db.commit()  
                 return
         else:

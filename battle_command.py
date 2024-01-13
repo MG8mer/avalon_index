@@ -51,7 +51,7 @@ attacks = {
     },
     "Dual Sword Attack": {
       "Weak": -40,
-      "Nomral": -45,
+      "Normal": -45,
       "Strong": -50,
     },
     "Sliced and Diced": {
@@ -73,7 +73,7 @@ attacks = {
     },
     "Triple Shot": {
       "Weak": -45,
-      "Nomral": -50,
+      "Normal": -50,
       "Strong": -60,
     },
     "Make it Rain": {
@@ -95,7 +95,7 @@ attacks = {
   },
   "Arcane Mania": {
     "Weak": -42,
-    "Nomral": -47,
+    "Normal": -47,
     "Strong": -55,
   },
   "Biden Blast": {
@@ -106,6 +106,8 @@ attacks = {
 }
 
 }
+
+
 
 # Define important variables to be used globally.
 class_evaluation_reciever = None # Eval of reciever
@@ -156,6 +158,7 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
               starter_hp_test = await cursor.fetchone()
           await db.commit()
         turn += 1
+          
     else:  # if turn is odd, define switch, insertting switch_value into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
         switch, dmg = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch_value, turn)
@@ -180,8 +183,8 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
       await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
-      await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
-      await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+      await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
+      await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
     await db.commit()
   if hp_starter <= 0:
     await interaction.followup.send(f"The battle has concluded and {member.mention} has won!")

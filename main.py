@@ -304,7 +304,6 @@ class RunStay(nextcord.ui.View):
           await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
         elif battle_check_two == (1,):  # If the reciever used /ff, use their id to delete the battle instance row.
            await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (interaction.user.id,))
-          
         await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
         await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
         await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle!", ephemeral=False) # Inform both users that the person who used /ff ranaway from the bottle because ephemeral is false, so everyone sees the message, unlike when ephemeral is true and only the person who performed the interaction sees the message.
