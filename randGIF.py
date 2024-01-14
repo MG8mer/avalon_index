@@ -16,7 +16,7 @@ def randgif(ARG):
   r = requests.get(
       f"https://tenor.googleapis.com/v2/search?q={search_term}&key={SECRET_KEY}&client_key={ckey}&limit={lim}&media_filter={media_filter}&random={random}")
   
-  if r.status_code == 200:
+  if r.status_code == 200 or r.status_code == 202:
     data = r.json()
     url = data["results"][0]["media_formats"]["gif"]["url"]
     return url

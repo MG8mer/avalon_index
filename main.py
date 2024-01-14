@@ -38,7 +38,9 @@ import pick_move
 import help_pageTWO
 import start_page
 import battle_command
+from randGIF import randgif
 import random
+from random import randint
 
 active() # from https://docs.replit.com/tutorials/python/build-basic-discord-bot-python
 
@@ -98,6 +100,8 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
       await cursor.execute('CREATE TABLE IF NOT EXISTS moves(user_id INTEGER, opponent_id INTEGER, move_used STRING, turn_num INTEGER)')
     await db.commit()
   # client.loop.create_task(node_connect())
+  url = randgif("cat")
+  print(url)
   print(f"{len(client.guilds)}")
   print(f"{client.guilds[0].id}")
   

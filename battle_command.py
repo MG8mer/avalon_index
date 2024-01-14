@@ -143,7 +143,11 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
     # Below https://stackoverflow.com/questions/21837208/check-if-a-number-is-odd-or-even-in-python
     if turn == 0 or turn % 2 == 0: # if turn is even, define switch_value, insertting switch into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
-        switch_value, dmg = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn)
+        switch_value, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn)
+        print(f"Switch Final Returned {switch_value}")
+        print(f"Damage done Rounded and Returned {dmg}")
+        print(f"Move Performed Returned: {move}")
+        print(f"Crit Hit Chance: {crit_hit}")
       except TypeError:
         return
       else:
@@ -157,11 +161,29 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
               await cursor.execute(f'UPDATE battles SET starter_hp = {hp_starter}') 
               starter_hp_test = await cursor.fetchone()
           await db.commit()
+        if switch_value == False:
+          if dmg == 0:
+            await interaction.followup.send(f"{member.mention} used the move {move[0]}, but missed the attack and dealt 0 damage!")
+          elif crit_hit == 3:
+            await interaction.followup.send(f"{member.mention} used the move {move[0]}, but landed a **critial** hit and dealt {dmg*-1} damage!")
+          else:
+            await interaction.followup.send(f"{member.mention} used the move {move[0]}, dealing {dmg*-1} damage!")
+        elif switch_value == True:
+          if dmg == 0:
+              await interaction.followup.send(f"{interaction.user.mention} used the move {move[0]}, but missed the attack and dealt 0 damage!")
+          elif crit_hit == 3:
+              await interaction.followup.send(f"{interaction.user.mention} used the move {move[0]}, but landed a **critial** hit and dealt {dmg*-1} damage!")
+          else:
+              await interaction.followup.send(f"{interaction.user.mention} used the move {move[0]}, dealing {dmg*-1} damage!")
         turn += 1
           
     else:  # if turn is odd, define switch, insertting switch_value into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
-        switch, dmg = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch_value, turn)
+        switch, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch_value, turn)
+        print(f"Switch Final Returned: {switch}")
+        print(f"Damage done Rounded and Returned: {dmg}")
+        print(f"Move Performed Returned: {move}")
+        print(f"Crit Hit Chance: {crit_hit}")
       except TypeError:
         return
       else:
@@ -175,6 +197,21 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
               await cursor.execute(f'UPDATE battles SET starter_hp = {hp_starter}') 
               starter_hp_test = await cursor.fetchone()
           await db.commit()
+          
+          if switch == False:
+            if dmg == 0:
+              await interaction.followup.send(f"{member.mention} used the move {move[0]}, but missed the attack and dealt 0 damage!")
+            elif crit_hit == 3 and dmg != 0:
+              await interaction.followup.send(f"{member.mention} used the move {move[0]}, but landed a **critial** hit and dealt {dmg*-1} damage!")
+            else:
+              await interaction.followup.send(f"{member.mention} used the move {move[0]}, dealing {dmg*-1} damage!")
+          elif switch == True:
+            if dmg == 0:
+                await interaction.followup.send(f"{interaction.user.mention} used the move {move[0]}, but missed the attack and dealt 0 damage!")
+            elif crit_hit == 3:
+                await interaction.followup.send(f"{interaction.user.mention} used the move {move[0]}, but landed a **critial** hit and dealt {dmg*-1} damage!")
+            else:
+                await interaction.followup.send(f"{interaction.user.mention} used the move {move[0]}, dealing {dmg*-1} damage!")
         turn += 1
         
     if starter_hp_value[0] == None or reciever_hp_value[0] == None: # If the row has been deleted in pick_move, making these value none due to returning nothing, break the loop, ending the battle. 

@@ -7,6 +7,8 @@ from battle_embeds import archer_battle
 from battle_embeds import mage_battle
 from battle_embeds import knight_battle
 from nextcord.ext import commands
+import random
+from random import randint
 
 
 client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # Define client.
@@ -117,14 +119,18 @@ attacks = {
 # Move function that returns what turn it is, taking the arguments interaction for who used battle, member for who recieved battle, start_rand for who starts in the battle, the class of the starter, and the class of the reciever.
 
 async def move(interaction: Interaction, member: nextcord.Member, start_rand, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn):
+  crit_hit = randint(1, 5)
   if switch == None:
     if start_rand == 1:
       switch = False
+      print(f"Switch Initial: {switch}")
     elif start_rand == 2:
-      switch = True
+       switch = True
+       print(f"Switch Initial: {switch}")
 
   # There is alot of repitition, so the code below will be explained with the first example as a sample. 
   if switch == False: # If it's the starter's turn.
+    print(f"Switch Inital Continued: {switch}")
     if class_value_starter[0] == 1: # If the class of the starter is the knight.
         move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value) # Send respective embed depending on class and whosever turn it is.     
         check_deleted = None
@@ -147,6 +153,22 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
                 return
         else:
           dmg = attacks[class_value_starter[0]][move[0]][evaluation[class_evaluation_starter]]
+          if move[0] == 'Sword Jab':
+            miss = randint(1, 1000)
+            if miss == 69:
+              dmg = 0
+          elif move[0] == 'Sword Slash':
+             miss = randint(1, 5)
+             if miss == 2:
+               dmg = 0
+          elif move[0] == 'Dual Sword Attack':
+            miss = random.choice(1, 2)
+            if miss == 1:
+              dmg = 0
+          elif move[0] == 'Sliced and Diced':
+            miss = randint(1, 4)
+            if miss == 1 or miss == 3 or miss == 4:
+              dmg = 0
     
     elif class_value_starter[0] == 2: # If the class of the starter is the archer.
       move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
@@ -169,6 +191,22 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
               return
       else:
         dmg = attacks[class_value_starter[0]][move[0]][evaluation[class_evaluation_starter]]
+        if move[0] == 'Weak Arrow':
+           miss = randint(1, 1000)
+           if miss == 69:
+              dmg = 0
+        elif move[0] == 'Piercing Shot':
+           miss = randint(1, 5)
+           if miss == 2:
+             dmg = 0
+        elif move[0] == 'Triple Shot':
+          miss = random.choice(1, 2)
+          if miss == 1:
+            dmg = 0
+        elif move[0] == 'Make it Rain':
+          miss = randint(1, 4)
+          if miss == 1 or miss == 3 or miss == 4:
+            dmg = 0
 
           
     elif class_value_starter[0] == 3: # If the class of the starter is the mage.
@@ -192,9 +230,27 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
               return
       else:
           dmg = attacks[class_value_starter[0]][move[0]][evaluation[class_evaluation_starter]]
+          if move[0] == 'Zap':
+             miss = randint(1, 1000)
+             if miss == 69:
+                dmg = 0
+          elif move[0] == 'Fireball':
+             miss = randint(1, 5)
+             if miss == 2:
+               dmg = 0
+          elif move[0] == 'Arcane Mania':
+            miss = random.choice(1, 2)
+            if miss == 1:
+              dmg = 0
+          elif move[0] == 'Biden Blast':
+            miss = randint(1, 4)
+            if miss == 1 or miss == 3 or miss == 4:
+              dmg = 0
     switch = True
+    print(f"Switch Final: {switch}")
     
   elif switch == True: # Else if it's the reciever's turn.
+    print(f"Switch Inital Continued: {switch}")
     if class_value_reciever[0] == 1: # If the class of the reciever is the knight.
       move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
       check_deleted = None
@@ -216,6 +272,22 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
               return
       else:
           dmg = attacks[class_value_reciever[0]][move[0]][evaluation[class_evaluation_reciever]]
+          if move[0] == 'Sword Jab':
+             miss = randint(1, 1000)
+             if miss == 69:
+                dmg = 0
+          elif move[0] == 'Sword Slash':
+             miss = randint(1, 5)
+             if miss == 2:
+               dmg = 0
+          elif move[0] == 'Dual Sword Attack':
+            miss = random.choice(1, 2)
+            if miss == 1:
+              dmg = 0
+          elif move[0] == 'Sliced and Diced':
+            miss = randint(1, 4)
+            if miss == 1 or miss == 3 or miss == 4:
+              dmg = 0
         
     elif class_value_reciever[0] == 2: # If the class of the reciever is the archer.
       move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
@@ -238,6 +310,22 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
               return
       else:
         dmg = attacks[class_value_reciever[0]][move[0]][evaluation[class_evaluation_reciever]]
+        if move[0] == 'Weak Arrow':
+           miss = randint(1, 1000)
+           if miss == 69:
+              dmg = 0
+        elif move[0] == 'Piercing Shot':
+           miss = randint(1, 5)
+           if miss == 2:
+             dmg = 0
+        elif move[0] == 'Triple Shot':
+          miss = random.choice(1, 2)
+          if miss == 1:
+            dmg = 0
+        elif move[0] == 'Make it Rain':
+          miss = randint(1, 4)
+          if miss == 1 or miss == 3 or miss == 4:
+            dmg = 0
             
     elif class_value_reciever[0] == 3: 
       # If the class of the reciever is the mage.
@@ -261,7 +349,34 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
                 return
         else:
             dmg = attacks[class_value_reciever[0]][move[0]][evaluation[class_evaluation_reciever]]
+            if move[0] == 'Zap':
+               miss = randint(1, 1000)
+               if miss == 69:
+                  dmg = 0
+            elif move[0] == 'Fireball':
+               miss = randint(1, 5)
+               if miss == 2:
+                 dmg = 0
+            elif move[0] == 'Arcane Mania':
+              miss = random.choice(1, 2)
+              if miss == 1:
+                dmg = 0
+            elif move[0] == 'Biden Blast':
+              miss = randint(1, 4)
+              if miss == 1 or miss == 3 or miss == 4:
+                dmg = 0
     switch = False
-  return switch, dmg 
+    print(f"Switch Final: {switch}")
+    
+    if crit_hit == 3:
+        dmg *= 1.2
+      
+    print(f"Damage Done (rounded): {dmg}")
+    print(f"Switch Final: {switch}")
+    print(f"Switch Final: {switch}")
+    print(f"Switch Final: {switch}")
+    print(f"Switch Final: {switch}")
+    print(f"Switch Final: {switch}") 
+  return switch, dmg, move, crit_hit 
     
       
