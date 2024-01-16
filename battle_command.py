@@ -2,6 +2,7 @@ import nextcord
 import random
 from nextcord.embeds import Embed
 from nextcord import Interaction
+from nextcord.ext import commands
 import asyncio
 import pick_move
 import aiosqlite
@@ -9,6 +10,8 @@ import aiosqlite
 # Useful source throughout: https://discordpy.readthedocs.io/en/stable/interactions/api.html
 
 # Dicts to store class info:
+
+client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # Define client.
 
 # Class health
 health = {
@@ -144,10 +147,6 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
     if turn == 0 or turn % 2 == 0: # if turn is even, define switch_value, insertting switch into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
         switch_value, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn)
-        print(f"Switch Final Returned {switch_value}")
-        print(f"Damage done Rounded and Returned {dmg}")
-        print(f"Move Performed Returned: {move}")
-        print(f"Crit Hit Chance: {crit_hit}")
       except TypeError:
         return
       else:
@@ -161,29 +160,42 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
               await cursor.execute(f'UPDATE battles SET starter_hp = {hp_starter}') 
               starter_hp_test = await cursor.fetchone()
           await db.commit()
+          
         if switch_value == False:
           if dmg == 0:
-            await interaction.followup.send(f"{member.mention} used the move {move[0]}, but missed the attack and dealt 0 damage!")
+            await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{interaction.user.mention} still has an HP of ***{hp_starter}***")
           elif crit_hit == 3:
-            await interaction.followup.send(f"{member.mention} used the move {move[0]}, but landed a **critial** hit and dealt {dmg*-1} damage!")
+            if hp_starter <= 0:
+              await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
+            else:
+              await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
           else:
-            await interaction.followup.send(f"{member.mention} used the move {move[0]}, dealing {dmg*-1} damage!")
+            if hp_starter <= 0:
+              await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
+            else:
+              await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
         elif switch_value == True:
           if dmg == 0:
-              await interaction.followup.send(f"{interaction.user.mention} used the move {move[0]}, but missed the attack and dealt 0 damage!")
+            await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{member.mention} still has an HP of ***{hp_reciever}***")
           elif crit_hit == 3:
-              await interaction.followup.send(f"{interaction.user.mention} used the move {move[0]}, but landed a **critial** hit and dealt {dmg*-1} damage!")
+            if hp_reciever <= 0:
+              await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
+            else:
+              await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
           else:
-              await interaction.followup.send(f"{interaction.user.mention} used the move {move[0]}, dealing {dmg*-1} damage!")
+              if hp_reciever <= 0:
+                await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
+              else:
+                await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
         turn += 1
+        try:
+          await client.wait_for("message", timeout=5.0, check=lambda message: interaction.user.id == member.id)
+        except asyncio.TimeoutError:
+          pass
           
     else:  # if turn is odd, define switch, insertting switch_value into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
         switch, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch_value, turn)
-        print(f"Switch Final Returned: {switch}")
-        print(f"Damage done Rounded and Returned: {dmg}")
-        print(f"Move Performed Returned: {move}")
-        print(f"Crit Hit Chance: {crit_hit}")
       except TypeError:
         return
       else:
@@ -200,19 +212,35 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
           
           if switch == False:
             if dmg == 0:
-              await interaction.followup.send(f"{member.mention} used the move {move[0]}, but missed the attack and dealt 0 damage!")
-            elif crit_hit == 3 and dmg != 0:
-              await interaction.followup.send(f"{member.mention} used the move {move[0]}, but landed a **critial** hit and dealt {dmg*-1} damage!")
+              await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{interaction.user.mention} still has an HP of ***{hp_starter}***")
+            elif crit_hit == 3:
+              if hp_starter <= 0:
+                await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
+              else:
+                await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
             else:
-              await interaction.followup.send(f"{member.mention} used the move {move[0]}, dealing {dmg*-1} damage!")
+              if hp_starter <= 0:
+                await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
+              else:
+                await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
           elif switch == True:
             if dmg == 0:
-                await interaction.followup.send(f"{interaction.user.mention} used the move {move[0]}, but missed the attack and dealt 0 damage!")
+                await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{member.mention} still has an HP of ***{hp_reciever}***")
             elif crit_hit == 3:
-                await interaction.followup.send(f"{interaction.user.mention} used the move {move[0]}, but landed a **critial** hit and dealt {dmg*-1} damage!")
+               if hp_reciever <= 0:
+                  await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
+               else:
+                  await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
             else:
-                await interaction.followup.send(f"{interaction.user.mention} used the move {move[0]}, dealing {dmg*-1} damage!")
+              if hp_reciever <= 0:
+                await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
+              else:
+                await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
         turn += 1
+        try:
+          await client.wait_for("message", timeout=5.0, check=lambda message: interaction.user.id == member.id)
+        except asyncio.TimeoutError:
+          pass
         
     if starter_hp_value[0] == None or reciever_hp_value[0] == None: # If the row has been deleted in pick_move, making these value none due to returning nothing, break the loop, ending the battle. 
       break

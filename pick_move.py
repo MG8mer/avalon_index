@@ -123,14 +123,11 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
   if switch == None:
     if start_rand == 1:
       switch = False
-      print(f"Switch Initial: {switch}")
     elif start_rand == 2:
        switch = True
-       print(f"Switch Initial: {switch}")
 
   # There is alot of repitition, so the code below will be explained with the first example as a sample. 
   if switch == False: # If it's the starter's turn.
-    print(f"Switch Inital Continued: {switch}")
     if class_value_starter[0] == 1: # If the class of the starter is the knight.
         move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value) # Send respective embed depending on class and whosever turn it is.     
         check_deleted = None
@@ -162,7 +159,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
              if miss == 2:
                dmg = 0
           elif move[0] == 'Dual Sword Attack':
-            miss = random.choice(1, 2)
+            miss = randint(1, 2)
             if miss == 1:
               dmg = 0
           elif move[0] == 'Sliced and Diced':
@@ -200,7 +197,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
            if miss == 2:
              dmg = 0
         elif move[0] == 'Triple Shot':
-          miss = random.choice(1, 2)
+          miss = randint(1, 2)
           if miss == 1:
             dmg = 0
         elif move[0] == 'Make it Rain':
@@ -239,7 +236,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
              if miss == 2:
                dmg = 0
           elif move[0] == 'Arcane Mania':
-            miss = random.choice(1, 2)
+            miss = randint(1, 2)
             if miss == 1:
               dmg = 0
           elif move[0] == 'Biden Blast':
@@ -247,10 +244,8 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
             if miss == 1 or miss == 3 or miss == 4:
               dmg = 0
     switch = True
-    print(f"Switch Final: {switch}")
     
   elif switch == True: # Else if it's the reciever's turn.
-    print(f"Switch Inital Continued: {switch}")
     if class_value_reciever[0] == 1: # If the class of the reciever is the knight.
       move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
       check_deleted = None
@@ -281,7 +276,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
              if miss == 2:
                dmg = 0
           elif move[0] == 'Dual Sword Attack':
-            miss = random.choice(1, 2)
+            miss = randint(1, 2)
             if miss == 1:
               dmg = 0
           elif move[0] == 'Sliced and Diced':
@@ -319,7 +314,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
            if miss == 2:
              dmg = 0
         elif move[0] == 'Triple Shot':
-          miss = random.choice(1, 2)
+          miss = randint(1, 2)
           if miss == 1:
             dmg = 0
         elif move[0] == 'Make it Rain':
@@ -358,7 +353,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
                if miss == 2:
                  dmg = 0
             elif move[0] == 'Arcane Mania':
-              miss = random.choice(1, 2)
+              miss = randint(1, 2)
               if miss == 1:
                 dmg = 0
             elif move[0] == 'Biden Blast':
@@ -366,17 +361,10 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
               if miss == 1 or miss == 3 or miss == 4:
                 dmg = 0
     switch = False
-    print(f"Switch Final: {switch}")
     
-    if crit_hit == 3:
-        dmg *= 1.2
-      
-    print(f"Damage Done (rounded): {dmg}")
-    print(f"Switch Final: {switch}")
-    print(f"Switch Final: {switch}")
-    print(f"Switch Final: {switch}")
-    print(f"Switch Final: {switch}")
-    print(f"Switch Final: {switch}") 
+  if crit_hit == 3:
+    dmg *= 1.2
+
   return switch, dmg, move, crit_hit 
     
       

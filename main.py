@@ -260,7 +260,7 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
         await cursor.execute('INSERT INTO battles (battle, starter_id, reciever_id, channel_id) VALUES (?, ?, ?, ?)', (0, interaction.user.id, member.id, interaction.channel_id)) # Insert these temporary values, in which 0 as the battle value means both the starter (interaction.user.id), and the reciever (member.id) are in a battle request state. Also, interaction.channel_id ensures that a command such as /ff can only be used in the channel where the battle between these users was started.
       await db.commit()
     await interaction.response.defer()
-    await interaction.followup.send(f"Before you fight {member.mention}, they must consent to your worthy request! \n{member.mention}, would you like to fight, {interaction.user.mention}? Respond `yes` to confirm, respond anything else to cancel.") # Send a message to inform both users of the battle and ask the reciever for their consent to the battle.  
+    await interaction.followup.send(f"Before you fight {member.mention}, they must consent to your worthy request! \n{member.mention}, would you like to fight, {interaction.user.mention}? Respond `yes` or something similar to confirm, respond anything else to cancel.") # Send a message to inform both users of the battle and ask the reciever for their consent to the battle.  
     if battle_requested != (0,): # If the starter has not started a battle request or has been requested for a battle then do what is below.
       # Below from https://www.youtube.com/watch?v=zamNFx3L7oA&t=2s&ab_channel=Dannycademy
       try:
@@ -274,10 +274,14 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
           await db.commit()
           return 
           
-      if msg.content == "yes": # However, if the reciever strictly says "yes", do what is below.
+      if msg.content == "yes" or msg.content == "Yes" or msg.content == "Yes" or msg.content == "ye" or msg.content == "Yeah" or msg.content == "yeah" or msg.content == "Ye" or msg.content == "sure" or msg.content == "Sure" or msg.content == "ok" or msg.content == "Ok" or msg.content == "Y" or msg.content == "y": # However, if the reciever strictly says "yes", do what is below.
         start_rand = random.choice([1,2]) #currently, we are deciding the person who gets first move by random
         await interaction.followup.send("Starting battle...") # Inform the users that the battle is starting.
-        await battle_command.battle(interaction, member, start_rand) # Call the battle function in the battle_command file and proceed.
+        try:
+          # https://stackoverflow.com/questions/66079751/how-to-wait-some-seconds-only-for-a-user-discord-bot-python
+          await client.wait_for("message", timeout=5.0, check=lambda message: interaction.user.id == member.id)
+        except asyncio.TimeoutError:
+          await battle_command.battle(interaction, member, start_rand) # Call the battle function in the battle_command file and proceed.
       else: # If the reciever responds with anything else, cancel the battle.
         async with aiosqlite.connect("main.db") as db:
           async with db.cursor() as cursor:

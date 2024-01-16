@@ -126,7 +126,6 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         await db.commit()
       self.value = True
       self.stop()
-      await interaction.message.delete()
 
     @nextcord.ui.button(label = 'Piercing Shot', style=nextcord.ButtonStyle.blurple)
     async def normal(self, button: nextcord.ui.Button, interaction: Interaction):
@@ -140,7 +139,6 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         await db.commit()
       self.value = True
       self.stop()
-      await interaction.message.delete()
 
     @nextcord.ui.button(label = 'Triple Shot', style=nextcord.ButtonStyle.blurple)
     async def special(self, button: nextcord.ui.Button, interaction: Interaction):
@@ -154,7 +152,6 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         await db.commit()
       self.value = True
       self.stop()
-      await interaction.message.delete()
 
     @nextcord.ui.button(label = 'Make it Rain', style=nextcord.ButtonStyle.blurple)
     async def blessing(self, button: nextcord.ui.Button, interaction: Interaction):
@@ -168,7 +165,6 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         await db.commit()
       self.value = True
       self.stop()
-      await interaction.message.delete()
       
   view = ChooseFour()
   hp = None # Define hp
