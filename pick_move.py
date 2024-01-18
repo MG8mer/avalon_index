@@ -129,6 +129,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
   # There is alot of repitition, so the code below will be explained with the first example as a sample. 
   if switch == False: # If it's the starter's turn.
     if class_value_starter[0] == 1: # If the class of the starter is the knight.
+        await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?)", (interaction.user.id, "Sword Jab", 0, "Sword Slash", 0, "Dual Sword Attack", 2, "Sliced and Diced", 3))
         move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value) # Send respective embed depending on class and whosever turn it is.     
         check_deleted = None
       # Sample Explanation (applicable for rest)
@@ -168,6 +169,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
               dmg = 0
     
     elif class_value_starter[0] == 2: # If the class of the starter is the archer.
+      await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?)", (interaction.user.id, "Weak Arrow", 0, "Piercing Shot", 0, "Triple Shot", 2, "Make it Rain", 3))
       move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
       check_deleted = None
       async with aiosqlite.connect("main.db") as db:           
@@ -207,6 +209,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
 
           
     elif class_value_starter[0] == 3: # If the class of the starter is the mage.
+      await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?)", (interaction.user.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3))
       move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
       check_deleted = None
       async with aiosqlite.connect("main.db") as db:         
@@ -247,6 +250,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
     
   elif switch == True: # Else if it's the reciever's turn.
     if class_value_reciever[0] == 1: # If the class of the reciever is the knight.
+      await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?)", (member.id, "Sword Jab", 0, "Sword Slash", 0, "Dual Sword Attack", 2, "Sliced and Diced", 3))
       move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
       check_deleted = None
       async with aiosqlite.connect("main.db") as db:           
@@ -285,6 +289,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
               dmg = 0
         
     elif class_value_reciever[0] == 2: # If the class of the reciever is the archer.
+      await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?)", (member.id, "Weak Arrow", 0, "Piercing Shot", 0, "Triple Shot", 2, "Make it Rain", 3))
       move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
       check_deleted = None
       async with aiosqlite.connect("main.db") as db:           
@@ -324,6 +329,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
             
     elif class_value_reciever[0] == 3: 
       # If the class of the reciever is the mage.
+        await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?)", (member.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3))
         move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
         check_deleted = None
         async with aiosqlite.connect("main.db") as db:         

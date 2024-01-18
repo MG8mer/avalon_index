@@ -11,8 +11,13 @@ https://www.w3schools.com/sql/sql_delete.asp
 https://www.w3schools.com/sql/sql_update.asp
 https://www.youtube.com/watch?v=aBm8OVxpJno&ab_channel=Glowstik
 """
-
-
+# ---------------------------------
+# TODO:
+  # Fix attacks dict values in:
+    # battle_embeds files
+    # battle_command
+    # pick_move
+# ---------------------------------
 
 # Database connect along with cursor method and database commit method all throughout main.py from https://www.youtube.com/watch?v=aBm8OVxpJno&ab_channel=Glowstik
 
@@ -98,6 +103,7 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
       await cursor.execute('CREATE TABLE IF NOT EXISTS users(user_id INTEGER, guild_id INTEGER, class INTEGER, start INTEGER)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id INTEGER, starter_hp INTEGER, reciever_id INTEGER, reciever_hp INTEGER, channel_id INTEGER, evaluation_starter STRING, evaluation_reciever STRING)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS moves(user_id INTEGER, opponent_id INTEGER, move_used STRING, turn_num INTEGER)')
+      await cursor.execute('CREATE TABLE IF NOT EXISTS cooldowns(user_id INTEGER, weak STRING, w_cooldown INTEGER, normal STRING, n_cooldown INTEGER, special STRING, s_cooldown INTEGER, avalon_blessing STRING, ab_cooldown INTEGER)')
     await db.commit()
   # client.loop.create_task(node_connect())
   url = randgif("cat")

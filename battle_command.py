@@ -6,6 +6,7 @@ from nextcord.ext import commands
 import asyncio
 import pick_move
 import aiosqlite
+import battle_page
 
 # Useful source throughout: https://discordpy.readthedocs.io/en/stable/interactions/api.html
 
@@ -110,8 +111,6 @@ attacks = {
 
 }
 
-
-
 # Define important variables to be used globally.
 class_evaluation_reciever = None # Eval of reciever
 class_evaluation_starter = None # Eval of strter
@@ -121,14 +120,13 @@ battle_value = None # If battle has been initiated
 starter_hp_value = None # hp of starter
 reciever_hp_value = None # hp of reciever
 
-
 async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
       await cursor.execute('SELECT class FROM users WHERE user_id = ?', (interaction.user.id,))
-      class_value_starter = await cursor.fetchone()
+      class_value_starter = await cursor.fetchone() # here
       await cursor.execute('SELECT class FROM users WHERE user_id = ?', (member.id,))
-      class_value_reciever = await cursor.fetchone()
+      class_value_reciever = await cursor.fetchone() # here
       class_evaluation_starter = str(class_value_starter[0]) + str(class_value_reciever[0]) # Concatenate strings of class values to see their evaluation according to the assigned dictionary.
       class_evaluation_reciever = str(class_value_reciever[0]) + str(class_value_starter[0]) # Concatenate strings of class values to see their evaluation according to the assigned dictionary.
       await cursor.execute('UPDATE battles SET battle = ?, starter_hp = ?, reciever_hp = ?, evaluation_starter = ?, evaluation_reciever = ? WHERE starter_id = ? AND reciever_id = ?', (1, health[class_value_starter[0]], health[class_value_reciever[0]], evaluation[class_evaluation_starter], evaluation[class_evaluation_reciever], interaction.user.id, member.id,)) # Update the battle row of both users, insertting values such as their health, evaluation determined by insertting the concatenated string above into the dict, and their ids.
@@ -163,6 +161,8 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
           
         if switch_value == False:
           if dmg == 0:
+            hp_percentage = (hp_starter//starter_hp_value[0])*100
+            await battle_page.battle_page(interaction, member, f"{member.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{interaction.user.mention} still has an HP of ***{hp_starter}***", hp_percentage)
             await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{interaction.user.mention} still has an HP of ***{hp_starter}***")
           elif crit_hit == 3:
             if hp_starter <= 0:
@@ -250,6 +250,8 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
       await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
       await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
       await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
+      await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+      await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {member.id}")
     await db.commit()
   if hp_starter <= 0:
     await interaction.followup.send(f"The battle has concluded and {member.mention} has won!")
