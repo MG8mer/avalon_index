@@ -103,7 +103,7 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
       await cursor.execute('CREATE TABLE IF NOT EXISTS users(user_id INTEGER, guild_id INTEGER, class INTEGER, start INTEGER)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id INTEGER, starter_hp INTEGER, reciever_id INTEGER, reciever_hp INTEGER, channel_id INTEGER, evaluation_starter STRING, evaluation_reciever STRING)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS moves(user_id INTEGER, opponent_id INTEGER, move_used STRING, turn_num INTEGER)')
-      await cursor.execute('CREATE TABLE IF NOT EXISTS cooldowns(user_id INTEGER, weak STRING, w_cooldown INTEGER, normal STRING, n_cooldown INTEGER, special STRING, s_cooldown INTEGER, avalon_blessing STRING, ab_cooldown INTEGER)')
+      await cursor.execute('CREATE TABLE IF NOT EXISTS cooldowns(user_id INTEGER, opponent_id INTEGER, weak STRING, w_cooldown INTEGER, normal STRING, n_cooldown INTEGER, special STRING, s_cooldown INTEGER, avalon_blessing STRING, ab_cooldown INTEGER)')
     await db.commit()
   # client.loop.create_task(node_connect())
   url = randgif("cat")
@@ -326,6 +326,8 @@ class RunStay(nextcord.ui.View):
            await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (interaction.user.id,))
         await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
         await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+        await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+        await cursor.execute(f"DELETE FROM cooldowns WHERE opponent_id = {interaction.user.id}")
         await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle!", ephemeral=False) # Inform both users that the person who used /ff ranaway from the bottle because ephemeral is false, so everyone sees the message, unlike when ephemeral is true and only the person who performed the interaction sees the message.
       await db.commit()
     self.value = True # Allow for the button to do something.

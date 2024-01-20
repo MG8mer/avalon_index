@@ -111,6 +111,24 @@ attacks = {
 # Function to send an embed to the user when they use battle if they picked knight.
 async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn, starter_hp_value, reciever_hp_value):
   id_user = interaction.user.id 
+  async with aiosqlite.connect("main.db") as db:
+    async with db.cursor() as cursor:
+      if switch == False:
+        await cursor.execute('SELECT n_cooldown FROM cooldowns WHERE user_id = ?', (interaction.user.id))
+        normal_c = await cursor.fetchone()
+        await cursor.execute('SELECT s_cooldown FROM cooldowns WHERE user_id = ?', (interaction.user.id))
+        speical_c = await cursor.fetchone()
+        await cursor.execute('SELECT ab_cooldown FROM cooldowns WHERE user_id = ?', (interaction.user.id))
+        avalonbless_c = await cursor.fetchone()
+      elif switch == True:
+        await cursor.execute('SELECT n_cooldown FROM cooldowns WHERE user_id = ?', (member.id))
+        normal_c = await cursor.fetchone()
+        await cursor.execute('SELECT s_cooldown FROM cooldowns WHERE user_id = ?', (member.id))
+        speical_c = await cursor.fetchone()
+        await cursor.execute('SELECT ab_cooldown FROM cooldowns WHERE user_id = ?', (member.id))
+        avalonbless_c = await cursor.fetchone()
+    await db.commit()
+  
   class ChooseFour(nextcord.ui.View):
     def __init__(self):
       super().__init__()
@@ -129,44 +147,47 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       self.value = True
       self.stop()
 
-    @nextcord.ui.button(label = 'Sword Slash', style=nextcord.ButtonStyle.blurple)
-    async def normal(self, button: nextcord.ui.Button, interaction: Interaction):
-      move = 'Sword Slash'
-      async with aiosqlite.connect("main.db") as db:
-        async with db.cursor() as cursor:
-          if switch == False:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn))
-          elif switch == True:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
-        await db.commit()
-      self.value = True
-      self.stop()
+    if normal_c[0] == 0:
+      @nextcord.ui.button(label = 'Sword Slash', style=nextcord.ButtonStyle.blurple)
+      async def normal(self, button: nextcord.ui.Button, interaction: Interaction):
+        move = 'Sword Slash'
+        async with aiosqlite.connect("main.db") as db:
+          async with db.cursor() as cursor:
+            if switch == False:
+              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn))
+            elif switch == True:
+              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
+          await db.commit()
+        self.value = True
+        self.stop()
 
-    @nextcord.ui.button(label = 'Dual Sword Attack', style=nextcord.ButtonStyle.blurple)
-    async def special(self, button: nextcord.ui.Button, interaction: Interaction):
-      move = 'Dual Sword Attack'
-      async with aiosqlite.connect("main.db") as db:
-        async with db.cursor() as cursor:
-          if switch == False:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn))
-          elif switch == True:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
-        await db.commit()
-      self.value = True
-      self.stop()
+    if special_c[0] == 0:
+      @nextcord.ui.button(label = 'Dual Sword Attack', style=nextcord.ButtonStyle.blurple)
+      async def special(self, button: nextcord.ui.Button, interaction: Interaction):
+        move = 'Dual Sword Attack'
+        async with aiosqlite.connect("main.db") as db:
+          async with db.cursor() as cursor:
+            if switch == False:
+              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn))
+            elif switch == True:
+              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
+          await db.commit()
+        self.value = True
+        self.stop()
 
-    @nextcord.ui.button(label = 'Sliced and Diced', style=nextcord.ButtonStyle.blurple)
-    async def blessing(self, button: nextcord.ui.Button, interaction: Interaction):
-      move = 'Sliced and Diced'
-      async with aiosqlite.connect("main.db") as db:
-        async with db.cursor() as cursor:
-          if switch == False:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn))
-          elif switch == True:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
-        await db.commit()
-      self.value = True
-      self.stop()
+    if avalonbless_c[0] == 0:
+      @nextcord.ui.button(label = 'Sliced and Diced', style=nextcord.ButtonStyle.blurple)
+      async def blessing(self, button: nextcord.ui.Button, interaction: Interaction):
+        move = 'Sliced and Diced'
+        async with aiosqlite.connect("main.db") as db:
+          async with db.cursor() as cursor:
+            if switch == False:
+              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn))
+            elif switch == True:
+              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
+          await db.commit()
+        self.value = True
+        self.stop()
 
   view = ChooseFour()
   hp = None # Define hp
@@ -193,19 +214,19 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
     value=str(hp[0]),
     inline=False)
   embed.add_field( # Field that shows the weak attack for that class and damage according the value of that user's evaluation.
-    name="Sword Jab(Weak)",
+    name="Sword Jab (Weak) **No Cooldown**",
     value=str(attacks[1]["Sword Jab"][evaluation[0]]),
     inline=False)
   embed.add_field( # Field that shows the normal attack for that class and damage according the value of that user's evaluation.
-    name="Sword Slash (Normal)",
+    name=f"Sword Slash (Normal) **Cooldown: {normal_c[0]}**",
     value=str(attacks[1]["Sword Slash"][evaluation[0]]),
     inline=False)
   embed.add_field( # Field that shows the special attack for that class and damage according the value of that user's evaluation.
-    name="Dual Sword Attack (Special)",
+    name=f"Dual Sword Attack (Special) **Cooldown: {special_c[0]}**",
     value=str(attacks[1]["Dual Sword Attack"][evaluation[0]]),
     inline=False)
   embed.add_field( # Field that shows the weak avalon blessing attack for that class and damage according the value of that user's evaluation.
-    name="Sliced and Diced (Avalon's Blessing)",
+    name=f"Sliced and Diced (Avalon's Blessing) **Cooldown: {avalonbless_c[0]}**",
     value=str(attacks[1]["Sliced and Diced"][evaluation[0]]),
     inline=False)            
   embed.set_thumbnail(url="https://i.imgur.com/soNMbTL.png")  # Shows image of knight.
@@ -214,6 +235,21 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
     await view.wait()
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
+        if normal_c[0] == 0:
+          await cursor.execute('UPDATE cooldowns SET n_cooldown = ? WHERE user_id = ?', (1, interaction.user.id))
+        elif normal_c[0] != 0:
+          await cursor.execute(f'UPDATE cooldowns SET n_cooldown = {(normal_c[0] - 1)} WHERE user_id = {interaction.user.id}')
+
+        if special_c[0] == 0:
+          await cursor.execute('UPDATE cooldowns SET s_cooldown = ? WHERE user_id = ?', (2, interaction.user.id))
+        elif special_c[0] != 0:
+          await cursor.execute(f'UPDATE cooldowns SET s_cooldown = {(special_c[0] - 1)} WHERE user_id = {interaction.user.id}')
+
+        if avalonbless_c[0] == 0:
+          await cursor.execute('UPDATE cooldowns SET ab_cooldown = ? WHERE user_id = ?', (3, interaction.user.id))
+        elif normal_c[0] != 0:
+          await cursor.execute(f'UPDATE cooldowns SET ab_cooldown = {(avalonbless_c[0] - 1)} WHERE user_id = {interaction.user.id}')
+          
         await cursor.execute(f"SELECT move_used FROM moves WHERE turn_num = {turn} AND user_id = {interaction.user.id}")
         move_final = await cursor.fetchone()
       await db.commit()
@@ -223,6 +259,21 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
     await view.wait()
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
+        if normal_c[0] == 0:
+          await cursor.execute('UPDATE cooldowns SET n_cooldown = ? WHERE user_id = ?', (1, member.id))
+        elif normal_c[0] != 0:
+          await cursor.execute(f'UPDATE cooldowns SET n_cooldown = {(normal_c[0] - 1)} WHERE user_id = {member.id}')
+
+        if special_c[0] == 0:
+          await cursor.execute('UPDATE cooldowns SET s_cooldown = ? WHERE user_id = ?', (2, member.id))
+        elif special_c[0] != 0:
+          await cursor.execute(f'UPDATE cooldowns SET s_cooldown = {(special_c[0] - 1)} WHERE user_id = {member.id}')
+
+        if avalonbless_c[0] == 0:
+          await cursor.execute('UPDATE cooldowns SET ab_cooldown = ? WHERE user_id = ?', (3, member.id))
+        elif normal_c[0] != 0:
+          await cursor.execute(f'UPDATE cooldowns SET ab_cooldown = {(avalonbless_c[0] - 1)} WHERE user_id = {member.id}')
+          
         await cursor.execute(f"SELECT move_used FROM moves WHERE turn_num = {turn} AND user_id = {member.id}")
         move_final = await cursor.fetchone()
       await db.commit()
