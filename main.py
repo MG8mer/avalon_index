@@ -125,10 +125,12 @@ async def help(interaction: Interaction, number: int = SlashOption(name="page", 
 # Start command implementation code from https://www.youtube.com/watch?v=aBm8OVxpJno&ab_channel=Glowstik
 
 @client.slash_command(name = "start", description = "Starts the game!")
-async def start(interaction: Interaction):    #/start command, to start the game users must type this first
+async def start(interaction: Interaction): 
   botName = client.user.name
   bot_avatar_url = client.user.avatar.url
+  
   start_value, check_battle_one, check_battle_two, user_count = await start_page.check_assign(interaction)
+  
   if check_battle_one == (1,) or check_battle_two == (1,):
       await interaction.response.send_message("Cannot start the game when you're playing the game! Like dude just make a move... Wait until the battle ends or flee the battle!")
   elif start_value == (1,):
@@ -138,6 +140,7 @@ async def start(interaction: Interaction):    #/start command, to start the game
       async with db.cursor() as cursor:
         await cursor.execute('INSERT INTO users (user_id, guild_id, start) VALUES (?, ?, ?)', (interaction.user.id, interaction.guild_id, 1))
       await db.commit()
+      
     await start_page.start(interaction, botName, bot_avatar_url)
 
 class ConfirmDeny(nextcord.ui.View):
@@ -190,15 +193,18 @@ async def re(interaction: Interaction):
 
 # The pick command allows the user to pick the class they will use until they reset their stats, which takes the arguments Knight with a value of one, Archer with a value of 2, and Mage with a value of 3. It ensures first that the start value is 1, or in other words that the user has used start, if so the program continues, and it also checks if the pick command has already been used by checking if the value of the class column is either 1, 2, or 3 for each class respectively. Afterwards, whatever the value of the argument is, function will insert that value into the users table for that user. Additionally, it will send a message notifying the user that they selected their class with the class they chose, dependent on the value of the argument.
 @client.slash_command(name = "pick", description = "Pick a class of your choice: Knight, Archer, or Mage!")
-async def pck(interaction: Interaction, number: int = SlashOption(name="class", choices={"Knight": 1, "Archer": 2, "Mage": 3})):    #.pick command, to pick a class users must type this command
+async def pck(interaction: Interaction, number: int = SlashOption(name="class", choices={"Knight": 1, "Archer": 2, "Mage": 3})):    
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
       await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
       start_value = await cursor.fetchone()
+      
       await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
       check_battle_one = await cursor.fetchone()
+      
       await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
       check_battle_two = await cursor.fetchone()
+      
       if start_value != (1,):
         await interaction.response.send_message("Cannot pick class when /start has not been initialized!")
       elif check_battle_one == (1,) or check_battle_two == (1,):
@@ -403,17 +409,17 @@ async def about(interaction: Interaction, number: int = SlashOption(name = "clas
         await (about_mage.about(interaction))
 
 
-@client.event    #from https://youtu.be/ksAtGCFxrP8?si=A89Nokdcqfsy_tGZ
-async def on_member_join(member):  #server notification on member join
-    channel = client.get_channel(1173135610605740082) 
-    if isinstance(channel, nextcord.TextChannel): 
-        await channel.send(f'Hi @{member.name}, use .help to use the Avalon Index!') 
+# @client.event    #from https://youtu.be/ksAtGCFxrP8?si=A89Nokdcqfsy_tGZ
+# async def on_member_join(member):  #server notification on member join
+#     channel = client.get_channel(1173135610605740082) 
+#     if isinstance(channel, nextcord.TextChannel): 
+#         await channel.send(f'Hi @{member.name}, use .help to use the Avalon Index!') 
 
-@client.event    #from https://youtu.be/ksAtGCFxrP8?si=A89Nokdcqfsy_tGZ
-async def on_member_remove(member):    #server notification on member leave
-  channel = client.get_channel(1173135610605740082)
-  if isinstance(channel, nextcord.TextChannel): 
-    await channel.send(f'We are sorry to see you go @{member.name} :sob:')
+# @client.event    #from https://youtu.be/ksAtGCFxrP8?si=A89Nokdcqfsy_tGZ
+# async def on_member_remove(member):    #server notification on member leave
+#   channel = client.get_channel(1173135610605740082)
+#   if isinstance(channel, nextcord.TextChannel): 
+#     await channel.send(f'We are sorry to see you go @{member.name} :sob:')
 
 # Below from https://stackoverflow.com/questions/73488299/how-can-i-import-a-cog-into-my-main-py-file
 cog_files = ["levels"]

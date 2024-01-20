@@ -36,9 +36,11 @@ async def start(interaction, bot_name, bot_avatar_url):
   botName=bot_name
   emoji = 'https://tenor.com/view/tower-defense-simulator-roblox-itzsweaking-mario-minecraft-gif-21237948'
   url = randGIF.randgif("GOOD LUCK RPG VIDEO GAME")
-  start_value, check_battle_one, check_battle_two, user_count = await check_assign(interaction) # Fetch the values fetched by the check_assign function, only one of intrest is user_count, but we must assign all the returned values to a relavent variable.
+  
+  start_value, check_battle_one, check_battle_two, user_count = await check_assign(interaction)
+  
   embed = nextcord.Embed(title=f"**__Welcome to Avalon Index!__**",
-    description=f"Hey {interaction.user.mention}! **__Avalon Index__** is a simple turn-based RPG game developed by **Hamzeus, Po, and Avash**. Currently, there are **__{user_count} users registered, including yourself!__** To get started, follow the steps below. We hope you enjoy!", # Also now shows in start the amount of users registered with the bot.
+    description=f"Hey {interaction.user.mention}! **__Avalon Index__** is a simple turn-based RPG game developed by **Hamzeus, Po, and Avash**. Currently, there are **__{user_count} users registered, including yourself!__** To get started, follow the steps below. We hope you enjoy!", 
     colour=0x00b0f4)
   embed.set_author(name=botName,
     icon_url=bot_avatar_url)

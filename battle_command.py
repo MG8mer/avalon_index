@@ -119,6 +119,8 @@ class_value_starter = None # Class of starter
 battle_value = None # If battle has been initiated 
 starter_hp_value = None # hp of starter
 reciever_hp_value = None # hp of reciever
+hp_percentage_starter = None
+hp_percentage_reciever = None
 
 async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
   async with aiosqlite.connect("main.db") as db:
@@ -152,41 +154,93 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
           async with db.cursor() as cursor:
             if switch_value == True:
               hp_reciever += (dmg)
-              await cursor.execute(f'UPDATE battles SET reciever_hp = {hp_reciever}') 
+              await cursor.execute(f'UPDATE battles SET reciever_hp = {hp_reciever}')
+              hp_percentage_starter = (hp_starter/starter_hp_value[0])*100
+              hp_percentage_reciever = (hp_reciever/reciever_hp_value[0])*100
             elif switch_value == False:
               hp_starter += (dmg)
               await cursor.execute(f'UPDATE battles SET starter_hp = {hp_starter}') 
               starter_hp_test = await cursor.fetchone()
+              hp_percentage_starter = (hp_starter/starter_hp_value[0])*100
+              hp_percentage_reciever = (hp_reciever/reciever_hp_value[0])*100
           await db.commit()
-          
+  
         if switch_value == False:
           if dmg == 0:
-            hp_percentage = (hp_starter//starter_hp_value[0])*100
-            await battle_page.battle_page(interaction, member, f"{member.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{interaction.user.mention} still has an HP of ***{hp_starter}***", hp_percentage)
             await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{interaction.user.mention} still has an HP of ***{hp_starter}***")
+            print(f"{hp_starter} , {starter_hp_value[0]}")
+            print(f"{hp_reciever} , {reciever_hp_value[0]}")
+            print(hp_percentage_starter)
+            print(hp_percentage_reciever)
+            await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
           elif crit_hit == 3:
             if hp_starter <= 0:
+              print(f"{hp_starter} , {starter_hp_value[0]}")
+              print(f"{hp_reciever} , {reciever_hp_value[0]}")
+              print(hp_percentage_starter)
+              print(hp_percentage_reciever)
               await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
+              await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
             else:
+              print(f"{hp_starter} , {starter_hp_value[0]}")
+              print(f"{hp_reciever} , {reciever_hp_value[0]}")
+              print(hp_percentage_starter)
+              print(hp_percentage_reciever)
               await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
+              await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
           else:
             if hp_starter <= 0:
+              print(f"{hp_starter} , {starter_hp_value[0]}")
+              print(f"{hp_reciever} , {reciever_hp_value[0]}")
+              print(hp_percentage_starter)
+              print(hp_percentage_reciever)
               await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
+              await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
             else:
+              print(f"{hp_starter} , {starter_hp_value[0]}")
+              print(f"{hp_reciever} , {reciever_hp_value[0]}")
+              print(hp_percentage_starter)
+              print(hp_percentage_reciever)
               await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
+              await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
         elif switch_value == True:
           if dmg == 0:
+            print(f"{hp_starter} , {starter_hp_value[0]}")
+            print(f"{hp_reciever} , {reciever_hp_value[0]}")
+            print(hp_percentage_starter)
+            print(hp_percentage_reciever)
             await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{member.mention} still has an HP of ***{hp_reciever}***")
+            await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
           elif crit_hit == 3:
             if hp_reciever <= 0:
+              print(f"{hp_starter} , {starter_hp_value[0]}")
+              print(f"{hp_reciever} , {reciever_hp_value[0]}")
+              print(hp_percentage_starter)
+              print(hp_percentage_reciever)
               await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
+              await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
             else:
+              print(f"{hp_starter} , {starter_hp_value[0]}")
+              print(f"{hp_reciever} , {reciever_hp_value[0]}")
+              print(hp_percentage_starter)
+              print(hp_percentage_reciever)
               await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
+              await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
           else:
               if hp_reciever <= 0:
+                print(f"{hp_starter} , {starter_hp_value[0]}")
+                print(f"{hp_reciever} , {reciever_hp_value[0]}")
+                print(hp_percentage_starter)
+                print(hp_percentage_reciever)
                 await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
+                await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
               else:
+                print(f"{hp_starter} , {starter_hp_value[0]}")
+                print(f"{hp_reciever} , {reciever_hp_value[0]}")
+                print(hp_percentage_starter)
+                print(hp_percentage_reciever)
                 await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
+                await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
         turn += 1
         try:
           await client.wait_for("message", timeout=5.0, check=lambda message: interaction.user.id == member.id)
@@ -203,45 +257,99 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
           async with db.cursor() as cursor:
             if switch == True:
               hp_reciever += (dmg)
-              await cursor.execute(f'UPDATE battles SET reciever_hp = {hp_reciever}') 
+              await cursor.execute(f'UPDATE battles SET reciever_hp = {hp_reciever}')
+              hp_percentage_starter = (hp_starter/starter_hp_value[0])*100
+              hp_percentage_reciever = (hp_reciever/reciever_hp_value[0])*100
             elif switch == False:
               hp_starter += (dmg)
               await cursor.execute(f'UPDATE battles SET starter_hp = {hp_starter}') 
               starter_hp_test = await cursor.fetchone()
+              hp_percentage_starter = (hp_starter/starter_hp_value[0])*100
+              hp_percentage_reciever = (hp_reciever/reciever_hp_value[0])*100
           await db.commit()
           
           if switch == False:
             if dmg == 0:
+              print(f"{hp_starter} , {starter_hp_value[0]}")
+              print(f"{hp_reciever} , {reciever_hp_value[0]}")
+              print(hp_percentage_starter)
+              print(hp_percentage_reciever)
               await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{interaction.user.mention} still has an HP of ***{hp_starter}***")
+              await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
             elif crit_hit == 3:
               if hp_starter <= 0:
+                print(f"{hp_starter} , {starter_hp_value[0]}")
+                print(f"{hp_reciever} , {reciever_hp_value[0]}")
+                print(hp_percentage_starter)
+                print(hp_percentage_reciever)
                 await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
+                await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
               else:
+                print(f"{hp_starter} , {starter_hp_value[0]}")
+                print(f"{hp_reciever} , {reciever_hp_value[0]}")
+                print(hp_percentage_starter)
+                print(hp_percentage_reciever)
                 await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
+                await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
             else:
               if hp_starter <= 0:
+                print(f"{hp_starter} , {starter_hp_value[0]}")
+                print(f"{hp_reciever} , {reciever_hp_value[0]}")
+                print(hp_percentage_starter)
+                print(hp_percentage_reciever)
                 await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
+                await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
               else:
+                print(f"{hp_starter} , {starter_hp_value[0]}")
+                print(f"{hp_reciever} , {reciever_hp_value[0]}")
+                print(hp_percentage_starter)
+                print(hp_percentage_reciever)
                 await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
+                await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
           elif switch == True:
             if dmg == 0:
+                print(f"{hp_starter} , {starter_hp_value[0]}")
+                print(f"{hp_reciever} , {reciever_hp_value[0]}")
+                print(hp_percentage_starter)
+                print(hp_percentage_reciever)
                 await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{member.mention} still has an HP of ***{hp_reciever}***")
+                await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
             elif crit_hit == 3:
                if hp_reciever <= 0:
+                  print(f"{hp_starter} , {starter_hp_value[0]}")
+                  print(f"{hp_reciever} , {reciever_hp_value[0]}")
+                  print(hp_percentage_starter)
+                  print(hp_percentage_reciever)
                   await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
+                  await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
                else:
+                  print(f"{hp_starter} , {starter_hp_value[0]}")
+                  print(f"{hp_reciever} , {reciever_hp_value[0]}")
+                  print(hp_percentage_starter)
+                  print(hp_percentage_reciever)
                   await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
+                  await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
             else:
               if hp_reciever <= 0:
+                print(f"{hp_starter} , {starter_hp_value[0]}")
+                print(f"{hp_reciever} , {reciever_hp_value[0]}")
+                print(hp_percentage_starter)
+                print(hp_percentage_reciever)
                 await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
+                await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
               else:
+                print(f"{hp_starter} , {starter_hp_value[0]}")
+                print(f"{hp_reciever} , {reciever_hp_value[0]}")
+                print(hp_percentage_starter)
+                print(hp_percentage_reciever)
                 await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
+                await battle_page.battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
         turn += 1
         try:
           await client.wait_for("message", timeout=5.0, check=lambda message: interaction.user.id == member.id)
         except asyncio.TimeoutError:
           pass
-        
+          
     if starter_hp_value[0] == None or reciever_hp_value[0] == None: # If the row has been deleted in pick_move, making these value none due to returning nothing, break the loop, ending the battle. 
       break
  # Add 1 to the turn count to cycle through the loop another time if its condition is still true, being that both players' health points are above 0.

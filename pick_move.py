@@ -129,7 +129,10 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
   # There is alot of repitition, so the code below will be explained with the first example as a sample. 
   if switch == False: # If it's the starter's turn.
     if class_value_starter[0] == 1: # If the class of the starter is the knight.
-        await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?)", (interaction.user.id, "Sword Jab", 0, "Sword Slash", 0, "Dual Sword Attack", 2, "Sliced and Diced", 3))
+        async with aiosqlite.connect("main.db") as db:        
+          async with db.cursor() as cursor:
+            await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (interaction.user.id, "Sword Jab", 0, "Sword Slash", 0, "Dual Sword Attack", 2, "Sliced and Diced", 3))
+          await db.commit()
         move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value) # Send respective embed depending on class and whosever turn it is.     
         check_deleted = None
       # Sample Explanation (applicable for rest)
@@ -147,6 +150,8 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
                     await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,)) # If it times out after 60 seconds and /ff was not used, send a message saying the request timed out, delete the row for the starter and reciever in the battles table, ending the battle. 
                     await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
                     await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
+                    await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+                    await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {member.id}")
                 await db.commit() 
                 return
         else:
@@ -169,172 +174,16 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
               dmg = 0
     
     elif class_value_starter[0] == 2: # If the class of the starter is the archer.
-      await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?)", (interaction.user.id, "Weak Arrow", 0, "Piercing Shot", 0, "Triple Shot", 2, "Make it Rain", 3))
-      move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
-      check_deleted = None
-      async with aiosqlite.connect("main.db") as db:           
+        async with aiosqlite.connect("main.db") as db:        
           async with db.cursor() as cursor:
-              await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
-              check_deleted = await cursor.fetchone() # Check if /ff was used. 
+              await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (interaction.user.id, "Weak Arrow", 0, "Piercing Shot", 0, "Triple Shot", 2, "Make it Rain", 3))
           await db.commit()
-      if check_deleted == None:
-          return
-      elif move is None: 
-          await interaction.followup.send("Request timed out...Ending battle.")
-          async with aiosqlite.connect("main.db") as db:     
-              async with db.cursor() as cursor:
-                  await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,)) # If it times out after 60 seconds and /ff was not used, send a message saying the request timed out, delete the row for the starter and reciever in the battles table, ending the battle. 
-                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
-                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
-              await db.commit() 
-              return
-      else:
-        dmg = attacks[class_value_starter[0]][move[0]][evaluation[class_evaluation_starter]]
-        if move[0] == 'Weak Arrow':
-           miss = randint(1, 1000)
-           if miss == 69:
-              dmg = 0
-        elif move[0] == 'Piercing Shot':
-           miss = randint(1, 5)
-           if miss == 2:
-             dmg = 0
-        elif move[0] == 'Triple Shot':
-          miss = randint(1, 2)
-          if miss == 1:
-            dmg = 0
-        elif move[0] == 'Make it Rain':
-          miss = randint(1, 4)
-          if miss == 1 or miss == 3 or miss == 4:
-            dmg = 0
-
-          
-    elif class_value_starter[0] == 3: # If the class of the starter is the mage.
-      await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?)", (interaction.user.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3))
-      move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
-      check_deleted = None
-      async with aiosqlite.connect("main.db") as db:         
-          async with db.cursor() as cursor:
-              await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
-              check_deleted = await cursor.fetchone() # Check if /ff was used. 
-          await db.commit()
-      if check_deleted == None:
-          return
-      elif move is None: 
-          await interaction.followup.send("Request timed out...Ending battle.")
-          async with aiosqlite.connect("main.db") as db:     
-              async with db.cursor() as cursor:
-                  await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,)) # If it times out after 60 seconds and /ff was not used, send a message saying the request timed out, delete the row for the starter and reciever in the battles table, ending the battle. 
-                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
-                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
-              await db.commit() 
-              return
-      else:
-          dmg = attacks[class_value_starter[0]][move[0]][evaluation[class_evaluation_starter]]
-          if move[0] == 'Zap':
-             miss = randint(1, 1000)
-             if miss == 69:
-                dmg = 0
-          elif move[0] == 'Fireball':
-             miss = randint(1, 5)
-             if miss == 2:
-               dmg = 0
-          elif move[0] == 'Arcane Mania':
-            miss = randint(1, 2)
-            if miss == 1:
-              dmg = 0
-          elif move[0] == 'Biden Blast':
-            miss = randint(1, 4)
-            if miss == 1 or miss == 3 or miss == 4:
-              dmg = 0
-    switch = True
-    
-  elif switch == True: # Else if it's the reciever's turn.
-    if class_value_reciever[0] == 1: # If the class of the reciever is the knight.
-      await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?)", (member.id, "Sword Jab", 0, "Sword Slash", 0, "Dual Sword Attack", 2, "Sliced and Diced", 3))
-      move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
-      check_deleted = None
-      async with aiosqlite.connect("main.db") as db:           
-          async with db.cursor() as cursor:
-              await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (member.id,))
-              check_deleted = await cursor.fetchone() # Check if /ff was used. 
-          await db.commit()
-      if check_deleted == None:
-          return
-      elif move is None: 
-          await interaction.followup.send("Request timed out...Ending battle.")
-          async with aiosqlite.connect("main.db") as db:      
-              async with db.cursor() as cursor:
-                  await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (member.id,)) 
-                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
-                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
-              await db.commit()  
-              return
-      else:
-          dmg = attacks[class_value_reciever[0]][move[0]][evaluation[class_evaluation_reciever]]
-          if move[0] == 'Sword Jab':
-             miss = randint(1, 1000)
-             if miss == 69:
-                dmg = 0
-          elif move[0] == 'Sword Slash':
-             miss = randint(1, 5)
-             if miss == 2:
-               dmg = 0
-          elif move[0] == 'Dual Sword Attack':
-            miss = randint(1, 2)
-            if miss == 1:
-              dmg = 0
-          elif move[0] == 'Sliced and Diced':
-            miss = randint(1, 4)
-            if miss == 1 or miss == 3 or miss == 4:
-              dmg = 0
-        
-    elif class_value_reciever[0] == 2: # If the class of the reciever is the archer.
-      await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?)", (member.id, "Weak Arrow", 0, "Piercing Shot", 0, "Triple Shot", 2, "Make it Rain", 3))
-      move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
-      check_deleted = None
-      async with aiosqlite.connect("main.db") as db:           
-          async with db.cursor() as cursor:
-              await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (member.id,))
-              check_deleted = await cursor.fetchone() # Check if /ff was used. 
-          await db.commit()
-      if check_deleted == None:
-          return
-      elif move is None: 
-          await interaction.followup.send("Request timed out...Ending battle.")
-          async with aiosqlite.connect("main.db") as db:      
-              async with db.cursor() as cursor:
-                  await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (member.id,)) 
-                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
-                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
-              await db.commit()  
-              return
-      else:
-        dmg = attacks[class_value_reciever[0]][move[0]][evaluation[class_evaluation_reciever]]
-        if move[0] == 'Weak Arrow':
-           miss = randint(1, 1000)
-           if miss == 69:
-              dmg = 0
-        elif move[0] == 'Piercing Shot':
-           miss = randint(1, 5)
-           if miss == 2:
-             dmg = 0
-        elif move[0] == 'Triple Shot':
-          miss = randint(1, 2)
-          if miss == 1:
-            dmg = 0
-        elif move[0] == 'Make it Rain':
-          miss = randint(1, 4)
-          if miss == 1 or miss == 3 or miss == 4:
-            dmg = 0
-            
-    elif class_value_reciever[0] == 3: 
-      # If the class of the reciever is the mage.
-        await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?)", (member.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3))
-        move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
+     
+        move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
         check_deleted = None
-        async with aiosqlite.connect("main.db") as db:         
+        async with aiosqlite.connect("main.db") as db:           
             async with db.cursor() as cursor:
-                await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (member.id,))
+                await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
                 check_deleted = await cursor.fetchone() # Check if /ff was used. 
             await db.commit()
         if check_deleted == None:
@@ -343,13 +192,61 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
             await interaction.followup.send("Request timed out...Ending battle.")
             async with aiosqlite.connect("main.db") as db:     
                 async with db.cursor() as cursor:
-                    await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (member.id,)) 
+                    await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,)) # If it times out after 60 seconds and /ff was not used, send a message saying the request timed out, delete the row for the starter and reciever in the battles table, ending the battle. 
                     await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
                     await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
-                await db.commit()  
+                    await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+                    await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {member.id}")
+                await db.commit() 
                 return
         else:
-            dmg = attacks[class_value_reciever[0]][move[0]][evaluation[class_evaluation_reciever]]
+          dmg = attacks[class_value_starter[0]][move[0]][evaluation[class_evaluation_starter]]
+          if move[0] == 'Weak Arrow':
+             miss = randint(1, 1000)
+             if miss == 69:
+                dmg = 0
+          elif move[0] == 'Piercing Shot':
+             miss = randint(1, 5)
+             if miss == 2:
+               dmg = 0
+          elif move[0] == 'Triple Shot':
+            miss = randint(1, 2)
+            if miss == 1:
+              dmg = 0
+          elif move[0] == 'Make it Rain':
+            miss = randint(1, 4)
+            if miss == 1 or miss == 3 or miss == 4:
+              dmg = 0
+
+          
+    elif class_value_starter[0] == 3: # If the class of the starter is the mage.
+        async with aiosqlite.connect("main.db") as db:       
+          async with db.cursor() as cursor:
+            await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (interaction.user.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3)) #can u check for indent problems here, i cant run the thing
+          await db.commit()
+      
+        move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
+        check_deleted = None
+        async with aiosqlite.connect("main.db") as db:         
+            async with db.cursor() as cursor:
+                await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
+                check_deleted = await cursor.fetchone() # Check if /ff was used. 
+            await db.commit()
+        if check_deleted == None:
+            return
+        elif move is None: 
+            await interaction.followup.send("Request timed out...Ending battle.")
+            async with aiosqlite.connect("main.db") as db:     
+                async with db.cursor() as cursor:
+                    await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,)) # If it times out after 60 seconds and /ff was not used, send a message saying the request timed out, delete the row for the starter and reciever in the battles table, ending the battle. 
+                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
+                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
+                    await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+                    await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {member.id}")
+                await db.commit() 
+                return
+        else:
+            dmg = attacks[class_value_starter[0]][move[0]][evaluation[class_evaluation_starter]]
             if move[0] == 'Zap':
                miss = randint(1, 1000)
                if miss == 69:
@@ -366,6 +263,141 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, cl
               miss = randint(1, 4)
               if miss == 1 or miss == 3 or miss == 4:
                 dmg = 0
+    switch = True
+    
+  elif switch == True: # Else if it's the reciever's turn.
+    if class_value_reciever[0] == 1: # If the class of the reciever is the knight.
+        async with aiosqlite.connect("main.db") as db:        
+          async with db.cursor() as cursor:
+            await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (member.id, "Sword Jab", 0, "Sword Slash", 0, "Dual Sword Attack", 2, "Sliced and Diced", 3))
+          await db.commit()
+        move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
+        check_deleted = None
+        async with aiosqlite.connect("main.db") as db:           
+            async with db.cursor() as cursor:
+                await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (member.id,))
+                check_deleted = await cursor.fetchone() # Check if /ff was used. 
+            await db.commit()
+        if check_deleted == None:
+            return
+        elif move is None: 
+            await interaction.followup.send("Request timed out...Ending battle.")
+            async with aiosqlite.connect("main.db") as db:      
+                async with db.cursor() as cursor:
+                    await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (member.id,)) 
+                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
+                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
+                    await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+                    await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {member.id}")
+                await db.commit()  
+                return
+        else:
+            dmg = attacks[class_value_reciever[0]][move[0]][evaluation[class_evaluation_reciever]]
+            if move[0] == 'Sword Jab':
+               miss = randint(1, 1000)
+               if miss == 69:
+                  dmg = 0
+            elif move[0] == 'Sword Slash':
+               miss = randint(1, 5)
+               if miss == 2:
+                 dmg = 0
+            elif move[0] == 'Dual Sword Attack':
+              miss = randint(1, 2)
+              if miss == 1:
+                dmg = 0
+            elif move[0] == 'Sliced and Diced':
+              miss = randint(1, 4)
+              if miss == 1 or miss == 3 or miss == 4:
+                dmg = 0
+        
+    elif class_value_reciever[0] == 2: # If the class of the reciever is the archer.
+        async with aiosqlite.connect("main.db") as db:        
+          async with db.cursor() as cursor:
+            await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (member.id, "Weak Arrow", 0, "Piercing Shot", 0, "Triple Shot", 2, "Make it Rain", 3))
+          await db.commit()
+        move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
+        check_deleted = None
+        async with aiosqlite.connect("main.db") as db:           
+            async with db.cursor() as cursor:
+                await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (member.id,))
+                check_deleted = await cursor.fetchone() # Check if /ff was used. 
+            await db.commit()
+        if check_deleted == None:
+            return
+        elif move is None: 
+            await interaction.followup.send("Request timed out...Ending battle.")
+            async with aiosqlite.connect("main.db") as db:      
+                async with db.cursor() as cursor:
+                    await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (member.id,)) 
+                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
+                    await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
+                    await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+                    await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {member.id}")
+                await db.commit()  
+                return
+        else:
+          dmg = attacks[class_value_reciever[0]][move[0]][evaluation[class_evaluation_reciever]]
+          if move[0] == 'Weak Arrow':
+             miss = randint(1, 1000)
+             if miss == 69:
+                dmg = 0
+          elif move[0] == 'Piercing Shot':
+             miss = randint(1, 5)
+             if miss == 2:
+               dmg = 0
+          elif move[0] == 'Triple Shot':
+            miss = randint(1, 2)
+            if miss == 1:
+              dmg = 0
+          elif move[0] == 'Make it Rain':
+            miss = randint(1, 4)
+            if miss == 1 or miss == 3 or miss == 4:
+              dmg = 0
+            
+    elif class_value_reciever[0] == 3: 
+      # If the class of the reciever is the mage.
+          async with aiosqlite.connect("main.db") as db:
+            async with db.cursor() as cursor:
+               await cursor.execute(f"INSERT INTO cooldowns (user_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (member.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3))
+            await db.commit()
+          move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
+          check_deleted = None
+          async with aiosqlite.connect("main.db") as db:         
+              async with db.cursor() as cursor:
+                  await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (member.id,))
+                  check_deleted = await cursor.fetchone() # Check if /ff was used. 
+              await db.commit()
+          if check_deleted == None:
+              return
+          elif move is None: 
+              await interaction.followup.send("Request timed out...Ending battle.")
+              async with aiosqlite.connect("main.db") as db:     
+                  async with db.cursor() as cursor:
+                      await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (member.id,)) 
+                      await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
+                      await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
+                      await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+                      await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {member.id}")
+                  await db.commit()  
+                  return
+          else:
+              dmg = attacks[class_value_reciever[0]][move[0]][evaluation[class_evaluation_reciever]]
+              if move[0] == 'Zap':
+                 miss = randint(1, 1000)
+                 if miss == 69:
+                    dmg = 0
+              elif move[0] == 'Fireball':
+                 miss = randint(1, 5)
+                 if miss == 2:
+                   dmg = 0
+              elif move[0] == 'Arcane Mania':
+                miss = randint(1, 2)
+                if miss == 1:
+                  dmg = 0
+              elif move[0] == 'Biden Blast':
+                miss = randint(1, 4)
+                if miss == 1 or miss == 3 or miss == 4:
+                  dmg = 0
     switch = False
     
   if crit_hit == 3:
