@@ -7,7 +7,13 @@ knight = (1, )
 archer = (2, )
 mage = (3, )
 
-async def battle_page(interaction, hp_percentage_starter, hp_percentage_reciever, class_starter, class_reciever):
+async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_starter, class_reciever):  
+  member = interaction.author 
+  reciever_name = member.name
+  user = interaction.user
+  starter_name = user.name
+  print(f"{starter_name}, {reciever_name}")
+  
   health_R = 'custom_assets/health_R_100.png'
   health_L = 'custom_assets/health_L_100.png'
   character_starter = None
@@ -46,7 +52,7 @@ async def battle_page(interaction, hp_percentage_starter, hp_percentage_reciever
     health_R = 'custom_assets/health_R_0.png'
 
   print(f"{character_starter}, {character_reciever}, {health_L}, {health_R}, {hp_percentage_starter}, {hp_percentage_reciever}")
-  battle_byte_img = overlay_img('custom_assets/bg_purple_field1.png', health_R, health_L, character_reciever, character_starter)
+  battle_byte_img = overlay_img('custom_assets/bg_purple_field1.png', health_R, health_L, character_reciever, character_starter, starter_name, reciever_name)
   file = nextcord.File(battle_byte_img, filename="battle_page.png")
   embed = Embed(title = "Battle Screen", color = nextcord.Color.blue())
   embed.set_image(url = "attachment://battle_page.png")

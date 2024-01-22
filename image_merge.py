@@ -2,10 +2,12 @@
 #still haven't implemented into the bot yet
 
 from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
 from io import BytesIO
 import nextcord
 
-def overlay_img(bg, bar_R, bar_L, starter, reciever):
+def overlay_img(bg, bar_R, bar_L, starter, reciever, starter_name, reciever_name):
   im_bar_R = Image.open(bar_R)
   im_bar_L = Image.open(bar_L)
   im_starter = Image.open(starter)
@@ -44,6 +46,10 @@ def overlay_img(bg, bar_R, bar_L, starter, reciever):
 
     # Create a new image as the result
   result = im_bg.copy()
+  draw = ImageDraw.Draw(result)
+  font = ImageFont.truetype("custom_assets/built titling bd.otf", 20)
+  draw.text((70,165), starter_name, (255,255,255), font=font)
+  draw.text((345,165), reciever_name, (255,255,255), font=font)
 
     # Overlay the scaled health bar on top of the background at the new location
   result.paste(im_bar_R, (left_R, top_R), im_bar_R)

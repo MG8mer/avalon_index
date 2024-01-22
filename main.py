@@ -291,7 +291,7 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
         await interaction.followup.send("Starting battle...") # Inform the users that the battle is starting.
         try:
           # https://stackoverflow.com/questions/66079751/how-to-wait-some-seconds-only-for-a-user-discord-bot-python
-          await client.wait_for("message", timeout=5.0, check=lambda message: interaction.user.id == member.id)
+          await client.wait_for("message", timeout=2.0, check=lambda message: interaction.user.id == member.id)
         except asyncio.TimeoutError:
           await battle_command.battle(interaction, member, start_rand) # Call the battle function in the battle_command file and proceed.
       else: # If the reciever responds with anything else, cancel the battle.

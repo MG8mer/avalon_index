@@ -113,18 +113,18 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
       if switch == False:
-        await cursor.execute('SELECT n_cooldown FROM cooldowns WHERE user_id = ?', (interaction.user.id))
+        await cursor.execute('SELECT n_cooldown FROM cooldowns WHERE user_id = ?', (interaction.user.id,))
         normal_c = await cursor.fetchone()
-        await cursor.execute('SELECT s_cooldown FROM cooldowns WHERE user_id = ?', (interaction.user.id))
+        await cursor.execute('SELECT s_cooldown FROM cooldowns WHERE user_id = ?', (interaction.user.id,))
         speical_c = await cursor.fetchone()
-        await cursor.execute('SELECT ab_cooldown FROM cooldowns WHERE user_id = ?', (interaction.user.id))
+        await cursor.execute('SELECT ab_cooldown FROM cooldowns WHERE user_id = ?', (interaction.user.id,))
         avalonbless_c = await cursor.fetchone()
       elif switch == True:
-        await cursor.execute('SELECT n_cooldown FROM cooldowns WHERE user_id = ?', (member.id))
+        await cursor.execute('SELECT n_cooldown FROM cooldowns WHERE user_id = ?', (member.id,))
         normal_c = await cursor.fetchone()
-        await cursor.execute('SELECT s_cooldown FROM cooldowns WHERE user_id = ?', (member.id))
+        await cursor.execute('SELECT s_cooldown FROM cooldowns WHERE user_id = ?', (member.id,))
         speical_c = await cursor.fetchone()
-        await cursor.execute('SELECT ab_cooldown FROM cooldowns WHERE user_id = ?', (member.id))
+        await cursor.execute('SELECT ab_cooldown FROM cooldowns WHERE user_id = ?', (member.id,))
         avalonbless_c = await cursor.fetchone()
     await db.commit()
     
@@ -139,9 +139,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       async with aiosqlite.connect("main.db") as db:
         async with db.cursor() as cursor:
           if switch == False:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn))
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn,))
           elif switch == True:
-            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
+            await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn,))
         await db.commit()
       self.value = True
       self.stop()
@@ -153,9 +153,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         async with aiosqlite.connect("main.db") as db:
           async with db.cursor() as cursor:
             if switch == False:
-              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn))
+              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn,))
             elif switch == True:
-              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
+              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn,))
           await db.commit()
         self.value = True
         self.stop()
@@ -167,9 +167,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         async with aiosqlite.connect("main.db") as db:
           async with db.cursor() as cursor:
             if switch == False:
-              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn))
+              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn,))
             elif switch == True:
-              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
+              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn,))
           await db.commit()
         self.value = True
         self.stop()
@@ -181,9 +181,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         async with aiosqlite.connect("main.db") as db:
           async with db.cursor() as cursor:
             if switch == False:
-              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn))
+              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn,))
             elif switch == True:
-              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn))
+              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn,))
           await db.commit()
         self.value = True
         self.stop()
@@ -235,17 +235,17 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
         if normal_c[0] == 0:
-          await cursor.execute('UPDATE cooldowns SET n_cooldown = ? WHERE user_id = ?', (1, interaction.user.id))
+          await cursor.execute('UPDATE cooldowns SET n_cooldown = ? WHERE user_id = ?', (1, interaction.user.id,))
         elif normal_c[0] != 0:
           await cursor.execute(f'UPDATE cooldowns SET n_cooldown = {(normal_c[0] - 1)} WHERE user_id = {interaction.user.id}')
 
         if special_c[0] == 0:
-          await cursor.execute('UPDATE cooldowns SET s_cooldown = ? WHERE user_id = ?', (2, interaction.user.id))
+          await cursor.execute('UPDATE cooldowns SET s_cooldown = ? WHERE user_id = ?', (2, interaction.user.id,))
         elif special_c[0] != 0:
           await cursor.execute(f'UPDATE cooldowns SET s_cooldown = {(special_c[0] - 1)} WHERE user_id = {interaction.user.id}')
 
         if avalonbless_c[0] == 0:
-          await cursor.execute('UPDATE cooldowns SET ab_cooldown = ? WHERE user_id = ?', (3, interaction.user.id))
+          await cursor.execute('UPDATE cooldowns SET ab_cooldown = ? WHERE user_id = ?', (3, interaction.user.id,))
         elif normal_c[0] != 0:
           await cursor.execute(f'UPDATE cooldowns SET ab_cooldown = {(avalonbless_c[0] - 1)} WHERE user_id = {interaction.user.id}')
           
@@ -259,17 +259,17 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
         if normal_c[0] == 0:
-          await cursor.execute('UPDATE cooldowns SET n_cooldown = ? WHERE user_id = ?', (1, member.id))
+          await cursor.execute('UPDATE cooldowns SET n_cooldown = ? WHERE user_id = ?', (1, member.id,))
         elif normal_c[0] != 0:
           await cursor.execute(f'UPDATE cooldowns SET n_cooldown = {(normal_c[0] - 1)} WHERE user_id = {member.id}')
 
         if special_c[0] == 0:
-          await cursor.execute('UPDATE cooldowns SET s_cooldown = ? WHERE user_id = ?', (2, member.id))
+          await cursor.execute('UPDATE cooldowns SET s_cooldown = ? WHERE user_id = ?', (2, member.id,))
         elif special_c[0] != 0:
           await cursor.execute(f'UPDATE cooldowns SET s_cooldown = {(special_c[0] - 1)} WHERE user_id = {member.id}')
 
         if avalonbless_c[0] == 0:
-          await cursor.execute('UPDATE cooldowns SET ab_cooldown = ? WHERE user_id = ?', (3, member.id))
+          await cursor.execute('UPDATE cooldowns SET ab_cooldown = ? WHERE user_id = ?', (3, member.id,))
         elif normal_c[0] != 0:
           await cursor.execute(f'UPDATE cooldowns SET ab_cooldown = {(avalonbless_c[0] - 1)} WHERE user_id = {member.id}')
           
