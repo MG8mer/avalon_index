@@ -243,7 +243,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
           await cursor.execute('UPDATE cooldowns SET s_cooldown = ? WHERE user_id = ?', (2, interaction.user.id,))
         elif special_c[0] != 0:
           await cursor.execute(f'UPDATE cooldowns SET s_cooldown = {(special_c[0] - 1)} WHERE user_id = {interaction.user.id}')
-
+        
         if avalonbless_c[0] == 0:
           await cursor.execute('UPDATE cooldowns SET ab_cooldown = ? WHERE user_id = ?', (3, interaction.user.id,))
         elif normal_c[0] != 0:
