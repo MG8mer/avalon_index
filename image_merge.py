@@ -14,7 +14,7 @@ def overlay_img(bg, bar_R, bar_L, starter, reciever, starter_name, reciever_name
   im_reciever = Image.open(reciever)
   im_bg = Image.open(bg)
 
-  # Scale down the health bar of R
+  # Resizing images
   new_width = im_bar_R.width // 6
   new_height = im_bar_R.height // 6
   im_bar_R = im_bar_R.resize((new_width, new_height))
@@ -31,7 +31,7 @@ def overlay_img(bg, bar_R, bar_L, starter, reciever, starter_name, reciever_name
   new_height_RC = im_reciever.height // 2
   im_bar_RC = im_reciever.resize((new_width_RC, new_height_RC))
 
-    # Change the location to paste the scaled health bar
+  # Setting location
   left_R = 355
   top_R = 150
 
@@ -44,14 +44,14 @@ def overlay_img(bg, bar_R, bar_L, starter, reciever, starter_name, reciever_name
   left_RC = 78
   top_RC = 83
 
-    # Create a new image as the result
+  # Create a new image called result, a copy of the bg
   result = im_bg.copy()
   draw = ImageDraw.Draw(result)
   font = ImageFont.truetype("custom_assets/built titling bd.otf", 20)
-  draw.text((70,165), starter_name, (255,255,255), font=font)
-  draw.text((345,165), reciever_name, (255,255,255), font=font)
+  draw.text((70,170), starter_name, (255,255,255), anchor = "lt", font=font)
+  draw.text((411,177), reciever_name, (255,255,255), anchor = "rm", font=font)
 
-    # Overlay the scaled health bar on top of the background at the new location
+  # Overlay the scaled health bar and characters onto copy of the bg
   result.paste(im_bar_R, (left_R, top_R), im_bar_R)
   result.paste(im_bar_L, (left_L, top_L), im_bar_L)
   result.paste(im_bar_ST, (left_ST, top_ST), im_bar_ST)

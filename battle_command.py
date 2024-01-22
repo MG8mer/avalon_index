@@ -134,14 +134,10 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
       await cursor.execute('UPDATE battles SET battle = ?, starter_hp = ?, reciever_hp = ?, evaluation_starter = ?, evaluation_reciever = ? WHERE starter_id = ? AND reciever_id = ?', (1, health[class_value_starter[0]], health[class_value_reciever[0]], evaluation[class_evaluation_starter], evaluation[class_evaluation_reciever], interaction.user.id, member.id,)) # Update the battle row of both users, insertting values such as their health, evaluation determined by insertting the concatenated string above into the dict, and their ids.
 
       if class_value_starter[0] == 1:
-        async with aiosqlite.connect("main.db") as db:        
-          async with db.cursor() as cursor:
-            await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (interaction.user.id, member.id, "Sword Jab", 0, "Sword Slash", 0, "Dual Sword Attack", 2, "Sliced and Diced", 3))
+          await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (interaction.user.id, member.id, "Sword Jab", 0, "Sword Slash", 0, "Dual Sword Attack", 2, "Sliced and Diced", 3))
           await db.commit()
       elif class_value_starter[0] == 2:
-        async with aiosqlite.connect("main.db") as db:        
-          async with db.cursor() as cursor:
-              await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (interaction.user.id, member.id, "Weak Arrow", 0, "Piercing Shot", 0, "Triple Shot", 2, "Make it Rain", 3))
+          await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (interaction.user.id, member.id, "Weak Arrow", 0, "Piercing Shot", 0, "Triple Shot", 2, "Make it Rain", 3))
       elif class_value_starter[0] == 3:
           await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (interaction.user.id, member.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3)) 
 
@@ -187,7 +183,7 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
   
         if switch_value == False:
           if dmg == 0:
-            await interaction.followup.send(f"{member.name} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{interaction.user.name} still has an HP of ***{hp_starter}***")
+            await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{interaction.user.mention} still has an HP of ***{hp_starter}***")
             await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever)
           elif crit_hit == 3:
             if hp_starter <= 0:

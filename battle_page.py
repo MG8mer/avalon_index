@@ -7,11 +7,9 @@ knight = (1, )
 archer = (2, )
 mage = (3, )
 
-async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_starter, class_reciever):  
-  member = interaction.author 
+async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_starter, class_reciever):   
   reciever_name = member.name
-  user = interaction.user
-  starter_name = user.name
+  starter_name = interaction.user.name
   print(f"{starter_name}, {reciever_name}")
   
   health_R = 'custom_assets/health_R_100.png'

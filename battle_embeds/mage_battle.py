@@ -116,14 +116,14 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         await cursor.execute('SELECT n_cooldown FROM cooldowns WHERE user_id = ?', (interaction.user.id,))
         normal_c = await cursor.fetchone()
         await cursor.execute('SELECT s_cooldown FROM cooldowns WHERE user_id = ?', (interaction.user.id,))
-        speical_c = await cursor.fetchone()
+        special_c = await cursor.fetchone()
         await cursor.execute('SELECT ab_cooldown FROM cooldowns WHERE user_id = ?', (interaction.user.id,))
         avalonbless_c = await cursor.fetchone()
       elif switch == True:
         await cursor.execute('SELECT n_cooldown FROM cooldowns WHERE user_id = ?', (member.id,))
         normal_c = await cursor.fetchone()
         await cursor.execute('SELECT s_cooldown FROM cooldowns WHERE user_id = ?', (member.id,))
-        speical_c = await cursor.fetchone()
+        special_c = await cursor.fetchone()
         await cursor.execute('SELECT ab_cooldown FROM cooldowns WHERE user_id = ?', (member.id,))
         avalonbless_c = await cursor.fetchone()
     await db.commit()
@@ -234,23 +234,22 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
     await view.wait()
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
-        if normal_c[0] == 0:
+        await cursor.execute(f"SELECT move_used FROM moves WHERE turn_num = {turn} AND user_id = {interaction.user.id}")
+        move_final = await cursor.fetchone()
+        if normal_c[0] == 0 and move_final[0] == "Fireball":
           await cursor.execute('UPDATE cooldowns SET n_cooldown = ? WHERE user_id = ?', (1, interaction.user.id,))
         elif normal_c[0] != 0:
           await cursor.execute(f'UPDATE cooldowns SET n_cooldown = {(normal_c[0] - 1)} WHERE user_id = {interaction.user.id}')
 
-        if special_c[0] == 0:
+        if special_c[0] == 0 and move_final[0] == "Arcane Mania":
           await cursor.execute('UPDATE cooldowns SET s_cooldown = ? WHERE user_id = ?', (2, interaction.user.id,))
         elif special_c[0] != 0:
           await cursor.execute(f'UPDATE cooldowns SET s_cooldown = {(special_c[0] - 1)} WHERE user_id = {interaction.user.id}')
         
-        if avalonbless_c[0] == 0:
+        if avalonbless_c[0] == 0 and move_final[0] == "Biden Blast":
           await cursor.execute('UPDATE cooldowns SET ab_cooldown = ? WHERE user_id = ?', (3, interaction.user.id,))
-        elif normal_c[0] != 0:
+        elif avalonbless_c[0] != 0:
           await cursor.execute(f'UPDATE cooldowns SET ab_cooldown = {(avalonbless_c[0] - 1)} WHERE user_id = {interaction.user.id}')
-          
-        await cursor.execute(f"SELECT move_used FROM moves WHERE turn_num = {turn} AND user_id = {interaction.user.id}")
-        move_final = await cursor.fetchone()
       await db.commit()
       return move_final
   elif switch == True: # If it's the reciever's turn, send the embed in their dm.
@@ -258,23 +257,22 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
     await view.wait()
     async with aiosqlite.connect("main.db") as db:
       async with db.cursor() as cursor:
-        if normal_c[0] == 0:
+        await cursor.execute(f"SELECT move_used FROM moves WHERE turn_num = {turn} AND user_id = {member.id}")
+        move_final = await cursor.fetchone()
+        if normal_c[0] == 0 and move_final[0] == "Fireball":
           await cursor.execute('UPDATE cooldowns SET n_cooldown = ? WHERE user_id = ?', (1, member.id,))
         elif normal_c[0] != 0:
           await cursor.execute(f'UPDATE cooldowns SET n_cooldown = {(normal_c[0] - 1)} WHERE user_id = {member.id}')
 
-        if special_c[0] == 0:
+        if special_c[0] == 0 and move_final[0] == "Arcane Mania":
           await cursor.execute('UPDATE cooldowns SET s_cooldown = ? WHERE user_id = ?', (2, member.id,))
         elif special_c[0] != 0:
           await cursor.execute(f'UPDATE cooldowns SET s_cooldown = {(special_c[0] - 1)} WHERE user_id = {member.id}')
 
-        if avalonbless_c[0] == 0:
+        if avalonbless_c[0] == 0 and move_final[0] == "Biden Blast":
           await cursor.execute('UPDATE cooldowns SET ab_cooldown = ? WHERE user_id = ?', (3, member.id,))
-        elif normal_c[0] != 0:
+        elif avalonbless_c[0] != 0:
           await cursor.execute(f'UPDATE cooldowns SET ab_cooldown = {(avalonbless_c[0] - 1)} WHERE user_id = {member.id}')
-          
-        await cursor.execute(f"SELECT move_used FROM moves WHERE turn_num = {turn} AND user_id = {member.id}")
-        move_final = await cursor.fetchone()
       await db.commit()
       return move_final
   if view.value is None:
