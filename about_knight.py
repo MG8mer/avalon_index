@@ -16,7 +16,7 @@ async def about(interaction):
     inline=False)
   embed_knight.add_field(    
     name="Stats:", 
-    value="150 HP; Low Damage",
+    value="125 HP; Low Damage",
     inline=False)
   embed_knight.add_field(    
     name="Attacks:", 
@@ -28,7 +28,7 @@ async def about(interaction):
     inline=True)
   embed_knight.add_field(
     name="Sword Slash (Normal)",
-    value="Weak -10 HP; Normal -20 HP; Strong -30 HP",
+    value="Weak -10 HP; Normal -20 HP; Strong -25 HP",
     inline=False)
   embed_knight.add_field(
     name="Dual Sword Attack (Special)",

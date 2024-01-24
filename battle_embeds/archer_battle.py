@@ -10,7 +10,7 @@ import aiosqlite
 
 # Class health
 health = {
-  1: 150,
+  1: 125,
   2: 75,
   3: 100
 }
@@ -45,10 +45,10 @@ attacks = {
     "Sword Slash": {
       "Weak": -10,
       "Normal": -20,
-      "Strong": -30
+      "Strong": -25
     },
     "Dual Sword Attack": {
-      "Weak": -40,
+      "Weak": -35,
       "Normal": -45,
       "Strong": -50,
     },
@@ -75,7 +75,7 @@ attacks = {
       "Strong": -60,
     },
     "Make it Rain": {
-      "Weak": -80,
+      "Weak": -75,
       "Normal": -90,
       "Strong": -100,
     }
@@ -89,7 +89,7 @@ attacks = {
   "Fireball": {
     "Weak": -15,
     "Normal": -25,
-    "Strong": -32
+    "Strong": -30
   },
   "Arcane Mania": {
     "Weak": -42,
@@ -104,7 +104,6 @@ attacks = {
 }
 
 }
-
 
 # Function to send an embed to the user when they use battle if they picked archer.
 async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn, starter_hp_value, reciever_hp_value):

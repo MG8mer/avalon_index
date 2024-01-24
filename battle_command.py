@@ -10,13 +10,13 @@ import battle_page
 
 # Useful source throughout: https://discordpy.readthedocs.io/en/stable/interactions/api.html
 
-# Dicts to store class info:
-
 client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # Define client.
+
+# Dicts to store class info:
 
 # Class health
 health = {
-  1: 150,
+  1: 125,
   2: 75,
   3: 100
 }
@@ -51,10 +51,10 @@ attacks = {
     "Sword Slash": {
       "Weak": -10,
       "Normal": -20,
-      "Strong": -30
+      "Strong": -25
     },
     "Dual Sword Attack": {
-      "Weak": -40,
+      "Weak": -35,
       "Normal": -45,
       "Strong": -50,
     },
@@ -81,7 +81,7 @@ attacks = {
       "Strong": -60,
     },
     "Make it Rain": {
-      "Weak": -80,
+      "Weak": -75,
       "Normal": -90,
       "Strong": -100,
     }
@@ -95,7 +95,7 @@ attacks = {
   "Fireball": {
     "Weak": -15,
     "Normal": -25,
-    "Strong": -32
+    "Strong": -30
   },
   "Arcane Mania": {
     "Weak": -42,
@@ -133,20 +133,23 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
       class_evaluation_reciever = str(class_value_reciever[0]) + str(class_value_starter[0]) # Concatenate strings of class values to see their evaluation according to the assigned dictionary.
       await cursor.execute('UPDATE battles SET battle = ?, starter_hp = ?, reciever_hp = ?, evaluation_starter = ?, evaluation_reciever = ? WHERE starter_id = ? AND reciever_id = ?', (1, health[class_value_starter[0]], health[class_value_reciever[0]], evaluation[class_evaluation_starter], evaluation[class_evaluation_reciever], interaction.user.id, member.id,)) # Update the battle row of both users, insertting values such as their health, evaluation determined by insertting the concatenated string above into the dict, and their ids.
 
+      rand_mage = None
       if class_value_starter[0] == 1:
           await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (interaction.user.id, member.id, "Sword Jab", 0, "Sword Slash", 0, "Dual Sword Attack", 2, "Sliced and Diced", 3))
           await db.commit()
       elif class_value_starter[0] == 2:
           await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (interaction.user.id, member.id, "Weak Arrow", 0, "Piercing Shot", 0, "Triple Shot", 2, "Make it Rain", 3))
       elif class_value_starter[0] == 3:
-          await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (interaction.user.id, member.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3)) 
+          await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (interaction.user.id, member.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3))
+          rand_mage = randint(1, 10)
 
       if class_value_reciever[0] == 1:
          await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (member.id, interaction.user.id, "Sword Jab", 0, "Sword Slash", 0, "Dual Sword Attack", 2, "Sliced and Diced", 3))
       elif class_value_reciever[0] == 2:
           await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (member.id, interaction.user.id, "Weak Arrow", 0, "Piercing Shot", 0, "Triple Shot", 2, "Make it Rain", 3))
       elif class_value_reciever[0] == 3:
-          await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (member.id, interaction.user.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3)) 
+          await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (member.id, interaction.user.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3))
+          rand_mage = randint(1, 10)
         
       await cursor.execute('SELECT starter_hp FROM battles WHERE starter_id = ?', (interaction.user.id,))
       starter_hp_value = await cursor.fetchone()
@@ -162,7 +165,7 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
     # Below https://stackoverflow.com/questions/21837208/check-if-a-number-is-odd-or-even-in-python
     if turn == 0 or turn % 2 == 0: # if turn is even, define switch_value, insertting switch into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
-        switch_value, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn)
+        switch_value, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, rand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn)
       except TypeError:
         return
       else:
@@ -225,7 +228,7 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
           
     else:  # if turn is odd, define switch, insertting switch_value into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
-        switch, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch_value, turn)
+        switch, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, rand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch_value, turn)
       except TypeError:
         return
       else:

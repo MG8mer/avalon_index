@@ -36,7 +36,7 @@ async def about(interaction):
       inline=False)
     embed_archer.add_field(
       name="Make it Rain! (Avalon's Blessing)",
-      value="Weak -80 HP; Normal -90 HP; Strong -100 HP",
+      value="Weak -75 HP; Normal -90 HP; Strong -100 HP",
       inline=False)
     embed_archer.add_field(
       name="Weaknesses/Strengths",

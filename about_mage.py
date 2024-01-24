@@ -30,7 +30,7 @@ async def about(interaction):
         inline=True)
     embed_mage.add_field(
         name="Fireball (Normal)",
-        value="Weak -15 HP; Normal -25 HP; Strong -32 HP",
+        value="Weak -15 HP; Normal -25 HP; Strong -30 HP",
         inline=False)
     embed_mage.add_field(
         name="Arcane Mania (Special)",
