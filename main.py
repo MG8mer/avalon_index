@@ -101,7 +101,7 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
   async with aiosqlite.connect("main.db") as db:
     async with db.cursor() as cursor:
       await cursor.execute('CREATE TABLE IF NOT EXISTS users(user_id INTEGER, guild_id INTEGER, class INTEGER, start INTEGER)')
-      await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id INTEGER, starter_hp INTEGER, reciever_id INTEGER, reciever_hp INTEGER, channel_id INTEGER, evaluation_starter STRING, evaluation_reciever STRING)')
+      await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id INTEGER, starter_hp INTEGER, starter_ff STRING, reciever_id INTEGER, reciever_hp INTEGER, reciever_ff STRING, channel_id INTEGER, evaluation_starter STRING, evaluation_reciever STRING)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS moves(user_id INTEGER, opponent_id INTEGER, move_used STRING, turn_num INTEGER)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS cooldowns(user_id INTEGER, opponent_id INTEGER, weak STRING, w_cooldown INTEGER, normal STRING, n_cooldown INTEGER, special STRING, s_cooldown INTEGER, avalon_blessing STRING, ab_cooldown INTEGER)')
     await db.commit()
@@ -289,11 +289,7 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
       if msg.content == "yes" or msg.content == "Yes" or msg.content == "Yes" or msg.content == "ye" or msg.content == "Yeah" or msg.content == "yeah" or msg.content == "Ye" or msg.content == "sure" or msg.content == "Sure" or msg.content == "ok" or msg.content == "Ok" or msg.content == "Y" or msg.content == "y": # However, if the reciever strictly says "yes", do what is below.
         start_rand = random.choice([1,2]) #currently, we are deciding the person who gets first move by random
         await interaction.followup.send("Starting battle...") # Inform the users that the battle is starting.
-        try:
-          # https://stackoverflow.com/questions/66079751/how-to-wait-some-seconds-only-for-a-user-discord-bot-python
-          await client.wait_for("message", timeout=2.0, check=lambda message: interaction.user.id == member.id)
-        except asyncio.TimeoutError:
-          await battle_command.battle(interaction, member, start_rand) # Call the battle function in the battle_command file and proceed.
+        await battle_command.battle(interaction, member, start_rand) # Call the battle function in the battle_command file and proceed.
       else: # If the reciever responds with anything else, cancel the battle.
         async with aiosqlite.connect("main.db") as db:
           async with db.cursor() as cursor:
@@ -352,13 +348,20 @@ async def ff(interaction: Interaction):    #/ff command which is to stop the bat
       battle_check_two = await cursor.fetchone() # Or check that the user is in a battle where they are the reciever.
       await cursor.execute('SELECT channel_id FROM battles WHERE channel_id = ?', (interaction.channel_id,))
       battle_check_three = await cursor.fetchone() # Check that /ff is used in the same channel where /battle was used.
+      await cursor.execute('SELECT starter_ff FROM battles WHERE starter_id = ?',(interaction.user.id,))
+      ff_check_one = await cursor.fetchone()
+      await cursor.execute('SELECT reciever_ff FROM battles WHERE reciever_id = ?', (interaction.user.id,))
+      ff_check_two = await cursor.fetchone()
       if battle_check_one == (1,) or battle_check_two == (1,): # If the user is in a battle where he is a starter or reciever and /ff is used in the same channel where /battle was used for that user (i.e the value for its checking isn't none), ask for confirmation with the two buttons with the class in the variable view, in which they can only see this interaction with ephermeral = True, then respond accordingly.
-        if battle_check_three != None:
-          if interaction.channel_id == battle_check_three[0]:
-            await interaction.response.send_message("Are you sure you want to flee this battle?", view=view, ephemeral=True)
-            await view.wait() # Await for the user to press one of the buttons made by the class RunStay.
-        else: # If /ff is used not in the place where /battle was used such as the bot's dms, send that you must use ff in the channel where you used /battle.
-           await interaction.response.send_message("Plese flee the battle in the channel where you started the battle.", ephemeral=True)
+        if ff_check_one == ('Yes',) or ff_check_two == ('Yes',):
+          if battle_check_three != None:
+            if interaction.channel_id == battle_check_three[0]:
+              await interaction.response.send_message("Are you sure you want to flee this battle?", view=view, ephemeral=True)
+              await view.wait() # Await for the user to press one of the buttons made by the class RunStay.
+          else: # If /ff is used not in the place where /battle was used such as the bot's dms, send that you must use ff in the channel where you used /battle.
+             await interaction.response.send_message("Plese flee the battle in the channel where you started the battle.", ephemeral=True)
+        else:
+          await interaction.response.send_message("Please flee the battle when it is your turn.", ephemeral=True)
       else: # If /ff is used when no battle exists for that user, simply respond only ot that user that you can't runaway from a nonexistent battle, or in other words the voices in your head.
          await interaction.response.send_message("No, you can't runaway from the voices in your head...", ephemeral=True)
     await db.commit()

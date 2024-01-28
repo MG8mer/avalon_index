@@ -3,11 +3,14 @@ from nextcord.embeds import Embed
 import nextcord.interactions
 from image_merge import overlay_img
 
-knight = (1, )
-archer = (2, )
-mage = (3, )
+characters = {
+  "knight": (1, ),
+  "archer": (2, ),
+  "mage": (3, )
+}
 
-async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_starter, class_reciever):   
+
+async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_starter, class_reciever, startrand_mage, recieverand_mage):   
   reciever_name = member.name
   starter_name = interaction.user.name
   print(f"{starter_name}, {reciever_name}")
@@ -17,19 +20,25 @@ async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_
   character_starter = None
   character_reciever = None
 
-  if class_starter == knight:
+  if class_starter == characters["knight"]:
     character_starter = 'custom_assets/knight_flipped.png'
-  elif class_starter == archer:
+  elif class_starter == characters["archer"]:
     character_starter = 'custom_assets/archer_flipped.png'
-  elif class_starter == mage:
-    character_starter = 'custom_assets/mage_flipped.png'
+  elif class_starter == characters["mage"]:
+    if startrand_mage == 7:
+      character_starter = 'custom_assets/mage_nerfed_flipped.png'
+    else:
+      character_starter = 'custom_assets/mage_flipped.png'
     
-  if class_reciever == knight:
+  if class_reciever == characters["knight"]:
     character_reciever = 'custom_assets/knight_final.png'
-  elif class_reciever == archer:
+  elif class_reciever == characters["archer"]:
     character_reciever = 'custom_assets/final_archer_1.png'
-  elif class_reciever == mage:
-    character_reciever = 'custom_assets/mage_final_normal.png'
+  elif class_reciever == characters["mage"]:
+    if recieverand_mage == 7:
+      character_reciever = 'custom_assets/final_mage_nerfed_eE.png'
+    else:
+      character_reciever = 'custom_assets/mage_final_normal.png'
 
   if hp_percentage_starter <= 75 and hp_percentage_starter > 50:
     health_L = 'custom_assets/health_L_75.png'

@@ -24,19 +24,19 @@ async def about(interaction):
     inline=False)
   embed_knight.add_field(
     name="Sword Jab (Weak)",
-    value="Weak -5 HP; Normal -10 HP; Strong -15 HP",
+    value="Weak -4 HP; Normal -8 HP; Strong -12 HP",
     inline=True)
   embed_knight.add_field(
     name="Sword Slash (Normal)",
-    value="Weak -10 HP; Normal -20 HP; Strong -25 HP",
+    value="Weak -8 HP; Normal -16 HP; Strong -20 HP",
     inline=False)
   embed_knight.add_field(
     name="Dual Sword Attack (Special)",
-    value="Weak -40 HP; Normal -45 HP; Strong -50 HP",
+    value="Weak -32 HP; Normal -38 HP; Strong -45 HP",
     inline=False)
   embed_knight.add_field(
     name="Sliced and Diced (Avalon's Blessing)",
-    value="Weak -60 HP; Normal -65 HP; Strong -70 HP",
+    value="Weak -55 HP; Normal -60 HP; Strong -65  HP",
     inline=False)
   embed_knight.add_field(
     name="Weaknesses/Strengths",
