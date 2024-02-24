@@ -106,8 +106,6 @@ attacks = {
 }
 
 
-
-
 # Function to send an embed to the user when they use battle if they picked knight.
 async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn, starter_hp_value, reciever_hp_value):
   id_user = interaction.user.id 
@@ -134,9 +132,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       super().__init__()
       self.value = None
 
-    @nextcord.ui.button(label = 'Sword Jab', style=nextcord.ButtonStyle.blurple)
+    @nextcord.ui.button(label = "Sword Jab", style=nextcord.ButtonStyle.blurple)
     async def weak(self, button: nextcord.ui.Button, interaction: Interaction):
-      move = 'Sword Jab'
+      move = "Sword Jab"
       async with aiosqlite.connect("main.db") as db:
         async with db.cursor() as cursor:
           if switch == False:
@@ -148,9 +146,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       self.stop()
 
     if normal_c[0] == 0:
-      @nextcord.ui.button(label = 'Sword Slash', style=nextcord.ButtonStyle.blurple)
+      @nextcord.ui.button(label = "Sword Slash", style=nextcord.ButtonStyle.blurple)
       async def normal(self, button: nextcord.ui.Button, interaction: Interaction):
-        move = 'Sword Slash'
+        move = "Sword Slash"
         async with aiosqlite.connect("main.db") as db:
           async with db.cursor() as cursor:
             if switch == False:
@@ -162,9 +160,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         self.stop()
 
     if special_c[0] == 0:
-      @nextcord.ui.button(label = 'Dual Sword Attack', style=nextcord.ButtonStyle.blurple)
+      @nextcord.ui.button(label = "Dual Sword Attack", style=nextcord.ButtonStyle.blurple)
       async def special(self, button: nextcord.ui.Button, interaction: Interaction):
-        move = 'Dual Sword Attack'
+        move = "Dual Sword Attack"
         async with aiosqlite.connect("main.db") as db:
           async with db.cursor() as cursor:
             if switch == False:
@@ -176,9 +174,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         self.stop()
 
     if avalonbless_c[0] == 0:
-      @nextcord.ui.button(label = 'Sliced and Diced', style=nextcord.ButtonStyle.blurple)
+      @nextcord.ui.button(label = "Sliced and Diced", style=nextcord.ButtonStyle.blurple)
       async def blessing(self, button: nextcord.ui.Button, interaction: Interaction):
-        move = 'Sliced and Diced'
+        move = "Sliced and Diced"
         async with aiosqlite.connect("main.db") as db:
           async with db.cursor() as cursor:
             if switch == False:

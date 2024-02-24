@@ -12,8 +12,8 @@ async def help(interaction, bot_name, bot_avatar_url):
   bot_avatar_url = bot_avatar_url
   url = randGIF.randgif("HELP ME")
   embed = Embed(    #main embed field, with title and description
-    title = f"**{botName}'s Help Menu**", 
-    description = f"All necessary commands to play the game to your heart's content! {interaction.user.mention}", 
+    title = f"**{botName}'s Help Menu (pg. 1)**", 
+    description = f"All the necessary commands to play the game to your heart's content! {interaction.user.mention}", 
     color = nextcord.Color.blue())
   embed.set_author(    #author field
     name=botName,
@@ -28,7 +28,7 @@ async def help(interaction, bot_name, bot_avatar_url):
     inline=True)
   embed.add_field(    #.pick embed, additional field for correct usage
     name="> Syntax", 
-    value="```\n/pick\n```", 
+    value="```\n/pick <class: Knight *or* Archer *or* Mage>\n```", 
     inline=True)
   embed.add_field(    #blank embed to seperate
     name="",
@@ -36,11 +36,11 @@ async def help(interaction, bot_name, bot_avatar_url):
     inline=False)
   embed.add_field(    #.about embed
     name="> /about", 
-    value="Get to know your class more!",
+    value="Learn more about each class!",
     inline=True)
   embed.add_field(    #.about embed, additional field for correct usage
     name="> Syntax", 
-    value="```\n/about```\n", 
+    value="```\n/about <class: Knight *or* Archer *or* Mage>```\n", 
     inline=True)
   embed.add_field(    #blank embed to seperate
     name="",
@@ -52,15 +52,23 @@ async def help(interaction, bot_name, bot_avatar_url):
     inline=True)
   embed.add_field(    #.battle embed, additional field for correct usage
     name="> Syntax", 
-    value="```\n/battle <must be present within the same server!>\n```", 
+    value="```\n/battle <member: **must be present within the same server!**>\n```", 
     inline=True)
+  embed.add_field(    #blank embed to seperate
+    name="",
+    value="",
+    inline=False)
   embed.add_field(    #.stats embed
     name="> /stats", 
     value="Displays stats of your character", 
-    inline=False)  
+    inline=True)
+  embed.add_field(    #.stats embed, additional field for correct usage
+    name="> Syntax", 
+    value="```\n/stats <member: **must be present within the same server!**>\n```", 
+    inline=True)
   embed.add_field(    #.moves embed
-    name="> /moves", 
-    value="Displays moves you're allowed to use on a turn", 
+    name="> /reset", 
+    value="Reset your stats and start from scratch!", 
     inline=False)
   embed.add_field(    #.ff embed
     name="> /ff",     

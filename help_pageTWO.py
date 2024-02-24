@@ -10,8 +10,8 @@ async def help(interaction, bot_name, bot_avatar_url):
   botName = bot_name
   bot_avatar_url = bot_avatar_url
   url = randGIF.randgif("HELP ME")
-  embed = Embed(title="Avalon Index's Help Menu", #main embed field, with title and description
-    description=f"All necessary commands to play the game to your heart's content! {interaction.user.mention}",
+  embed = Embed(title="Avalon Index's Help Menu (pg. 2)", #main embed field, with title and description
+    description=f"All the necessary commands to play the game to your heart's content! {interaction.user.mention}",
     colour=nextcord.Color.blurple(),
     timestamp=datetime.now())
   embed.set_author(name=botName, #author field

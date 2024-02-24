@@ -45,24 +45,24 @@ evaluation = {
 attacks = {
   1: {
     "Sword Jab": {
-      "Weak": -5,
-      "Normal": -10,
-      "Strong": -15
+      "Weak": -4,
+      "Normal": -8,
+      "Strong": -12
     },
     "Sword Slash": {
-      "Weak": -10,
-      "Normal": -20,
-      "Strong": -25
+      "Weak": -8,
+      "Normal": -16,
+      "Strong": -20
     },
     "Dual Sword Attack": {
-      "Weak": -35,
-      "Normal": -45,
-      "Strong": -50,
+      "Weak": -32,
+      "Normal": -38,
+      "Strong": -45,
     },
     "Sliced and Diced": {
-      "Weak": -60,
-      "Normal": -65,
-      "Strong": -70,
+      "Weak": -55,
+      "Normal": -60,
+      "Strong": -65,
     }
   },
   2: {

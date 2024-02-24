@@ -131,7 +131,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       super().__init__()
       self.value = None
     
-    @nextcord.ui.button(label = 'Weak Arrow', style=nextcord.ButtonStyle.blurple)
+    @nextcord.ui.button(label = "Weak Arrow", style=nextcord.ButtonStyle.blurple)
     async def weak(self, button: nextcord.ui.Button, interaction: Interaction):
       move = "Weak Arrow"
       async with aiosqlite.connect("main.db") as db:
@@ -145,7 +145,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       self.stop()
 
     if normal_c[0] == 0:
-      @nextcord.ui.button(label = 'Piercing Shot', style=nextcord.ButtonStyle.blurple)
+      @nextcord.ui.button(label = "Piercing Shot", style=nextcord.ButtonStyle.blurple)
       async def normal(self, button: nextcord.ui.Button, interaction: Interaction):
         move = "Piercing Shot"
         async with aiosqlite.connect("main.db") as db:
@@ -159,7 +159,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         self.stop()
 
     if special_c[0] == 0:
-      @nextcord.ui.button(label = 'Triple Shot', style=nextcord.ButtonStyle.blurple)
+      @nextcord.ui.button(label = "Triple Shot", style=nextcord.ButtonStyle.blurple)
       async def special(self, button: nextcord.ui.Button, interaction: Interaction):
         move = "Triple Shot"
         async with aiosqlite.connect("main.db") as db:
@@ -173,7 +173,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         self.stop()
 
     if avalonbless_c[0] == 0:
-      @nextcord.ui.button(label = 'Make it Rain', style=nextcord.ButtonStyle.blurple)
+      @nextcord.ui.button(label = "Make it Rain", style=nextcord.ButtonStyle.blurple)
       async def blessing(self, button: nextcord.ui.Button, interaction: Interaction):
         move = "Make it Rain"
         async with aiosqlite.connect("main.db") as db:

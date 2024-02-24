@@ -20,81 +20,81 @@ client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # De
 
 async def move(interaction: Interaction, member: nextcord.Member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn):
   if startrand_mage == 7 or recieverand_mage == 7:
-    # Dicts to store class info:
+      # Dicts to store class info:
 
-    # Class health
-    health = {
-      1: 125,
-      2: 75,
-      3: 100
-    }
+      # Class health
+      health = {
+        1: 125,
+        2: 75,
+        3: 100
+      }
 
-    # Battle evaluation:
-      # Ex: 12; if a knight fights an archer it's weak for the knight.
-      # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
-    evaluation = {
-      "11": "Normal",
-      "22": "Normal",
-      "33": "Normal",
-      "12": "Weak",
-      "13": "Strong",
-      "21": "Strong",
-      "23": "Weak",
-      "31": "Weak",
-      "32": "Strong",
-    }
+      # Battle evaluation:
+        # Ex: 12; if a knight fights an archer it's weak for the knight.
+        # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
+      evaluation = {
+        "11": "Normal",
+        "22": "Normal",
+        "33": "Normal",
+        "12": "Weak",
+        "13": "Strong",
+        "21": "Strong",
+        "23": "Weak",
+        "31": "Weak",
+        "32": "Strong",
+      }
 
-    # Dict order:
-      # Class
-        # Attacks:
-          # Damage dependent on evaluation.
+      # Dict order:
+        # Class
+          # Attacks:
+            # Damage dependent on evaluation.
 
-    attacks = {
-      1: {
-        "Sword Jab": {
-          "Weak": -5,
-          "Normal": -10,
-          "Strong": -15
+      attacks = {
+        1: {
+          "Sword Jab": {
+            "Weak": -4,
+            "Normal": -8,
+            "Strong": -12
+          },
+          "Sword Slash": {
+            "Weak": -8,
+            "Normal": -16,
+            "Strong": -20
+          },
+          "Dual Sword Attack": {
+            "Weak": -32,
+            "Normal": -38,
+            "Strong": -50
+          },
+          "Sliced and Diced": {
+            "Weak": -55,
+            "Normal": -60,
+            "Strong": -65
+          }
         },
-        "Sword Slash": {
-          "Weak": -10,
-          "Normal": -20,
-          "Strong": -25
+        2: {
+          "Weak Arrow": {
+            "Weak": -7,
+            "Normal": -12,
+            "Strong": -15
+          },
+          "Piercing Shot": {
+            "Weak": -20,
+            "Normal": -25,
+            "Strong": -35
+          },
+          "Triple Shot": {
+            "Weak": -45,
+            "Normal": -50,
+            "Strong": -60
+          },
+          "Make it Rain": {
+            "Weak": -75,
+            "Normal": -90,
+            "Strong": -100
+          }
         },
-        "Dual Sword Attack": {
-          "Weak": -35,
-          "Normal": -45,
-          "Strong": -50,
-        },
-        "Sliced and Diced": {
-          "Weak": -60,
-          "Normal": -65,
-          "Strong": -70,
-        }
-      },
-      2: {
-        "Weak Arrow": {
-          "Weak": -7,
-          "Normal": -12,
-          "Strong": -15
-        },
-        "Piercing Shot": {
-          "Weak": -20,
-          "Normal": -25,
-          "Strong": -35
-        },
-        "Triple Shot": {
-          "Weak": -45,
-          "Normal": -50,
-          "Strong": -60,
-        },
-        "Make it Rain": {
-          "Weak": -75,
-          "Normal": -90,
-          "Strong": -100,
-        }
-      },
-      3: {
+        3: {
         "Zap": {
           "Weak": -6,
           "Normal": -11,
@@ -108,12 +108,12 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
         "Arcane Mania": {
           "Weak": -42,
           "Normal": -47,
-          "Strong": -55,
+          "Strong": -55
         },
         "Biden Blast": {
           "Weak": -70,
           "Normal": -75,
-          "Strong": -80,
+          "Strong": -80
         }
       },
       4: {
@@ -138,105 +138,105 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
         "Strong": -999,
       }
     }
-  }
+    }
   else:
-    # Dicts to store class info:
-
-    # Class health
-    health = {
-      1: 125,
-      2: 75,
-      3: 100
-    }
-
-    # Battle evaluation:
-      # Ex: 12; if a knight fights an archer it's weak for the knight.
-      # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
-    evaluation = {
-      "11": "Normal",
-      "22": "Normal",
-      "33": "Normal",
-      "12": "Weak",
-      "13": "Strong",
-      "21": "Strong",
-      "23": "Weak",
-      "31": "Weak",
-      "32": "Strong",
-    }
-
-    # Dict order:
-      # Class
-        # Attacks:
-          # Damage dependent on evaluation.
-
-    attacks = {
-      1: {
-        "Sword Jab": {
-          "Weak": -5,
-          "Normal": -10,
-          "Strong": -15
+      # Dicts to store class info:
+  
+      # Class health
+      health = {
+        1: 125,
+        2: 75,
+        3: 100
+      }
+  
+      # Battle evaluation:
+        # Ex: 12; if a knight fights an archer it's weak for the knight.
+        # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
+      evaluation = {
+        "11": "Normal",
+        "22": "Normal",
+        "33": "Normal",
+        "12": "Weak",
+        "13": "Strong",
+        "21": "Strong",
+        "23": "Weak",
+        "31": "Weak",
+        "32": "Strong",
+      }
+  
+      # Dict order:
+        # Class
+          # Attacks:
+            # Damage dependent on evaluation.
+  
+      attacks = {
+        1: {
+          "Sword Jab": {
+            "Weak": -4,
+            "Normal": -8,
+            "Strong": -12
+          },
+          "Sword Slash": {
+            "Weak": -8,
+            "Normal": -16,
+            "Strong": -20
+          },
+          "Dual Sword Attack": {
+            "Weak": -32,
+            "Normal": -38,
+            "Strong": -50
+          },
+          "Sliced and Diced": {
+            "Weak": -55,
+            "Normal": -60,
+            "Strong": -65
+          }
         },
-        "Sword Slash": {
-          "Weak": -10,
-          "Normal": -20,
-          "Strong": -25
+        2: {
+          "Weak Arrow": {
+            "Weak": -7,
+            "Normal": -12,
+            "Strong": -15
+          },
+          "Piercing Shot": {
+            "Weak": -20,
+            "Normal": -25,
+            "Strong": -35
+          },
+          "Triple Shot": {
+            "Weak": -45,
+            "Normal": -50,
+            "Strong": -60
+          },
+          "Make it Rain": {
+            "Weak": -75,
+            "Normal": -90,
+            "Strong": -100
+          }
         },
-        "Dual Sword Attack": {
-          "Weak": -35,
-          "Normal": -45,
-          "Strong": -50,
+        3: {
+        "Zap": {
+          "Weak": -6,
+          "Normal": -11,
+          "Strong": -14
         },
-        "Sliced and Diced": {
-          "Weak": -60,
-          "Normal": -65,
-          "Strong": -70,
-        }
-      },
-      2: {
-        "Weak Arrow": {
-          "Weak": -7,
-          "Normal": -12,
-          "Strong": -15
-        },
-        "Piercing Shot": {
-          "Weak": -20,
+        "Fireball": {
+          "Weak": -15,
           "Normal": -25,
-          "Strong": -35
+          "Strong": -30
         },
-        "Triple Shot": {
-          "Weak": -45,
-          "Normal": -50,
-          "Strong": -60,
+        "Arcane Mania": {
+          "Weak": -42,
+          "Normal": -47,
+          "Strong": -55
         },
-        "Make it Rain": {
-          "Weak": -75,
-          "Normal": -90,
-          "Strong": -100,
+        "Biden Blast": {
+          "Weak": -70,
+          "Normal": -75,
+          "Strong": -80
         }
-      },
-      3: {
-      "Zap": {
-        "Weak": -6,
-        "Normal": -11,
-        "Strong": -14
-      },
-      "Fireball": {
-        "Weak": -15,
-        "Normal": -25,
-        "Strong": -30
-      },
-      "Arcane Mania": {
-        "Weak": -42,
-        "Normal": -47,
-        "Strong": -55,
-      },
-      "Biden Blast": {
-        "Weak": -70,
-        "Normal": -75,
-        "Strong": -80,
       }
     }
-  }
   crit_hit = randint(1, 5)
   if switch == None:
     async with aiosqlite.connect("main.db") as db:        
@@ -398,6 +398,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
     print("true")
     if class_value_reciever[0] == 1: # If the class of the reciever is the knight.
         move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
+        print(move)
         check_deleted = None
         async with aiosqlite.connect("main.db") as db:        
             async with db.cursor() as cursor:

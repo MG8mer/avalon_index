@@ -11,12 +11,12 @@ async def about(interaction):
     title = "About the Knight:", 
     color = nextcord.Color.dark_gray())
   embed_knight.add_field(    
-    name="About:", 
-    value="The knight is the tankiest class in the game, being close range.", 
+    name="Brief Description:", 
+    value="The Knight is the tankiest class in the game, being a close ranger and dealing low damage.", 
     inline=False)
   embed_knight.add_field(    
-    name="Stats:", 
-    value="125 HP; Low Damage",
+    name="HP:", 
+    value="125",
     inline=False)
   embed_knight.add_field(    
     name="Attacks:", 
@@ -36,11 +36,11 @@ async def about(interaction):
     inline=False)
   embed_knight.add_field(
     name="Sliced and Diced (Avalon's Blessing)",
-    value="Weak -55 HP; Normal -60 HP; Strong -65  HP",
+    value="Weak -55 HP; Normal -60 HP; Strong -65 HP",
     inline=False)
   embed_knight.add_field(
     name="Weaknesses/Strengths",
-    value="Knight is strong against mage but weak against archer.",
+    value="The Knight is **STRONG** against the Mage but **WEAK** against the Archer (**NORMAL** against itself).",
     inline=False)
   embed_knight.set_thumbnail(url="https://i.imgur.com/soNMbTL.png")# We also included a little pixel-art in the embed resembling the knight class.
   # We then proceed to defer the need to respond to the interaction and then followup by sending the embed for the knight.

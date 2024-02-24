@@ -11,12 +11,12 @@ async def about(interaction):
       title = "About the Archer:", 
       color = nextcord.Color.green())
     embed_archer.add_field(    
-      name="About:", 
-      value="The archer is a long ranger, but has lower hp with more damage.", 
+      name="Brief Description:", 
+      value="The Archer is a long ranger, but has a low HP and deals high damage.", 
       inline=False)
     embed_archer.add_field(    
-      name="Stats:", 
-      value="75 HP; High Damage",
+      name="HP:", 
+      value="75",
       inline=False)
     embed_archer.add_field(    
       name="Attacks:", 
@@ -40,7 +40,7 @@ async def about(interaction):
       inline=False)
     embed_archer.add_field(
       name="Weaknesses/Strengths",
-      value="Archer is strong against knight but weak against knight.",
+      value="Archer is **STRONG** against the Knight but **WEAK** against the Mage (**NORMAL** against itself).",
       inline=False)
     embed_archer.set_thumbnail(
       url="https://i.imgur.com/NcJsHO3.png"
