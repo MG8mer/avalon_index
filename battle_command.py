@@ -144,7 +144,6 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
       elif class_value_starter[0] == 3:
           await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (interaction.user.id, member.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3))
           startrand_mage = randint(1, 10)
-          print(f'STARTRAND MAGE: {startrand_mage}')
     
       if class_value_reciever[0] == 1:
          await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (member.id, interaction.user.id, "Sword Jab", 0, "Sword Slash", 0, "Dual Sword Attack", 2, "Sliced and Diced", 3))
@@ -153,7 +152,6 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
       elif class_value_reciever[0] == 3:
           await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (member.id, interaction.user.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3))
           recieverand_mage = randint(1, 10)
-          print(f'RECIEVER RAND MAGE: {recieverand_mage}')
         
       await cursor.execute('SELECT starter_hp FROM battles WHERE starter_id = ?', (interaction.user.id,))
       starter_hp_value = await cursor.fetchone()

@@ -51,7 +51,6 @@ async def gif(ctx, *args): #prefix command to grab gif based on arg
    await ctx.send("Usage: ``.gif <search_term>``. Check ``.help`` for more info") #usage error
  else:
   arg = args[0]
-  print (f"{arg}")
   search_term = arg
   lim = 1
   media_filter = "gif, tinygif"
@@ -64,16 +63,12 @@ async def gif(ctx, *args): #prefix command to grab gif based on arg
       f"https://tenor.googleapis.com/v2/search?q={search_term}&key={SECRET_KEY}&client_key={ckey}&limit={lim}&media_filter={media_filter}&random={random}") #requests api for an obj containing our results
     r.raise_for_status()
   except requests.exceptions.RequestException as e:
-    print(f"Error making API request: {e}")
     await ctx.send("Error fetching GIF. Please try again later.")
     return
 
   if r.status_code == 200:
     data = r.json()
-    pprint(data)
-    print(r.status_code)
     url = data['results'][0]['media_formats']['gif']['url'] #opens the json obj and grabs the gif url
-    print(url)
     embed = Embed(title="The GIF Machine", 
                   description=f"Here's your GIF! {ctx.author.mention}", 
                   color=0x00ff00)
@@ -82,7 +77,6 @@ async def gif(ctx, *args): #prefix command to grab gif based on arg
     await ctx.send(embed=embed) #sends the gif and deletes the user msg to not clutter the chat
     await ctx.message.delete()
   else:
-    print("No results found.")
     embed = Embed(title="No Results Found")
     await ctx.send(embed=embed)
     await ctx.message.delete() #a prefix command to get a gif based on the arguement
@@ -363,7 +357,7 @@ async def ff(interaction: Interaction):    #/ff command which is to stop the bat
   if view.value is None: # If the user dosen't press any button after a while, invalidate the interaction.
     return
 
-# The stats command diplays the stats of a user that is mentioned, for now displaying the user's class only. The function checks that the start value is one for the user so stats can be actually displayed for the user. Then the value of the class column for that user is checked to display their class, which is then proceeded to deferring the need to respond to the interaction and then following up by sending the embed for the user's stats, which is for now only their class. If the user has not used the pick function yet, the class displayed will simply be N/A.
+# The stats command diplays the stats of a user that is mentioned, for now displaying the user's class only. The function checks that the start value is one for the user so stats can be actually displayed for the user. Then the value of the class column for that user is checked to display their class, which is then proceeded to deferring the need to respond to the interaction and then following up by sending the embed for the user's stats, which is for now only their class. If the user has not used the pick function ypet, the class displayed will simply be N/A.
 @client.slash_command(name = "stats", description = "Display the stats for any person on the server!")
 async def st(interaction: Interaction, member: nextcord.Member):    #.stats command, displays the stats of user's chosen class in an embed
   # member: nextcord.Member arg gotten from https://stackoverflow.com/questions/68646719/discord-py-set-user-id-as-an-argument

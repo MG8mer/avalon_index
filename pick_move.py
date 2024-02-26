@@ -395,10 +395,8 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
     switch = True
     
   elif switch == True: # Else if it's the reciever's turn.
-    print("true")
     if class_value_reciever[0] == 1: # If the class of the reciever is the knight.
         move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
-        print(move)
         check_deleted = None
         async with aiosqlite.connect("main.db") as db:        
             async with db.cursor() as cursor:
@@ -419,7 +417,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
                 await db.commit()  
                 return
         else:
-                dmg = attacks[class_value_starter[0]][move[0]][evaluation[class_evaluation_starter]]
+                dmg = attacks[class_value_reciever[0]][move[0]][evaluation[class_evaluation_reciever]]
                 if move[0] == 'Sword Jab':
                   miss = randint(1, 800)
                   if miss == 69:

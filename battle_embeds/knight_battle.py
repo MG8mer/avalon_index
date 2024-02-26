@@ -229,7 +229,6 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
     inline=False)            
   embed.set_thumbnail(url="https://i.imgur.com/soNMbTL.png")  # Shows image of knight.
   if switch == False: # If it's the starter's turn, send the embed in their dm.
-    print("false embed")
     await interaction.user.send(embed=embed, view=view)
     await view.wait()
     async with aiosqlite.connect("main.db") as db:
@@ -259,7 +258,6 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       async with db.cursor() as cursor:
         await cursor.execute(f"SELECT move_used FROM moves WHERE turn_num = {turn} AND user_id = {member.id}")
         move_final = await cursor.fetchone()
-        print(move_final)
         if normal_c[0] == 0 and move_final[0] == "Sword Slash":
           await cursor.execute('UPDATE cooldowns SET n_cooldown = ? WHERE user_id = ?', (1, member.id,))
         elif normal_c[0] != 0:
