@@ -1,6 +1,5 @@
 import nextcord
 from nextcord.ext import commands
-import vacefron 
 import math
 import random
 import sqlite3

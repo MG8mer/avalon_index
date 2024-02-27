@@ -29,7 +29,6 @@ from nextcord.embeds import Embed # from https://www.youtube.com/watch?v=wn7NIqS
 from nextcord.ext import commands # from https://www.youtube.com/watch?v=wn7NIqSSgas&list=PL-7Dfw57ZZVRB4N7VWPjmT0Q-2FIMNBMP&index=16&ab_channel=JamesS
 from nextcord.ext.commands import context    #from https://docs.replit.com/tutorialsb/python/build-basic-discord-bot- python and # from https://www.youtube.com/watch?v=wn7NIqSSgas&list=PL-7Dfw57ZZVRB4N7VWPjmT0Q-2FIMNBMP&index=16&ab_channel=JamesS
 # import wavelink
-import wavelinkcord as wavelink
 import about_archer
 import about_knight
 import about_mage
