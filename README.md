@@ -4,32 +4,31 @@
 > ### **Tasks**
 > #### V2.0
 
-- Inspired by the quote "Many hands make light work," we allowed everyone to contribute whenever they were free as some of us were busy with other work and tests since this was the last week of school before winter break. Moreover, we made sure everyone had a role in the **V2** of __*Avalon Index*__.  Here is a table representing the tasks each of us has done and future tasks that we will contribute to...
+- Here is a table representing the tasks each of us has done for **EA 1.0** of __*Avalon Index*__ and future tasks that we will contribute to for **EA 2.0**...
 >
 |                |Tasks Done                        | Future Tasks |
 |----------------|-------------------------------|---------------|
-|**Po**            |`Embeds (Battle Embeds/Pages), Slash Commands, Music (Wavelink API, etc.), Debugging Code, Battle Command, Image Merging Feature (Pillow), Picking Moves Feature `|`Battle Command, Activity System, Touch-ups for Embeds`|
-|**Hamzeus**          |`Database (Editing and Creating Tables), Debugging, Slash Commands, Debugging Code, Battle Command, /ff Command, /reset Command, /pick Command`         |`Battle Command, Leveling System, Activity System`|
-|**Avash**            |`Creating Custom Assets for Battle Embeds (Battlefield, Health Bars, and Characters), Debugging Code, Slash Commands, Music (Wavelink API, etc.), Leveling System`                                           |`Activity System, Leveling System, Music (Wavelink API, etc.)`|
+|**Po**            |`Embeds (Battle Embeds/Pages), Slash Commands, Debugging Code, Battle Command, Image Merging Feature (Pillow), Picking Moves Feature `|`Battle Command, Activity System, Touch-ups for Embeds`|
+|**Hamzeus**          |`Database (Editing and Creating Tables), Debugging, Slash Commands, Debugging Code, Battle Command, /ff Command, /reset Command, /pick Command`|`Battle Command, Leveling System, Activity System, Skill Tree`|
+|**Avash**            |`Creating Custom Assets for Battle Embeds (Battlefield, Health Bars, and Characters), Debugging Code, Slash Commands, Leveling System`|`Activity System, Leveling System, Skill Tree`|
 
 >### Milestones
-> #### V2.0
-- For Milestones and Features that have a **``✘``** will be worked on after **V2**
+> #### EA 1.0
+- For Milestones and Features that have a **``✘``** will be worked on for **EA 2.0**
 
 |**`Milestones and Features`**| **`Finished`** |  
 |------------|----------------|
 |<div align="center">Setting up database|<div align="center">✔|
 |<div align="center">Custom assets for battlefield and embeds|<div align="center">✔|
+|<div align="center">Image Merging Function-->**``For Battle Embeds``|<div align="center">✔|
 |<div align="center">User can enter ``/ff`` in order to forfeit a battle|<div align="center">✔|
 |<div align="center">Some fixes with ``/pick``|<div align="center">✔|
 |<div align="center">User can enter ``/reset`` in order to reset their progress and start over|<div align="center">✔|
+|<div align="center">User can view their or others' stats with ``/stats`` to view class and level|<div align="center">✔|
 |<div align="center">User can enter ``/battle`` in order to battle another user|<div align="center">✔|
 |<div align="center">Created more embed pages relating to ``/battle``|<div align="center">✔|
-|<div align="center">Show skill tree and evolutions of each class in order to let user truly select their preference **`(Skill Tree System was not acheivable till we had the database setup)`**|<div align="center">✘|
-|<div align="center">Basic Mechanics and Gameplay **`(This feature is underway and is 50% done)`**|<div align="center">✘|
-|<div align="center">Image Merging Function-->**``For Battle Embeds``**-->**`(This feature is finished, however, it will be implemented with the basic battle gameplay)`**|<div align="center">✔|
-|<div align="center">Music **`(Was touched upon but haven't been able to get it to work)`**|<div align="center">✘|
-|<div align="center">Leveling System**`(Was touched upon but haven't been able to get it to work)`**|<div align="center">✘|
+|<div align="center">Leveling System `(Was touched upon but haven't been able to get it to work)`|<div align="center">✘|
+|<div align="center">Show skill tree and evolutions of each class in order to let user truly select their preference **`(Skill Tree System will be worked on after EA 2.0)`**|<div align="center">✘|
 |||
 
 ## Avalon Index Description
