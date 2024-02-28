@@ -15,6 +15,7 @@ health = {
   3: 100
 }
 
+
 # Battle evaluation:
   # Ex: 12; if a knight fights an archer it's weak for the knight.
   # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
@@ -104,7 +105,6 @@ attacks = {
 }
 
 }
-
 
 # Function to send an embed to the user when they use battle if they picked knight.
 async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn, starter_hp_value, reciever_hp_value):
