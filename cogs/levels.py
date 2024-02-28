@@ -1,6 +1,5 @@
 import nextcord
 from nextcord.ext import commands
-import vacefron 
 import math
 import random
 import sqlite3
@@ -29,7 +28,7 @@ class Leveling(commands.Cog):#level system function
       cursor.execute(f'SELECT start FROM users WHERE user_id = {message.author.id}')
       start_value = cursor.fetchone()
       if result is None:  #if there is no data in result, it will add the base levels and exp to that particular user
-        cursor.execute(f"INSERT INTO levels (user_id, guild_id, exp, level, last_lvl) VALUES ({message.author.id}, {message.guild.id}, 0, 0, 0)")
+        cursor.execute(f"INSERT INTO levels (user_id, guild_id, exp, level, last_lvl) VALUES ({message.author.id},{message.guild.id}, 0, 0, 0)")
         database.commit()
       elif start_value == (1,): #if the user has already started the bot, it will store the existing levels, exp, and etc. in their respective variables below
         exp = result[2]
@@ -38,10 +37,11 @@ class Leveling(commands.Cog):#level system function
         exp_gained = random.randint(1, 5)
         exp += exp_gained #adds the exp gained to the exp variable
         lvl = 0.1 * math.sqrt(exp)
-        cursor.execute(f"UPDATE levels SET exp = {exp}, level = {lvl}, last_lvl = {last_lvl} WHERE user_id") #updates the user's exp, level, and last level
+        cursor.execute(f"UPDATE levels SET exp = {exp}, level = {lvl}, last_lvl = {last_lvl} WHERE user_id = {message.author.id}") #updates the user's exp, level, and last level
+        database.commit()
         if int(lvl // 1) == last_lvl + 1: 
           last_lvl = int(lvl // 1)
-          cursor.execute(f"UPDATE levels SET last_lvl = {last_lvl} WHERE user_id") #updates database to their new level
+          cursor.execute(f"UPDATE levels SET last_lvl = {last_lvl} WHERE user_id = {message.author.id}") #updates database to their new level
           embed = nextcord.Embed(title=f"**__Congratulations!__**",
             description=f"You have reached level {last_lvl}!",
             colour=0x00b0f4)

@@ -36,23 +36,25 @@ async def start(interaction, bot_name, bot_avatar_url):
   botName=bot_name
   emoji = 'https://tenor.com/view/tower-defense-simulator-roblox-itzsweaking-mario-minecraft-gif-21237948'
   url = randGIF.randgif("GOOD LUCK RPG VIDEO GAME")
-  start_value, check_battle_one, check_battle_two, user_count = await check_assign(interaction) # Fetch the values fetched by the check_assign function, only one of intrest is user_count, but we must assign all the returned values to a relavent variable.
+  
+  start_value, check_battle_one, check_battle_two, user_count = await check_assign(interaction)
+  
   embed = nextcord.Embed(title=f"**__Welcome to Avalon Index!__**",
-    description=f"Hey {interaction.user.mention}! **__Avalon Index__** is a simple turn-based RPG game developed by **Hamzeus, Po, and Avash**. Currently, there are **__{user_count} users registered, including yourself!__** To get started, follow the steps below. We hope you enjoy!", # Also now shows in start the amount of users registered with the bot.
+    description=f"Hey {interaction.user.mention}! **__Avalon Index__** is a simple turn-based RPG game developed by **Hamzeus, Po, and Avash**. Currently, there are **__{user_count} users registered, including yourself!__** To get started, follow the steps below. We hope you enjoy!", 
     colour=0x00b0f4)
   embed.set_author(name=botName,
     icon_url=bot_avatar_url)
   embed.add_field(name="**Pick Your Class**",
-    value="You must pick **1** out of the **3** currently available classes to accompany you on your journey. Use ``.pick`` command once ready.",
+    value="You must pick **1** out of the **3** currently available classes to accompany you on your journey. Use ``/pick`` command once ready.",
     inline=False)
   embed.add_field(name="**Knight** `1`",
-    value="The knight is the tankiest, **__close range__** class in the game.",
+    value="The Knight is the tankiest class in the game and is a **__close ranger__**.",
     inline=True)
   embed.add_field(name="**Archer** `2`",
-    value="The archer has amazing and deadly **__long range__** capabilities but is the weakest",
+    value="The Archer has amazing and deadly **__long range__** capabilities but is the weakest.",
     inline=True)
   embed.add_field(name="**Mage** `3`",
-    value="The mage is a **__mid ranger__** class and lacks in both defence and damange",
+    value="The Mage is a **__mid ranger__** class and lacks in both defense and damage.",
     inline=True)
   embed.add_field(name="**Having Trouble Picking A Class?**",
     value="We've provided you with the base stats of each class to help you pick the best fit class! Use ``/about`` command to display the base stats of a class.",

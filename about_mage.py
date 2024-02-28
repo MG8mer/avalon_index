@@ -14,11 +14,11 @@ async def about(interaction):
         color = nextcord.Color.purple())
     embed_mage.add_field(    
         name="About:", 
-        value="The mage is a mid ranger but has mediocre hp with mediocre damage.", 
+        value="The Mage is a mid ranger, dealing mediocre damage and having mediocre HP.", 
         inline=False)
     embed_mage.add_field(    
-        name="Stats:", 
-        value="100 HP; Mediocore Damage",
+        name="HP:", 
+        value="100",
         inline=False)
     embed_mage.add_field(    
         name="Attacks:", 
@@ -30,7 +30,7 @@ async def about(interaction):
         inline=True)
     embed_mage.add_field(
         name="Fireball (Normal)",
-        value="Weak -15 HP; Normal -25 HP; Strong -32 HP",
+        value="Weak -15 HP; Normal -25 HP; Strong -30 HP",
         inline=False)
     embed_mage.add_field(
         name="Arcane Mania (Special)",
@@ -42,7 +42,7 @@ async def about(interaction):
         inline=False)
     embed_mage.add_field(
         name="Weaknesses/Strengths",
-        value="Mage is strong against archer but weak against knight.",
+        value="Mage is **STRONG** against the Archer but **WEAK** against the Knight (**NORMAL** against itself).",
         inline=False)
     embed_mage.set_thumbnail(url="https://i.imgur.com/0DpJe0b.png")# We also included a little pixel-art in the embed resembling the mage class.
   # We then proceed to defer the need to respond to the interaction and then followup by sending the embed for the mage.

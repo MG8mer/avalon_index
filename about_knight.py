@@ -11,12 +11,12 @@ async def about(interaction):
     title = "About the Knight:", 
     color = nextcord.Color.dark_gray())
   embed_knight.add_field(    
-    name="About:", 
-    value="The knight is the tankiest class in the game, being close range.", 
+    name="Brief Description:", 
+    value="The Knight is the tankiest class in the game, being a close ranger and dealing low damage.", 
     inline=False)
   embed_knight.add_field(    
-    name="Stats:", 
-    value="150 HP; Low Damage",
+    name="HP:", 
+    value="125",
     inline=False)
   embed_knight.add_field(    
     name="Attacks:", 
@@ -24,23 +24,23 @@ async def about(interaction):
     inline=False)
   embed_knight.add_field(
     name="Sword Jab (Weak)",
-    value="Weak -5 HP; Normal -10 HP; Strong -15 HP",
+    value="Weak -4 HP; Normal -8 HP; Strong -12 HP",
     inline=True)
   embed_knight.add_field(
     name="Sword Slash (Normal)",
-    value="Weak -10 HP; Normal -20 HP; Strong -30 HP",
+    value="Weak -8 HP; Normal -16 HP; Strong -20 HP",
     inline=False)
   embed_knight.add_field(
     name="Dual Sword Attack (Special)",
-    value="Weak -40 HP; Normal -45 HP; Strong -50 HP",
+    value="Weak -32 HP; Normal -38 HP; Strong -45 HP",
     inline=False)
   embed_knight.add_field(
     name="Sliced and Diced (Avalon's Blessing)",
-    value="Weak -60 HP; Normal -65 HP; Strong -70 HP",
+    value="Weak -55 HP; Normal -60 HP; Strong -65 HP",
     inline=False)
   embed_knight.add_field(
     name="Weaknesses/Strengths",
-    value="Knight is strong against mage but weak against archer.",
+    value="The Knight is **STRONG** against the Mage but **WEAK** against the Archer (**NORMAL** against itself).",
     inline=False)
   embed_knight.set_thumbnail(url="https://i.imgur.com/soNMbTL.png")# We also included a little pixel-art in the embed resembling the knight class.
   # We then proceed to defer the need to respond to the interaction and then followup by sending the embed for the knight.
