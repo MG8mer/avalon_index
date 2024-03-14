@@ -543,5 +543,3 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
   math.floor(dmg)
   
   return switch, dmg, move, crit_hit 
-    
-      

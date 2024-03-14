@@ -123,6 +123,7 @@ async def start(interaction: Interaction):
       async with db.cursor() as cursor:
         await cursor.execute('INSERT INTO users (user_id, guild_id, start) VALUES (?, ?, ?)', (interaction.user.id, interaction.guild_id, 1))
       await db.commit()
+
       
     await start_page.start(interaction, botName, bot_avatar_url)
 
@@ -405,12 +406,6 @@ async def about(interaction: Interaction, number: int = SlashOption(name = "clas
     elif number == 3: 
         await (about_mage.about(interaction))
       
-# Below from https://stackoverflow.com/questions/73488299/how-can-i-import-a-cog-into-my-main-py-file
-cog_files = ["levels"]
-
-for file in cog_files:
-    client.load_extension(f"cogs.{file}")
-
 @client.command()
 async def download_db(ctx):
       try:
@@ -438,9 +433,14 @@ async def download_db(ctx):
           response = await ctx.send("You do not have permission to use this command.")
           await asyncio.sleep(3)
           await response.delete()
-        
+    
+# Below from https://stackoverflow.com/questions/73488299/how-can-i-import-a-cog-into-my-main-py-file
+cog_files = ["levels"]
+
+for file in cog_files:
+    client.load_extension(f"cogs.{file}")
+
 # Below from https://docs.replit.com/tutorials/python/build-basic discord-bot-python
 
-# my_secret = os.environ['DISCORD_BOT_SECRET'] 
-my_secret = os.environ['DISCORD_ALPHA_SECRET'] 
+my_secret = os.environ['DISCORD_BOT_SECRET'] 
 client.run(my_secret)  
