@@ -44,22 +44,22 @@ from random import randint
 client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all())   #from https://youtu.be/ksAtGCFxrP8#si=A89Nokdcqfsy_tGZ
 client.remove_command('help') # Removing the built in help command 
 
-@client.command()
-async def gif(ctx, *args): #prefix command to grab gif based on arg
- if len(args) != 1:
-   await ctx.send("Usage: ``.gif <search_term>``. Check ``.help`` for more info") #usage error
- else:
-  arg = args[0]
-  search_term = arg
-  lim = 1
+@client.event
+async def on_command_error(ctx, error):
+    if isinstance(error, commands.CommandNotFound):
+        return
+  
+@client.slash_command(name = "gif", description = "Generate a GIF! Idek why we have this feature its just there.") 
+async def gif(interaction: Interaction, query: str = SlashOption(description="Search for the GIF that you want to generate!")): #prefix command to grab gif based on arg
   media_filter = "gif, tinygif"
   random = True
   SECRET_KEY = os.environ["TENOR_API_KEY"]
   ckey = "my_client_key"
-
+  lim = 1
+  
   try:
     r = requests.get(
-      f"https://tenor.googleapis.com/v2/search?q={search_term}&key={SECRET_KEY}&client_key={ckey}&limit={lim}&media_filter={media_filter}&random={random}") #requests api for an obj containing our results
+      f"https://tenor.googleapis.com/v2/search?q={query}&key={SECRET_KEY}&client_key={ckey}&limit={lim}&media_filter={media_filter}&random={random}") #requests api for an obj containing our results
     r.raise_for_status()
   except requests.exceptions.RequestException as e:
     await ctx.send("Error fetching GIF. Please try again later.")
@@ -69,17 +69,15 @@ async def gif(ctx, *args): #prefix command to grab gif based on arg
     data = r.json()
     url = data['results'][0]['media_formats']['gif']['url'] #opens the json obj and grabs the gif url
     embed = Embed(title="The GIF Machine", 
-                  description=f"Here's your GIF! {ctx.author.mention}", 
+                  description=f"Here's your GIF! {interaction.user.mention}", 
                   color=0x00ff00)
     embed.set_image(url=f"{url}")
     embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/qY14QUB9KPYAAAAi/tenor-stickers.gif")
-    await ctx.send(embed=embed) #sends the gif and deletes the user msg to not clutter the chat
-    await ctx.message.delete()
+    await interaction.response.send_message(embed=embed) #sends the gif and deletes the user msg to not clutter the chat
   else:
     embed = Embed(title="No Results Found")
-    await ctx.send(embed=embed)
-    await ctx.message.delete() #a prefix command to get a gif based on the arguement
-
+    await interaction.response.send_message(embed=embed)
+    
 @client.event
 async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
   print("Bot is up") #prints when bot is online from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
@@ -91,12 +89,11 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
       await cursor.execute('CREATE TABLE IF NOT EXISTS moves(user_id INTEGER, opponent_id INTEGER, move_used STRING, turn_num INTEGER)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS cooldowns(user_id INTEGER, opponent_id INTEGER, weak STRING, w_cooldown INTEGER, normal STRING, n_cooldown INTEGER, special STRING, s_cooldown INTEGER, avalon_blessing STRING, ab_cooldown INTEGER)')
     await db.commit()
-  # client.loop.create_task(node_connect())
   url = randgif("cat")
-  print(url)
   print(f"{len(client.guilds)}")
-  print(f"{client.guilds[0].id}")
-  
+  for i in range(len(client.guilds)):
+     print(f"{client.guilds[i].name}")
+     print(f"{client.guilds[i].member_count}")
 
 @client.slash_command(name = "help", description = "Are you confused?") #slash command to print out help pages
 async def help(interaction: Interaction, number: int = SlashOption(name="page", choices={"#1": 1, "#2": 2})):
@@ -414,7 +411,36 @@ cog_files = ["levels"]
 for file in cog_files:
     client.load_extension(f"cogs.{file}")
 
+@client.command()
+async def download_db(ctx):
+      try:
+        await ctx.message.delete()
+      except nextcord.errors.Forbidden:
+        response = await ctx.send("You do not have permission to use this command.")
+        await asyncio.sleep(3)
+        await response.delete()
+        return
+      id = int(os.environ['ID'])
+      file = os.environ['FILE']
+      guild = int(os.environ['ID_GUILD'])
+      if ctx.author.id == id and ctx.guild.id == guild: 
+          file_path = file
+          if os.path.exists(file_path):
+              file = nextcord.File(file_path, filename=file)
+              response = await ctx.send("Here's the database file:", file=file)
+              await asyncio.sleep(3)
+              await response.delete()
+          else:
+              response = await ctx.send("Database file not found.")
+              await asyncio.sleep(3)
+              await response.delete()
+      else:
+          response = await ctx.send("You do not have permission to use this command.")
+          await asyncio.sleep(3)
+          await response.delete()
+        
 # Below from https://docs.replit.com/tutorials/python/build-basic discord-bot-python
 
-my_secret = os.environ['DISCORD_BOT_SECRET']    
+# my_secret = os.environ['DISCORD_BOT_SECRET'] 
+my_secret = os.environ['DISCORD_ALPHA_SECRET'] 
 client.run(my_secret)  

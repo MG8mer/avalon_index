@@ -2,6 +2,8 @@ import nextcord
 from nextcord.embeds import Embed
 import nextcord.interactions
 from image_merge import overlay_img
+from nextcord.ext import commands
+import aiosqlite
 
 characters = {
   "knight": (1, ),
@@ -10,7 +12,7 @@ characters = {
 }
 
 
-async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_starter, class_reciever, startrand_mage, recieverand_mage):   
+async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_starter, class_reciever, startrand_mage, recieverand_mage, switch, crit_hit, hp_starter, hp_reciever, move, dmg):   
   reciever_name = member.name
   starter_name = interaction.user.name
   
@@ -59,6 +61,87 @@ async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_
 
   battle_byte_img = overlay_img('custom_assets/bg_purple_field1.png', health_R, health_L, character_reciever, character_starter, starter_name, reciever_name)
   file = nextcord.File(battle_byte_img, filename="battle_page.png")
-  embed = Embed(title = "Battle Screen", color = nextcord.Color.blue())
-  embed.set_image(url = "attachment://battle_page.png")
-  await interaction.followup.send(embed = embed, file = file)
+  if switch == False:
+    if dmg == 0:
+      embed = Embed(title = "Battle Screen", color = nextcord.Color.blue(), description = f"{member.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{interaction.user.mention} still has an HP of ***{hp_starter}***")
+      embed.set_image(url = "attachment://battle_page.png")
+    elif crit_hit == 3:
+      if hp_starter <= 0:
+        embed = Embed(title = "Battle Screen", color = nextcord.Color.blue(), description = f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
+        embed.set_image(url = "attachment://battle_page.png")
+      else:
+        embed = Embed(title = "Battle Screen", color = nextcord.Color.blue(), description = f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
+        embed.set_image(url = "attachment://battle_page.png")
+    else:
+      if hp_starter <= 0:
+        embed = Embed(title = "Battle Screen", color = nextcord.Color.blue(), description = f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
+        embed.set_image(url = "attachment://battle_page.png")
+      else:
+        embed = Embed(title = "Battle Screen", color = nextcord.Color.blue(), description = f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
+        embed.set_image(url = "attachment://battle_page.png")
+    async with aiosqlite.connect("main.db") as db:        
+      async with db.cursor() as cursor:
+        await cursor.execute('UPDATE battles SET starter_ff = ?, reciever_ff = ? WHERE starter_id = ? AND reciever_id = ?', ("Yes", "No", interaction.user.id, member.id,))
+      await db.commit()
+  elif switch == True:
+    if dmg == 0:
+      embed = Embed(title = "Battle Screen", color = nextcord.Color.blue(), description = f"{interaction.user.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{member.mention} still has an HP of ***{hp_reciever}***")
+      embed.set_image(url = "attachment://battle_page.png")
+    elif crit_hit == 3:
+       if hp_reciever <= 0:
+         embed = Embed(title = "Battle Screen", color = nextcord.Color.blue(), description = f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
+         embed.set_image(url = "attachment://battle_page.png")
+       else:
+         embed = Embed(title = "Battle Screen", color = nextcord.Color.blue(), description = f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
+         embed.set_image(url = "attachment://battle_page.png")
+    else:
+      if hp_reciever <= 0:
+        embed = Embed(title = "Battle Screen", color = nextcord.Color.blue(), description = f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
+        embed.set_image(url = "attachment://battle_page.png")
+      else:
+        embed = Embed(title = "Battle Screen", color = nextcord.Color.blue(), description = f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
+        embed.set_image(url = "attachment://battle_page.png")
+  battle_screen = await interaction.followup.send(embed = embed, file = file)
+  return battle_screen
+
+
+# if switch == False:
+#   if dmg == 0:
+#     dmg_msg = await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{interaction.user.mention} still has an HP of ***{hp_starter}***")
+#     battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
+#   elif crit_hit == 3:
+#     if hp_starter <= 0:
+#       dmg_msg = await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
+#       battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage, switch, crit_hit, hp_starter, hp_reciever, move, dmg)
+#     else:
+#       dmg_msg = await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
+#       battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
+#   else:
+#     if hp_starter <= 0:
+#       dmg_msg = await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
+#       battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
+#     else:
+#       dmg_msg = await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
+#       battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
+#   async with aiosqlite.connect("main.db") as db:        
+#     async with db.cursor() as cursor:
+#       await cursor.execute('UPDATE battles SET starter_ff = ?, reciever_ff = ? WHERE starter_id = ? AND reciever_id = ?', ("Yes", "No", interaction.user.id, member.id,))
+#     await db.commit()
+# elif switch == True:
+#   if dmg == 0:
+#     dmg_msg = await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{member.mention} still has an HP of ***{hp_reciever}***")
+#     battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
+#   elif crit_hit == 3:
+#      if hp_reciever <= 0:
+#        dmg_msg = await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
+#        battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
+#      else:
+#        dmg_msg = await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
+#        battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
+#   else:
+#     if hp_reciever <= 0:
+#       dmg_msg = await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
+#       battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
+#     else:
+#       dmg_msg = await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
+#       battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)

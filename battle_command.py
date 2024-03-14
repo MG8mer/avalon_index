@@ -163,11 +163,13 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
   turn = 0 # Turn num
   hp_starter = starter_hp_value[0] 
   hp_reciever = reciever_hp_value[0]
+  dmg_msg = None
+  battle_screen = None
   while hp_starter > 0 and hp_reciever > 0:
     # Below https://stackoverflow.com/questions/21837208/check-if-a-number-is-odd-or-even-in-python
     if turn == 0 or turn % 2 == 0: # if turn is even, define switch_value, insertting switch into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
-        switch_value, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn)
+        switch_value, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn, battle_screen)
       except TypeError:
         return
       else:
@@ -186,47 +188,8 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
               hp_percentage_reciever = (hp_reciever/reciever_hp_value[0])*100
           await db.commit()
   
-        if switch_value == False:
-          if dmg == 0:
-            await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{interaction.user.mention} still has an HP of ***{hp_starter}***")
-            await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-          elif crit_hit == 3:
-            if hp_starter <= 0:
-              await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
-              await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-            else:
-              await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
-              await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-          else:
-            if hp_starter <= 0:
-              await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
-              await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-            else:
-              await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
-              await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-          async with aiosqlite.connect("main.db") as db:        
-            async with db.cursor() as cursor:
-              await cursor.execute('UPDATE battles SET starter_ff = ?, reciever_ff = ? WHERE starter_id = ? AND reciever_id = ?', ("Yes", "No", interaction.user.id, member.id,))
-            await db.commit()
-        elif switch_value == True:
-          if dmg == 0:
-            await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{member.mention} still has an HP of ***{hp_reciever}***")
-            await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-          elif crit_hit == 3:
-            if hp_reciever <= 0:
-              await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
-              await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-            else:
-              await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
-              await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-          else:
-              if hp_reciever <= 0:
-                await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
-                await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-              else:
-                await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
-                await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-          async with aiosqlite.connect("main.db") as db:        
+        battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage, switch_value, crit_hit, hp_starter, hp_reciever, move, dmg)
+        async with aiosqlite.connect("main.db") as db:        
             async with db.cursor() as cursor:
               await cursor.execute('UPDATE battles SET starter_ff = ?, reciever_ff = ? WHERE starter_id = ? AND reciever_id = ?', ("No", "Yes", interaction.user.id, member.id,))
             await db.commit()
@@ -234,7 +197,7 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
           
     else:  # if turn is odd, define switch, insertting switch_value into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
-        switch, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, startrand_mage, recieverand_mage,  class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch_value, turn)
+        switch, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, startrand_mage, recieverand_mage,  class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch_value, turn, battle_screen)
       except TypeError:
         return
       else:
@@ -253,51 +216,13 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
               hp_percentage_reciever = (hp_reciever/reciever_hp_value[0])*100
           await db.commit()
           
-          if switch == False:
-            if dmg == 0:
-              await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{interaction.user.mention} still has an HP of ***{hp_starter}***")
-              await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-            elif crit_hit == 3:
-              if hp_starter <= 0:
-                await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
-                await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-              else:
-                await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
-                await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-            else:
-              if hp_starter <= 0:
-                await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has a depleted HP of ***0***")
-                await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-              else:
-                await interaction.followup.send(f"{member.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{interaction.user.mention} now has an HP of ***{hp_starter}***")
-                await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-            async with aiosqlite.connect("main.db") as db:        
-              async with db.cursor() as cursor:
-                await cursor.execute('UPDATE battles SET starter_ff = ?, reciever_ff = ? WHERE starter_id = ? AND reciever_id = ?', ("Yes", "No", interaction.user.id, member.id,))
-              await db.commit()
-          elif switch == True:
-            if dmg == 0:
-                await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but missed the attack and dealt **0** damage! \n{member.mention} still has an HP of ***{hp_reciever}***")
-                await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-            elif crit_hit == 3:
-               if hp_reciever <= 0:
-                  await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
-                  await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-               else:
-                  await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, but landed a *critical* hit and dealt **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
-                  await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-            else:
-              if hp_reciever <= 0:
-                await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has a depleted HP of ***0***")
-                await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-              else:
-                await interaction.followup.send(f"{interaction.user.mention} used the move **{move[0]}**, dealing **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***")
-                await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage)
-            async with aiosqlite.connect("main.db") as db:        
+      battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage, switch, crit_hit, hp_starter, hp_reciever, move, dmg)
+      
+      async with aiosqlite.connect("main.db") as db:        
               async with db.cursor() as cursor:
                 await cursor.execute('UPDATE battles SET starter_ff = ?, reciever_ff = ? WHERE starter_id = ? AND reciever_id = ?', ("No", "Yes", interaction.user.id, member.id,))
               await db.commit()
-        turn += 1
+      turn += 1
           
     if starter_hp_value[0] == None or reciever_hp_value[0] == None: # If the row has been deleted in pick_move, making these value none due to returning nothing, break the loop, ending the battle. 
       break

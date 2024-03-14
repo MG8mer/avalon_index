@@ -11,7 +11,8 @@ language = "python3"
 
 [deployment]
 run = ["python3", "main.py"]
-deploymentTarget = "cloudrun"
+deploymentTarget = "gce"
+ignorePorts = true
 
 [languages]
 

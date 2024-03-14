@@ -9,6 +9,7 @@ from battle_embeds import knight_battle
 from nextcord.ext import commands
 import random
 from random import randint
+import math
 
 
 client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # Define client.
@@ -18,7 +19,7 @@ client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # De
 
 # Move function that returns what turn it is, taking the arguments interaction for who used battle, member for who recieved battle, start_rand for who starts in the battle, the class of the starter, and the class of the reciever.
 
-async def move(interaction: Interaction, member: nextcord.Member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn):
+async def move(interaction: Interaction, member: nextcord.Member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn, battle_screen):
   if startrand_mage == 7 or recieverand_mage == 7:
       # Dicts to store class info:
 
@@ -252,7 +253,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
   # There is alot of repitition, so the code below will be explained with the first example as a sample. 
   if switch == False: # If it's the starter's turn.
     if class_value_starter[0] == 1: # If the class of the starter is the knight.
-        move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value) # Send respective embed depending on class and whosever turn it is.     
+        move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value, battle_screen) # Send respective embed depending on class and whosever turn it is.     
         check_deleted = None
       # Sample Explanation (applicable for rest)
         async with aiosqlite.connect("main.db") as db:        
@@ -293,7 +294,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
               dmg = 0
     
     elif class_value_starter[0] == 2: # If the class of the starter is the archer.
-        move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
+        move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value, battle_screen)
         check_deleted = None
         async with aiosqlite.connect("main.db") as db:           
             async with db.cursor() as cursor:
@@ -334,7 +335,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
 
           
     elif class_value_starter[0] == 3: # If the class of the starter is the mage.
-        move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value, startrand_mage, recieverand_mage)
+        move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value, startrand_mage, recieverand_mage, battle_screen)
         check_deleted = None
         async with aiosqlite.connect("main.db") as db:         
             async with db.cursor() as cursor:
@@ -396,7 +397,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
     
   elif switch == True: # Else if it's the reciever's turn.
     if class_value_reciever[0] == 1: # If the class of the reciever is the knight.
-        move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
+        move = await knight_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value, battle_screen)
         check_deleted = None
         async with aiosqlite.connect("main.db") as db:        
             async with db.cursor() as cursor:
@@ -436,7 +437,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
                     dmg = 0
         
     elif class_value_reciever[0] == 2: # If the class of the reciever is the archer.
-        move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value)
+        move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value, battle_screen)
         check_deleted = None
         async with aiosqlite.connect("main.db") as db:      
             async with db.cursor() as cursor:
@@ -477,7 +478,7 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
             
     elif class_value_reciever[0] == 3: 
       # If the class of the reciever is the mage.
-          move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value, startrand_mage, recieverand_mage)
+          move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value, startrand_mage, recieverand_mage, battle_screen)
           check_deleted = None
           async with aiosqlite.connect("main.db") as db:         
               async with db.cursor() as cursor:
@@ -539,6 +540,8 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
   if crit_hit == 3:
     dmg *= 1.2
 
+  math.floor(dmg)
+  
   return switch, dmg, move, crit_hit 
     
       
