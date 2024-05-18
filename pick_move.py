@@ -143,14 +143,13 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
     }
   else:
       # Dicts to store class info:
-
+      
       # Class health
       health = {
         1: 125,
         2: 75,
         3: 100
       }
-
       # Battle evaluation:
         # Ex: 12; if a knight fights an archer it's weak for the knight.
         # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
@@ -165,12 +164,10 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
         "31": "Weak",
         "32": "Strong",
       }
-
       # Dict order:
         # Class
           # Attacks:
             # Damage dependent on evaluation.
-
       attacks = {
         1: {
           "Sword Jab": {
@@ -315,7 +312,6 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
             miss = randint(1, 4)
             if miss == 1 or miss == 3 or miss == 4:
               dmg = 0
-
 
     elif class_value_starter == 3: # If the class of the starter is the mage.
         move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value, startrand_mage, recieverand_mage, battle_screen, db_pool)

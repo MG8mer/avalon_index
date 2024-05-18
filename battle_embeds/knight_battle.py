@@ -320,5 +320,3 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         await cursor.execute(f'UPDATE cooldowns SET ab_cooldown = {(avalonbless_c - 1)} WHERE user_id = {member.id}')
 
     return move_final  
-
-

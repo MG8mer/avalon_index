@@ -18,7 +18,6 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
           2: 75,
           3: 100
         }
-
         # Battle evaluation:
           # Ex: 12; if a knight fights an archer it's weak for the knight.
           # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
@@ -33,12 +32,10 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
           "31": "Weak",
           "32": "Strong",
         }
-
         # Dict order:
           # Class
             # Attacks:
               # Damage dependent on evaluation.
-
         attacks = {
           1: {
             "Sword Jab": {
@@ -441,6 +438,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
 
                 self.value = True
                 self.stop()
+                
   elif switch == True:
     if recieverand_mage == 7:
       class ChooseFour(nextcord.ui.View):
@@ -655,7 +653,6 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       user = member
       hp = await cursor.fetchval(f"SELECT reciever_hp FROM battles WHERE starter_id = {interaction.user.id}") # Get hp value of that user 
       evaluation = await cursor.fetchval(f"SELECT evaluation_reciever FROM battles WHERE starter_id = {interaction.user.id}") # Get the evaluation of that user
-
 
   if switch == False:
     if startrand_mage == 7:

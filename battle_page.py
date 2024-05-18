@@ -14,7 +14,6 @@ characters = {
 async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_starter, class_reciever, startrand_mage, recieverand_mage, switch, crit_hit, hp_starter, hp_reciever, move, dmg):   
   reciever_name = member.name
   starter_name = interaction.user.name
-
   health_R = 'custom_assets/health_R_100.png'
   health_L = 'custom_assets/health_L_100.png'
   character_starter = None
@@ -29,7 +28,6 @@ async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_
       character_starter = 'custom_assets/mage_nerfed_flipped.png'
     else:
       character_starter = 'custom_assets/mage_flipped.png'
-
   if class_reciever == characters["knight"]:
     character_reciever = 'custom_assets/knight_final.png'
   elif class_reciever == characters["archer"]:
@@ -48,7 +46,6 @@ async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_
     health_L = 'custom_assets/health_L_25.png'
   elif hp_percentage_starter <= 0:
     health_L = 'custom_assets/health_L_0.png'
-
   if hp_percentage_reciever <= 75 and hp_percentage_reciever > 50:
     health_R = 'custom_assets/health_R_75.png'
   elif hp_percentage_reciever <= 50 and hp_percentage_reciever > 25:

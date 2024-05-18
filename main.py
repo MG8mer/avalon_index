@@ -342,7 +342,6 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
 
           await interaction.followup.send("Battle request cancelled.")
           await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id) # Delete that battle instance row in the table as a result of the cancellation of the battle.
-
     else:
       return
 
@@ -358,7 +357,6 @@ async def st(interaction: Interaction, member: nextcord.Member):    #.stats comm
     else:
         class_value = await cursor.fetchval('SELECT class FROM users WHERE user_id = $1', member.id)
         level = await cursor.fetchval('SELECT level FROM levels WHERE user_id = $1', member.id)
-
         level_value = None
         if level != None:
           level_value = int(level // 1)
@@ -393,6 +391,9 @@ async def about(interaction: Interaction, number: int = SlashOption(name = "clas
         await (about_archer.about(interaction))
     elif number == 3: 
         await (about_mage.about(interaction))
+      
+# Below from https://stackoverflow.com/questions/73488299/how-can-i-import-a-cog-into-my-main-py-file
+cog_files = ["levels"]
 
 # Below from https://stackoverflow.com/questions/73488299/how-can-i-import-a-cog-into-my-main-py-file
 
@@ -404,5 +405,6 @@ async def on_disconnect():
 
 # Below from https://docs.replit.com/tutorials/python/build-basic discord-bot-python
 
-my_secret = os.environ['DISCORD_ALPHA_SECRET'] 
+
+my_secret = os.environ['DISCORD_BOT_SECRET']
 client.run(my_secret)  

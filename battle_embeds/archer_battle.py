@@ -106,7 +106,6 @@ attacks = {
 
 }
 
-
 # Function to send an embed to the user when they use battle if they picked archer.
 async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn, starter_hp_value, reciever_hp_value, battle_screen, db_pool):
   id_user = interaction.user.id 
@@ -225,7 +224,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
 
               self.value = True
               self.stop()
-
+              
   view = ChooseFour()
   hp = None # Define hp
   evaluation = None # Define evaluation
