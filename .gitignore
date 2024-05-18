@@ -1,7 +1,6 @@
 alpha_development/
 .local/
 main.db
-merged_image.png
 archer_battle.cpython-310.pyc
 knight_battle.cpython-310.pyc
 mage_battle.cpython-310.pyc
