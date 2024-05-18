@@ -1,44 +1,35 @@
+import os
 import nextcord
 import nextcord.embeds
 import nextcord.interactions
 from nextcord import Interaction
-import aiosqlite
+from nextcord.ext import commands
+import asyncpg
 import randGIF
 
 # Below is a function to check specific values of the user that used the start function in addition to counting the amount of players registered with the bot.
-async def check_assign(interaction: Interaction):
-  async with aiosqlite.connect("main.db") as db:
-    async with db.cursor() as cursor:
-      await cursor.execute('SELECT * FROM users')
-      user_data = await cursor.fetchall() # Fetch all the data in the users table for player count.
-      await cursor.execute('SELECT start FROM users WHERE user_id = ?', (interaction.user.id,))
-      start_value = await cursor.fetchone() # For if they already used start.
-      await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
-      check_battle_one = await cursor.fetchone() # Check if the user is in a battle where they are the starter.
-      await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
-      check_battle_two = await cursor.fetchone() # Check if the user is in a battle where they are the reciever.
-      user_count = 0 
-      archive_i = 0 # For the for conditional
-      user_data_concatenated = ()
-      if user_data != None: # If the user_data has actual data to iterate through
-        for j in range(len(user_data)): 
-          user_data_concatenated += user_data[j] # For the length of user_data, add each value of user_data into a new tuple to properly store the data of all the users.
-        for i in range(len(user_data_concatenated)):
-          if i == 3 or i - archive_i == 4: 
-            user_count += 1 # For the length of the new tuple, if the value of i is 3 or if the difference between archive_i and i is 4, add 1 to the user_count to indicate that the loop has detected one user in the data base.
-            archive_i = i # Store that i value when the for loop condition was fulfiled to be checked later.
-      return start_value, check_battle_one, check_battle_two, user_count # Return the value of start, check_battle_one (will be 1 if the user is a starter in a battle), check_battle_two (will be 1 if the user is a reciever in a battle), and the amount of users.
-    await db.commit()
+async def check_assign(interaction: Interaction, db_pool):
+  async with db_pool.acquire() as cursor:
+    user_data = await cursor.fetch('SELECT start FROM users')
+    start_value = await cursor.fetchval('SELECT start FROM users WHERE user_id = $1', interaction.user.id)
+    check_battle_one = await cursor.fetchval('SELECT battle FROM battles WHERE starter_id = $1', interaction.user.id)
+    check_battle_two = await cursor.fetchval('SELECT battle FROM battles WHERE reciever_id = $1', interaction.user.id)
+    user_count = 0 
+    if user_data != None: 
+      for data in user_data:
+        user_count += 1
+
+  return start_value, check_battle_one, check_battle_two, user_count # Return the value of start, check_battle_one (will be 1 if the user is a starter in a battle), check_battle_two (will be 1 if the user is a reciever in a battle), and the amount of users.
 
 
 #this is the start page, the first page the players will see when they get started w the bot, sending an embed with useful information.
-async def start(interaction, bot_name, bot_avatar_url):
+async def start(interaction: Interaction, bot_name, bot_avatar_url, db_pool):
   botName=bot_name
   emoji = 'https://tenor.com/view/tower-defense-simulator-roblox-itzsweaking-mario-minecraft-gif-21237948'
   url = randGIF.randgif("GOOD LUCK RPG VIDEO GAME")
-  
-  start_value, check_battle_one, check_battle_two, user_count = await check_assign(interaction)
-  
+
+  start_value, check_battle_one, check_battle_two, user_count = await check_assign(interaction, db_pool)
+
   embed = nextcord.Embed(title=f"**__Welcome to Avalon Index!__**",
     description=f"Hey {interaction.user.mention}! **__Avalon Index__** is a simple turn-based RPG game developed by **Hamzeus, Po, and Avash**. Currently, there are **__{user_count} users registered, including yourself!__** To get started, follow the steps below. We hope you enjoy!", 
     colour=0x00b0f4)
@@ -67,5 +58,4 @@ async def start(interaction, bot_name, bot_avatar_url):
   embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
   embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
   # We then proceed to defer the need to respond to the interaction and then followup by sending the embed for the start page.
-  await interaction.response.defer()
   await interaction.followup.send(embed=embed)

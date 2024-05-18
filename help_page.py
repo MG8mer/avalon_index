@@ -5,7 +5,7 @@ from nextcord.embeds import Embed
 import nextcord.interactions
 import randGIF
 
-      
+
 # Below is the first page from the help function, which lists the first few important commands in the Avalon Index in case the user is confused.
 
 async def help(interaction, bot_name, bot_avatar_url):
