@@ -12,7 +12,7 @@ async def about(interaction):
       color = nextcord.Color.green())
     embed_archer.add_field(    
       name="Brief Description:", 
-      value="The Archer is a long ranger, but has a low HP and deals high damage.", 
+      value="The Archer has low HP and deals high damage.", 
       inline=False)
     embed_archer.add_field(    
       name="HP:", 

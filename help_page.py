@@ -5,7 +5,7 @@ from nextcord.embeds import Embed
 import nextcord.interactions
 import randGIF
 
-      
+
 # Below is the first page from the help function, which lists the first few important commands in the Avalon Index in case the user is confused.
 
 async def help(interaction, bot_name, bot_avatar_url):
@@ -72,8 +72,8 @@ async def help(interaction, bot_name, bot_avatar_url):
     value="Reset your stats and start from scratch!", 
     inline=False)
   embed.add_field(    #.ff embed
-    name="> /ff",     
-    value="Run away from a battle!", 
+    name="> FF",     
+    value="Forfeiting a battle can now be done by simply pressing the red `FF` button on your battle embed!", 
     inline=False)
   embed.set_thumbnail(url=f"{url}")
   embed.set_image(url=f"{bot_avatar_url}")
