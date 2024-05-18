@@ -48,13 +48,13 @@ async def start(interaction, bot_name, bot_avatar_url):
     value="You must pick **1** out of the **3** currently available classes to accompany you on your journey. Use ``/pick`` command once ready.",
     inline=False)
   embed.add_field(name="**Knight** `1`",
-    value="The Knight is the tankiest class in the game and is a **__close ranger__**.",
+    value="The Knight is the tankiest class in the game, with high HP, but low damagae.",
     inline=True)
   embed.add_field(name="**Archer** `2`",
-    value="The Archer has amazing and deadly **__long range__** capabilities but is the weakest.",
+    value="The Archer has high damage but lacks in terms of health.",
     inline=True)
   embed.add_field(name="**Mage** `3`",
-    value="The Mage is a **__mid ranger__** class and lacks in both defense and damage.",
+    value="The Mage is a class with reliable damage and HP.",
     inline=True)
   embed.add_field(name="**Having Trouble Picking A Class?**",
     value="We've provided you with the base stats of each class to help you pick the best fit class! Use ``/about`` command to display the base stats of a class.",

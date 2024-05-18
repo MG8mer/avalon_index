@@ -12,7 +12,7 @@ async def about(interaction):
     color = nextcord.Color.dark_gray())
   embed_knight.add_field(    
     name="Brief Description:", 
-    value="The Knight is the tankiest class in the game, being a close ranger and dealing low damage.", 
+    value="The Knight is the tankiest class in the game, but deals low damage.", 
     inline=False)
   embed_knight.add_field(    
     name="HP:", 

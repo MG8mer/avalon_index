@@ -35,75 +35,8 @@ evaluation = {
     # Attacks:
       # Damage dependent on evaluation.
 
-attacks = {
-  1: {
-    "Sword Jab": {
-      "Weak": -4,
-      "Normal": -8,
-      "Strong": -12
-    },
-    "Sword Slash": {
-      "Weak": -8,
-      "Normal": -16,
-      "Strong": -20
-    },
-    "Dual Sword Attack": {
-      "Weak": -32,
-      "Normal": -38,
-      "Strong": -45,
-    },
-    "Sliced and Diced": {
-      "Weak": -55,
-      "Normal": -60,
-      "Strong": -65,
-    }
-  },
-  2: {
-    "Weak Arrow": {
-      "Weak": -7,
-      "Normal": -12,
-      "Strong": -15
-    },
-    "Piercing Shot": {
-      "Weak": -20,
-      "Normal": -25,
-      "Strong": -35
-    },
-    "Triple Shot": {
-      "Weak": -45,
-      "Normal": -50,
-      "Strong": -60,
-    },
-    "Make it Rain": {
-      "Weak": -75,
-      "Normal": -90,
-      "Strong": -100,
-    }
-  },
-  3: {
-  "Zap": {
-    "Weak": -6,
-    "Normal": -11,
-    "Strong": -14
-  },
-  "Fireball": {
-    "Weak": -15,
-    "Normal": -25,
-    "Strong": -30
-  },
-  "Arcane Mania": {
-    "Weak": -42,
-    "Normal": -47,
-    "Strong": -55,
-  },
-  "Biden Blast": {
-    "Weak": -70,
-    "Normal": -75,
-    "Strong": -80,
-  }
-}
 
-}
+  
 
 # Function to send an embed to the user when they use battle if they picked archer.
 async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn, starter_hp_value, reciever_hp_value, battle_screen):
@@ -126,86 +59,136 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         await cursor.execute('SELECT ab_cooldown FROM cooldowns WHERE user_id = ?', (member.id,))
         avalonbless_c = await cursor.fetchone()
     await db.commit()
-        
+
+
+  # Create a class for two buttons (yes and no) like /reset.
+  class RunStay(nextcord.ui.View):
+    def __init__(self):
+      super().__init__(timeout=3)
+      self.value = None
+
+    # For yes, delete the battle instance as a result of one of the belligerents running away.
+    @nextcord.ui.button(label = 'Yes', style=nextcord.ButtonStyle.green) #yes button for ff
+    async def y(self, button: nextcord.ui.Button, interaction: Interaction):
+      async with aiosqlite.connect("main.db") as db:
+        async with db.cursor() as cursor:
+          await cursor.execute('SELECT battle FROM battles WHERE starter_id = ?', (interaction.user.id,))
+          battle_check_one = await cursor.fetchone() # Check if the starter is the one who used /ff
+          await cursor.execute('SELECT battle FROM battles WHERE reciever_id = ?', (interaction.user.id,))
+          battle_check_two = await cursor.fetchone() # Check if the reciever is the one who used /ff
+          if battle_check_one == (1,): # If the starter used /ff, use their id to delete the battle instance row.
+            await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
+          elif battle_check_two == (1,):  # If the reciever used /ff, use their id to delete the battle instance row.
+             await cursor.execute('DELETE FROM battles WHERE reciever_id = ?', (interaction.user.id,))
+          await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
+          await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+          await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+          await cursor.execute(f"DELETE FROM cooldowns WHERE opponent_id = {interaction.user.id}")
+          await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle!", ephemeral=False) # Inform both users that the person who used /ff ranaway from the bottle because ephemeral is false, so everyone sees the message, unlike when ephemeral is true and only the person who performed the interaction sees the message.
+        await db.commit()
+      self.value = True # Allow for the button to do something.
+      self.stop() # After the button is pressed, stop the interaction.
+
+    # TODO
+    @nextcord.ui.button(label = 'No', style=nextcord.ButtonStyle.red) #no button for ff
+    async def n(self, button: nextcord.ui.Button, interaction: Interaction):
+      await interaction.response.send_message('The battle continues!', ephemeral=True) # Inform the user that the battle continues.
+      self.value = False # This button being pressed will be as though nothing happened.
+      self.stop() # After the button is pressed, stop the interaction.
+
   class ChooseFour(nextcord.ui.View):
     def __init__(self):
-      super().__init__()
+      super().__init__(timeout=120)
       self.value = None
-    
-    @nextcord.ui.button(label = "Weak Arrow", style=nextcord.ButtonStyle.blurple)
-    async def weak(self, button: nextcord.ui.Button, interaction: Interaction):
+
+    @nextcord.ui.button(label="FF", style=nextcord.ButtonStyle.red)
+    async def ff(self, button: nextcord.ui.Button, interaction: Interaction):
       if switch == False and interaction.user.id != id_user:
           await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
       elif switch == True and interaction.user.id != id_member:
           await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
       else:
-        move = "Weak Arrow"
-        async with aiosqlite.connect("main.db") as db:
-          async with db.cursor() as cursor:
-            if switch == False:
-              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn,)) 
-            elif switch == True:
-              await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn,))
-          await db.commit()
-        self.value = True
-        self.stop()
-
+        view = RunStay()
+        await interaction.response.send_message("Are you sure you want to forfeit this battle?", view=view, ephemeral=True)
+        await view.wait()
+        if view.value == None:
+          await interaction.send("Request timed out.", ephemeral=True)
+        elif view.value == True:
+          self.value = "FF"
+          self.stop()
+    
+    @nextcord.ui.button(label = "Weak Arrow", style=nextcord.ButtonStyle.blurple)
+    async def weak(self, button: nextcord.ui.Button, interaction: Interaction):
+        if switch == False and interaction.user.id != id_user:
+            await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+        elif switch == True and interaction.user.id != id_member:
+            await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+        else:
+            move = "Weak Arrow"
+            async with aiosqlite.connect("main.db") as db:
+              async with db.cursor() as cursor:
+                if switch == False:
+                  await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn,)) 
+                elif switch == True:
+                  await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn,))
+              await db.commit()
+            self.value = True
+            self.stop()
+  
     if normal_c[0] == 0:
       @nextcord.ui.button(label = "Piercing Shot", style=nextcord.ButtonStyle.blurple)
       async def normal(self, button: nextcord.ui.Button, interaction: Interaction):
-        if switch == False and interaction.user.id != id_user:
-            await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-        elif switch == True and interaction.user.id != id_member:
-            await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-        else:
-          move = "Piercing Shot"
-          async with aiosqlite.connect("main.db") as db:
-            async with db.cursor() as cursor:
-              if switch == False:
-                await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn,))
-              elif switch == True:
-                await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn,))
-            await db.commit()
-          self.value = True
-          self.stop()
-
+            if switch == False and interaction.user.id != id_user:
+                await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+            elif switch == True and interaction.user.id != id_member:
+                await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+            else:
+                move = "Piercing Shot"
+                async with aiosqlite.connect("main.db") as db:
+                  async with db.cursor() as cursor:
+                    if switch == False:
+                      await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn,))
+                    elif switch == True:
+                      await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn,))
+                  await db.commit()
+                self.value = True
+                self.stop()
+  
     if special_c[0] == 0:
-      @nextcord.ui.button(label = "Triple Shot", style=nextcord.ButtonStyle.blurple)
-      async def special(self, button: nextcord.ui.Button, interaction: Interaction):
-        if switch == False and interaction.user.id != id_user:
-            await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-        elif switch == True and interaction.user.id != id_member:
-            await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-        else:
-          move = "Triple Shot"
-          async with aiosqlite.connect("main.db") as db:
-            async with db.cursor() as cursor:
-              if switch == False:
-                await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn,))
-              elif switch == True:
-                await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn,))
-            await db.commit()
-          self.value = True
-          self.stop()
-
+       @nextcord.ui.button(label = "Triple Shot", style=nextcord.ButtonStyle.blurple)
+       async def special(self, button: nextcord.ui.Button, interaction: Interaction):
+              if switch == False and interaction.user.id != id_user:
+                  await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+              elif switch == True and interaction.user.id != id_member:
+                  await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+              else:
+                    move = "Triple Shot"
+                    async with aiosqlite.connect("main.db") as db:
+                      async with db.cursor() as cursor:
+                        if switch == False:
+                          await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn,))
+                        elif switch == True:
+                          await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn,))
+                      await db.commit()
+                    self.stop()
+  
     if avalonbless_c[0] == 0:
       @nextcord.ui.button(label = "Make it Rain", style=nextcord.ButtonStyle.blurple)
       async def blessing(self, button: nextcord.ui.Button, interaction: Interaction):
-        if switch == False and interaction.user.id != id_user:
-            await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-        elif switch == True and interaction.user.id != id_member:
-            await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-        else:
-          move = "Make it Rain"
-          async with aiosqlite.connect("main.db") as db:
-            async with db.cursor() as cursor:
-              if switch == False:
-                await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn,))
-              elif switch == True:
-                await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn,))
-            await db.commit()
-          self.value = True
-          self.stop()
+          if switch == False and interaction.user.id != id_user:
+              await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+          elif switch == True and interaction.user.id != id_member:
+              await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+          else:
+              move = "Make it Rain"
+              async with aiosqlite.connect("main.db") as db:
+                async with db.cursor() as cursor:
+                  if switch == False:
+                    await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (id_user, member.id, move, turn,))
+                  elif switch == True:
+                    await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES (?, ?, ?, ?)", (member.id, id_user, move, turn,))
+                await db.commit()
+              self.stop()
       
   view = ChooseFour()
   hp = None # Define hp
@@ -255,6 +238,10 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
   if switch == False: # If it's the starter's turn, send the embed in their dm.
     message = await interaction.followup.send(embed=embed, view=view)
     await view.wait()
+    if view.value is None:
+      return
+    elif view.value == "FF":
+      return False
     await message.delete()
     if battle_screen != None:
       await battle_screen.delete()
@@ -281,6 +268,10 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
   elif switch == True: # If it's the reciever's turn, send the embed in their dm.
     message = await interaction.followup.send(embed=embed, view=view)
     await view.wait()
+    if view.value is None:
+      return
+    elif view.value == "FF":
+      return False
     await message.delete()
     if battle_screen != None:
       await battle_screen.delete()
@@ -304,5 +295,3 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
           await cursor.execute(f'UPDATE cooldowns SET ab_cooldown = {(avalonbless_c[0] - 1)} WHERE user_id = {member.id}')
       await db.commit()
       return move_final
-  if view.value is None:
-    return

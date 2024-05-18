@@ -12,6 +12,8 @@ requests = "^2.31.0"
 git-python = "^1.0.3"
 pillow = "^10.1.0"
 replit = "3.6.1"
+asyncpg = "0.29.0"
+aiohttp = "3.9.3"
 
 [tool.pyright]
 # https://github.com/microsoft/pyright/blob/main/docs/configuration.md

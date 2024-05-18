@@ -189,10 +189,6 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
           await db.commit()
   
         battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage, switch_value, crit_hit, hp_starter, hp_reciever, move, dmg)
-        async with aiosqlite.connect("main.db") as db:        
-            async with db.cursor() as cursor:
-              await cursor.execute('UPDATE battles SET starter_ff = ?, reciever_ff = ? WHERE starter_id = ? AND reciever_id = ?', ("No", "Yes", interaction.user.id, member.id,))
-            await db.commit()
         turn += 1
           
     else:  # if turn is odd, define switch, insertting switch_value into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
@@ -217,25 +213,21 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand):
           await db.commit()
           
       battle_screen = await battle_page.battle_page(interaction, member, hp_percentage_starter, hp_percentage_reciever, class_value_starter, class_value_reciever, startrand_mage, recieverand_mage, switch, crit_hit, hp_starter, hp_reciever, move, dmg)
-      
-      async with aiosqlite.connect("main.db") as db:        
-              async with db.cursor() as cursor:
-                await cursor.execute('UPDATE battles SET starter_ff = ?, reciever_ff = ? WHERE starter_id = ? AND reciever_id = ?', ("No", "Yes", interaction.user.id, member.id,))
-              await db.commit()
       turn += 1
           
     if starter_hp_value[0] == None or reciever_hp_value[0] == None: # If the row has been deleted in pick_move, making these value none due to returning nothing, break the loop, ending the battle. 
       break
  # Add 1 to the turn count to cycle through the loop another time if its condition is still true, being that both players' health points are above 0.
-  async with aiosqlite.connect("main.db") as db:
-    async with db.cursor() as cursor:
-      await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
-      await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
-      await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
-      await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
-      await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {member.id}")
-    await db.commit()
-  if hp_starter <= 0:
-    await interaction.followup.send(f"The battle has concluded and {member.mention} has won!")
-  elif hp_reciever <= 0:
-    await interaction.followup.send(f"The battle has concluded and {interaction.user.mention} has won!")
+  if hp_starter <= 0 or hp_reciever <= 0:
+    async with aiosqlite.connect("main.db") as db:
+      async with db.cursor() as cursor:
+        await cursor.execute('DELETE FROM battles WHERE starter_id = ?', (interaction.user.id,))
+        await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id} AND opponent_id = {member.id}")
+        await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
+        await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+        await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {member.id}")
+      await db.commit()
+    if hp_starter <= 0:
+      await interaction.followup.send(f"The battle has concluded and {member.mention} has won!")
+    elif hp_reciever <= 0:
+      await interaction.followup.send(f"The battle has concluded and {interaction.user.mention} has won!")

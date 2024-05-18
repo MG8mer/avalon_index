@@ -1,3 +1,5 @@
+alpha_development/
+.local/
 main.db
 archer_battle.cpython-310.pyc
 knight_battle.cpython-310.pyc

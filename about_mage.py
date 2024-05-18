@@ -14,7 +14,7 @@ async def about(interaction):
         color = nextcord.Color.purple())
     embed_mage.add_field(    
         name="About:", 
-        value="The Mage is a mid ranger, dealing mediocre damage and having mediocre HP.", 
+        value="The Mage deals baseline damage and has decent HP.", 
         inline=False)
     embed_mage.add_field(    
         name="HP:", 
