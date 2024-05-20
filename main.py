@@ -28,6 +28,7 @@ from nextcord.application_command import ClientCog, SlashOption # from https://w
 from nextcord.embeds import Embed # from https://www.youtube.com/watch?v=wn7NIqSSgas&list=PL-7Dfw57ZZVRB4N7VWPjmT0Q-2FIMNBMP&index=16&ab_channel=JamesS
 from nextcord.ext import commands # from https://www.youtube.com/watch?v=wn7NIqSSgas&list=PL-7Dfw57ZZVRB4N7VWPjmT0Q-2FIMNBMP&index=16&ab_channel=JamesS
 from nextcord.ext.commands import context    #from https://docs.replit.com/tutorialsb/python/build-basic-discord-bot- python and # from https://www.youtube.com/watch?v=wn7NIqSSgas&list=PL-7Dfw57ZZVRB4N7VWPjmT0Q-2FIMNBMP&index=16&ab_channel=JamesS
+from nextcord.ext import tasks, commands
 import about_archer
 import about_knight
 import about_mage
@@ -39,6 +40,9 @@ import battle_command
 from randGIF import randgif
 import random
 from random import randint
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all())   #from https://youtu.be/ksAtGCFxrP8#si=A89Nokdcqfsy_tGZ
 client.remove_command('help') # Removing the built in help command 
@@ -52,23 +56,50 @@ async def create_db_pool():
   if run == "Main":
     global db_pool
     DATABASE_URL = os.environ['DATABASE_URL']
-    db_pool = await asyncpg.create_pool(dsn=DATABASE_URL)
+    try:
+      db_pool = await asyncpg.create_pool(dsn=DATABASE_URL)
+      logging.info("Database pool created successfully.")
+    except Exception as e:
+      logging.error(f"Error creating database connection pool: {e}")
   elif run == "Alpha":
     ALPHA_HOST=os.environ['ALPHA_HOST']
     ALPHA_PORT=os.environ['ALPHA_PORT']
     ALPHA_DBNAME=os.environ['ALPHA_DBNAME']
     ALPHA_USER=os.environ['ALPHA_USER']
     ALPHA_PASSWORD=os.environ['ALPHA_PASSWORD']
-    db_pool = await asyncpg.create_pool(
-      host=ALPHA_HOST,
-      database=ALPHA_DBNAME,
-      user=ALPHA_USER,
-      password=ALPHA_PASSWORD
-    )
+    try:
+      db_pool = await asyncpg.create_pool(
+        host=ALPHA_HOST,
+        database=ALPHA_DBNAME,
+        user=ALPHA_USER,
+        password=ALPHA_PASSWORD
+      )
+    except Exception as e:
+      logging.error(f"Error creating database connection pool: {e}")
+
+async def ensure_db_pool():
+  global db_pool
+  if db_pool is None or db_pool._closed:
+      logging.warning("Recreating the database pool.")
+      await create_db_pool()
+
+@tasks.loop(minutes=1)
+async def keep_db_alive():
+    if db_pool is None or db_pool._closed:
+        logging.warning("Database pool is not initialized.")
+        await ensure_db_pool()
+      
+    async with db_pool.acquire() as cursor:
+        try:
+            await cursor.execute('SELECT 1')
+            logging.info("Executed keep-alive query successfully.")
+        except Exception as e:
+            logging.error(f"Keep-alive query failed: {e}")
 
 @client.event
 async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
-    print("DEV page is up.") #prints when bot is online from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
+    print("Bot is up.") #prints when bot is online from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
+    print("Relase the lions.")
     global db_pool
     await create_db_pool()
     client.db_pool = db_pool
@@ -78,6 +109,9 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
       await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id BIGINT, starter_hp INTEGER, reciever_id BIGINT, reciever_hp INTEGER, evaluation_starter TEXT, evaluation_reciever TEXT)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS moves(user_id BIGINT, opponent_id BIGINT, move_used TEXT, turn_num INTEGER)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS cooldowns(user_id BIGINT, opponent_id BIGINT, weak TEXT, w_cooldown INTEGER, normal TEXT, n_cooldown INTEGER, special TEXT, s_cooldown INTEGER, avalon_blessing TEXT, ab_cooldown INTEGER)') 
+
+    if not keep_db_alive.is_running():
+        keep_db_alive.start()
 
     url = randgif("cat")
     print(f"{len(client.guilds)}")
@@ -391,11 +425,6 @@ async def about(interaction: Interaction, number: int = SlashOption(name = "clas
         await (about_archer.about(interaction))
     elif number == 3: 
         await (about_mage.about(interaction))
-      
-# Below from https://stackoverflow.com/questions/73488299/how-can-i-import-a-cog-into-my-main-py-file
-cog_files = ["levels"]
-
-# Below from https://stackoverflow.com/questions/73488299/how-can-i-import-a-cog-into-my-main-py-file
 
 @client.event
 async def on_disconnect():
@@ -404,7 +433,6 @@ async def on_disconnect():
     print("Bot shut down successfully!")
 
 # Below from https://docs.replit.com/tutorials/python/build-basic discord-bot-python
-
 
 my_secret = os.environ['DISCORD_BOT_SECRET']
 client.run(my_secret)  
