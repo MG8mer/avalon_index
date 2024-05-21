@@ -41,6 +41,7 @@ from randGIF import randgif
 import random
 from random import randint
 import logging
+import signal
 
 logging.basicConfig(level=logging.INFO)
 
@@ -48,6 +49,7 @@ client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all())   #f
 client.remove_command('help') # Removing the built in help command 
 
 db_pool = None
+keep_db_alive_task = None
 
 run = "Main"
 
@@ -82,6 +84,7 @@ async def ensure_db_pool():
   if db_pool is None or db_pool._closed:
       logging.warning("Recreating the database pool.")
       await create_db_pool()
+      client.db_pool = db_pool
 
 @tasks.loop(minutes=1)
 async def keep_db_alive():
@@ -99,7 +102,6 @@ async def keep_db_alive():
 @client.event
 async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
     print("Bot is up.") #prints when bot is online from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
-    print("Relase the lions.")
     global db_pool
     await create_db_pool()
     client.db_pool = db_pool
@@ -109,9 +111,11 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
       await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id BIGINT, starter_hp INTEGER, reciever_id BIGINT, reciever_hp INTEGER, evaluation_starter TEXT, evaluation_reciever TEXT)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS moves(user_id BIGINT, opponent_id BIGINT, move_used TEXT, turn_num INTEGER)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS cooldowns(user_id BIGINT, opponent_id BIGINT, weak TEXT, w_cooldown INTEGER, normal TEXT, n_cooldown INTEGER, special TEXT, s_cooldown INTEGER, avalon_blessing TEXT, ab_cooldown INTEGER)') 
-
+      
     if not keep_db_alive.is_running():
-        keep_db_alive.start()
+       keep_db_alive.start()
+    keep_db_alive_task = keep_db_alive
+    
 
     url = randgif("cat")
     print(f"{len(client.guilds)}")
@@ -126,12 +130,43 @@ async def on_command_error(ctx, error):
 
 async def close_pool():
   global db_pool
+  global keep_db_alive_task
   if db_pool is not None:
     print("Closing connection pools...")
     await db_pool.close()
     db_pool = None 
   else:
     print("No connection pools to close.")
+
+  if keep_db_alive_task is not None:
+    keep_db_alive_task.cancel()
+    try:
+        await keep_db_alive_task
+    except asyncio.CancelledError:
+        pass
+
+async def shutdown():
+  global keep_db_alive_task
+  print("Shutting down gracefully...")
+  if keep_db_alive_task is not None:
+      keep_db_alive_task.cancel()
+      try:
+          await keep_db_alive_task
+      except asyncio.CancelledError:
+          pass
+  
+  if db_pool is not None:
+      print("Closing connection pools...")
+      await db_pool.close()
+      db_pool = None 
+    
+  await client.close()
+  print("Bot has shut down.")
+
+def handle_shutdowns():
+  signals = (signal.SIGINT, signal.SIGTERM)
+  for s in signals:
+      client.loop.add_signal_handler(s, lambda: asyncio.create_task(shutdown()))
 
 @client.command()
 async def shutdown(ctx):
@@ -425,7 +460,7 @@ async def about(interaction: Interaction, number: int = SlashOption(name = "clas
         await (about_archer.about(interaction))
     elif number == 3: 
         await (about_mage.about(interaction))
-
+  
 @client.event
 async def on_disconnect():
     print("Double checking connection pools...")
@@ -434,5 +469,7 @@ async def on_disconnect():
 
 # Below from https://docs.replit.com/tutorials/python/build-basic discord-bot-python
 
-my_secret = os.environ['DISCORD_BOT_SECRET']
-client.run(my_secret)  
+if not asyncio.get_event_loop().is_running():
+  my_secret = os.environ['DISCORD_BOT_SECRET']
+  handle_shutdowns()
+  client.run(my_secret)  

@@ -1,6 +1,6 @@
 alpha_development/
 .local/
-main.db
+dotrepl.py
 merged_image.png
 archer_battle.cpython-310.pyc
 knight_battle.cpython-310.pyc
@@ -18,3 +18,4 @@ image_merge.cpython-310.pyc
 pick_move.cpython-310.pyc
 randGIF.cpython-310.pyc
 start_page.cpython-310.pyc
+main.cpython-310.pyc

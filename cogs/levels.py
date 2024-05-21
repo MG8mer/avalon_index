@@ -5,6 +5,7 @@ import math
 import random
 import logging
 import asyncpg
+from main import ensure_db_pool
 
 client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # define client
 
@@ -14,9 +15,7 @@ class Leveling(commands.Cog):#level system function
     self.db_pool = client.db_pool
 
   async def ensure_pool(self):
-    if self.db_pool is None or self.db_pool._closed:
-      logging.warning("Database pool needs to be reinitialized.")
-      await self.client.create_db_pool()
+      await ensure_db_pool()
       self.db_pool = self.client.db_pool
     
   @commands.Cog.listener()
@@ -48,7 +47,7 @@ class Leveling(commands.Cog):#level system function
           await cursor.execute(f"UPDATE levels SET exp = {exp}, level = {lvl}, last_lvl = {last_lvl} WHERE user_id = {message.author.id}") #updates the user's exp, level, and last level
         if int(lvl // 1) == last_lvl + 1: 
           last_lvl = int(lvl // 1)
-          async with self.self.db_pool.acquire() as cursor:
+          async with self.db_pool.acquire() as cursor:
             await cursor.execute(f"UPDATE levels SET last_lvl = {last_lvl} WHERE user_id = {message.author.id}") #updates database to their new level
           embed = nextcord.Embed(title=f"**__Congratulations!__**",
             description=f"You have reached level {last_lvl}!",
