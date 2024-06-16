@@ -13,17 +13,13 @@ class Leveling(commands.Cog):#level system function
   def __init__(self, client):
     self.client = client
     self.db_pool = client.db_pool
-
-  async def ensure_pool(self):
-      await ensure_db_pool()
-      self.db_pool = self.client.db_pool
     
   @commands.Cog.listener()
   async def on_message(self, message):
     if message.author.bot or message.content == ".shutdown":
       return
     else:
-      await self.ensure_pool()
+      await ensure_db_pool(self.db_pool)
       async with self.db_pool.acquire() as cursor:
         await cursor.execute("""CREATE TABLE IF NOT EXISTS levels(user_id BIGINT, guild_id BIGINT, exp INTEGER, level INTEGER, last_lvl INTEGER)""") # Create levels table if it doesn't exist.
       try: #will try to grab the exp, levels, and etc. from database

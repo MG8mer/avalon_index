@@ -57,55 +57,67 @@ async def create_db_pool():
   # Function to establish database connection using asyncpg
   if run == "Main":
     global db_pool
-    DATABASE_URL = os.environ['DATABASE_URL']
+    DATABASE_URL = os.environ['DBURL']
     try:
       db_pool = await asyncpg.create_pool(dsn=DATABASE_URL)
       logging.info("Database pool created successfully.")
     except Exception as e:
       logging.error(f"Error creating database connection pool: {e}")
   elif run == "Alpha":
-    ALPHA_HOST=os.environ['ALPHA_HOST']
-    ALPHA_PORT=os.environ['ALPHA_PORT']
-    ALPHA_DBNAME=os.environ['ALPHA_DBNAME']
-    ALPHA_USER=os.environ['ALPHA_USER']
-    ALPHA_PASSWORD=os.environ['ALPHA_PASSWORD']
+    DATABASE_HOST = os.environ['ALPHA_HOST']
+    DATABASE_PORT = os.environ['ALPHA_PORT']
+    DATABASE_USER = os.environ['ALPHA_USER']
+    DATABASE_PASSWORD = os.environ['ALPHA_PASSWORD']
+    DATABASE_NAME = os.environ['ALPHA_DBNAME']
     try:
       db_pool = await asyncpg.create_pool(
-        host=ALPHA_HOST,
-        database=ALPHA_DBNAME,
-        user=ALPHA_USER,
-        password=ALPHA_PASSWORD
+        host = DATABASE_HOST,
+        port = DATABASE_PORT,
+        user = DATABASE_USER,
+        password = DATABASE_PASSWORD,
+        database = DATABASE_NAME
       )
     except Exception as e:
       logging.error(f"Error creating database connection pool: {e}")
 
-async def ensure_db_pool():
-  global db_pool
-  if db_pool is None or db_pool._closed:
-      logging.warning("Recreating the database pool.")
-      await create_db_pool()
-      client.db_pool = db_pool
+async def ensure_db_pool(pool_conn):
+    if pool_conn is None or pool_conn._closed:
+        logging.warning("Recreating the database pool (ensure_db_pool).")
+        await create_db_pool()
+    client.db_pool = db_pool
 
 @tasks.loop(minutes=1)
 async def keep_db_alive():
-    if db_pool is None or db_pool._closed:
-        logging.warning("Database pool is not initialized.")
-        await ensure_db_pool()
+    global db_pool
+    try:
+      if not keep_db_alive.is_running():
+         keep_db_alive.start()
+         keep_db_alive_task = keep_db_alive
       
-    async with db_pool.acquire() as cursor:
-        try:
-            await cursor.execute('SELECT 1')
-            logging.info("Executed keep-alive query successfully.")
-        except Exception as e:
-            logging.error(f"Keep-alive query failed: {e}")
+      if db_pool is None or db_pool._closed:
+          logging.warning("Database pool is not initialized (keep_db_alive).")
+          await ensure_db_pool(db_pool)
 
+      if "Leveling" not in client.cogs:
+          client.db_pool = db_pool
+          client.load_extension("cogs.levels")
+
+      async with db_pool.acquire() as cursor:
+          try:
+              await cursor.execute('SELECT 1')
+              logging.info("Executed keep-alive query successfully.")
+          except Exception as e:
+              logging.error(f"Keep-alive query failed: {e}")
+    except Exception as e:
+      logging.error(f"Error in keep_db_alive: {e}")
+  
 @client.event
 async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
-    print("Bot is up.") #prints when bot is online from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
+    logging.info("Bot is up and ready.") #prints when bot is online from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
     global db_pool
     await create_db_pool()
     client.db_pool = db_pool
-    client.load_extension('cogs.levels')
+    client.load_extension("cogs.levels")
     async with db_pool.acquire() as cursor:
       await cursor.execute('CREATE TABLE IF NOT EXISTS users(user_id BIGINT, guild_id BIGINT, class INTEGER, start INTEGER)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id BIGINT, starter_hp INTEGER, reciever_id BIGINT, reciever_hp INTEGER, evaluation_starter TEXT, evaluation_reciever TEXT)')
@@ -114,14 +126,23 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
       
     if not keep_db_alive.is_running():
        keep_db_alive.start()
-    keep_db_alive_task = keep_db_alive
-    
+       keep_db_alive_task = keep_db_alive
 
-    url = randgif("cat")
-    print(f"{len(client.guilds)}")
+    logging.info(f"{len(client.guilds)}")
     for i in range(len(client.guilds)):
-       print(f"{client.guilds[i].name}")
-       print(f"{client.guilds[i].member_count}")
+       logging.info(f"{client.guilds[i].name}")
+       logging.info(f"{client.guilds[i].member_count}")  
+
+@client.event
+async def on_resumed():
+      logging.info("Bot has reconnected to Discord.") 
+      global db_pool
+      await create_db_pool()
+      client.db_pool = db_pool
+      client.load_extension('cogs.levels')
+      if not keep_db_alive.is_running():
+         keep_db_alive.start()
+         keep_db_alive_task = keep_db_alive
 
 @client.event
 async def on_command_error(ctx, error):
@@ -132,40 +153,28 @@ async def close_pool():
   global db_pool
   global keep_db_alive_task
   if db_pool is not None:
-    print("Closing connection pools...")
+    logging.info("Closing connection pools...")
     await db_pool.close()
     db_pool = None 
   else:
-    print("No connection pools to close.")
-
-  if keep_db_alive_task is not None:
-    keep_db_alive_task.cancel()
-    try:
-        await keep_db_alive_task
-    except asyncio.CancelledError:
-        pass
+    logging.info("No connection pools to close.")
 
 async def shutdown():
   global keep_db_alive_task
-  print("Shutting down gracefully...")
+  logging.info("Shutting down gracefully...")
   if keep_db_alive_task is not None:
       keep_db_alive_task.cancel()
+      logging.info("Keep alive task cancelled...")
       try:
           await keep_db_alive_task
       except asyncio.CancelledError:
           pass
-  
-  if db_pool is not None:
-      print("Closing connection pools...")
-      await db_pool.close()
-      db_pool = None 
     
-  await client.close()
-  print("Bot has shut down.")
-
 def handle_shutdowns():
+  print("Handling shutdown...")
   signals = (signal.SIGINT, signal.SIGTERM)
   for s in signals:
+      print(f"Handling {s}")
       client.loop.add_signal_handler(s, lambda: asyncio.create_task(shutdown()))
 
 @client.command()
@@ -179,11 +188,10 @@ async def shutdown(ctx):
   file = os.environ['FILE']
   guild = int(os.environ['ID_GUILD'])
   if ctx.author.id == id and ctx.guild.id == guild:
-      print("Starting closure...")
-      await close_pool()
-      print("Shutting down bot...")
+      logging.info("Starting closure...")
       await client.http.close()
       await client.close()
+      logging.info("Bot shut down...")
   else:
       print("User does not have permissions to access command.")
 
@@ -411,6 +419,7 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
 
           await interaction.followup.send("Battle request cancelled.")
           await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id) # Delete that battle instance row in the table as a result of the cancellation of the battle.
+          
     else:
       return
 
@@ -463,9 +472,12 @@ async def about(interaction: Interaction, number: int = SlashOption(name = "clas
   
 @client.event
 async def on_disconnect():
-    print("Double checking connection pools...")
+  try:
+    logging.info("Commencing cleanup procedure...")
     await close_pool()
-    print("Bot shut down successfully!")
+    client.unload_extension("cogs.levels")
+  except Exception as e:
+    logging.error(f"Error in on_disconnect: {e}")
 
 # Below from https://docs.replit.com/tutorials/python/build-basic discord-bot-python
 
