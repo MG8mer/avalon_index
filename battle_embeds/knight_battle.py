@@ -7,15 +7,14 @@ from nextcord import Interaction
 
 # Useful source throughout: https://discordpy.readthedocs.io/en/stable/interactions/api.html
 
-# Dicts to store class info:
+# Dicts to store class info: 
 
 # Class health
 health = {
-  1: 125,
-  2: 75,
-  3: 100
+  1: 150,
+  2: 100,
+  3: 125
 }
-
 
 # Battle evaluation:
   # Ex: 12; if a knight fights an archer it's weak for the knight.
@@ -40,68 +39,68 @@ evaluation = {
 attacks = {
   1: {
     "Sword Jab": {
-      "Weak": -4,
-      "Normal": -8,
-      "Strong": -12
-    },
-    "Sword Slash": {
-      "Weak": -8,
-      "Normal": -16,
+      "Weak": -10,
+      "Normal": -15,
       "Strong": -20
     },
+    "Sword Slash": {
+      "Weak": -15,
+      "Normal": -25,
+      "Strong": -35
+    },
     "Dual Sword Attack": {
-      "Weak": -32,
-      "Normal": -38,
-      "Strong": -45,
+      "Weak": -30,
+      "Normal": -45,
+      "Strong": -60
     },
     "Sliced and Diced": {
-      "Weak": -55,
-      "Normal": -60,
-      "Strong": -65,
+      "Weak": -50,
+      "Normal": -75,
+      "Strong": -100
     }
   },
   2: {
     "Weak Arrow": {
-      "Weak": -7,
-      "Normal": -12,
-      "Strong": -15
+      "Weak": -15,
+      "Normal": -20,
+      "Strong": -25
     },
     "Piercing Shot": {
-      "Weak": -20,
-      "Normal": -25,
-      "Strong": -35
+      "Weak": -25,
+      "Normal": -35,
+      "Strong": -45
     },
     "Triple Shot": {
-      "Weak": -45,
-      "Normal": -50,
-      "Strong": -60,
+      "Weak": -50,
+      "Normal": -70,
+      "Strong": -90,
     },
     "Make it Rain": {
-      "Weak": -75,
-      "Normal": -90,
-      "Strong": -100,
+      "Weak": -85,
+      "Normal": -125,
+      "Strong": -150,
     }
   },
   3: {
   "Zap": {
-    "Weak": -6,
-    "Normal": -11,
-    "Strong": -14
+    "Weak": -12,
+    "Normal": -18,
+    "Strong": -22
   },
   "Fireball": {
-    "Weak": -15,
-    "Normal": -25,
-    "Strong": -30
+    "Weak": -22,
+    "Normal": -32,
+    "Strong": -42
   },
   "Arcane Mania": {
-    "Weak": -42,
-    "Normal": -47,
-    "Strong": -55,
+    "Weak": -45,
+    "Normal": -65,
+    "Strong": -80,
   },
   "Biden Blast": {
-    "Weak": -70,
-    "Normal": -75,
-    "Strong": -80,
+    "Weak": -75,
+    "Normal": -100,
+    "Strong": -125,
   }
 }
 
@@ -127,25 +126,26 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       super().__init__(timeout=120)
       self.value = None
 
-    @nextcord.ui.button(label="Forfeit", style=nextcord.ButtonStyle.red)
-    async def ff(self, button: nextcord.ui.Button, interaction: Interaction):
-      if switch == False and interaction.user.id != id_user:
-          await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-      elif switch == True and interaction.user.id != id_member:
-          await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-      else:
-          async with db_pool.acquire() as cursor:
-            if switch is False: 
-              await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
-            elif switch is True: 
-               await cursor.execute('DELETE FROM battles WHERE reciever_id = $1', interaction.user.id)
-            await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
-            await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
-            await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
-            await cursor.execute(f"DELETE FROM cooldowns WHERE opponent_id = {interaction.user.id}")
-            await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle!", ephemeral=False) 
-          self.value = "FF"
-          self.stop()
+    if turn <= 3:
+      @nextcord.ui.button(label="Forfeit", style=nextcord.ButtonStyle.red)
+      async def ff(self, button: nextcord.ui.Button, interaction: Interaction):
+        if switch == False and interaction.user.id != id_user:
+            await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+        elif switch == True and interaction.user.id != id_member:
+            await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+        else:
+            async with db_pool.acquire() as cursor:
+              if switch is False: 
+                await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
+              elif switch is True: 
+                 await cursor.execute('DELETE FROM battles WHERE reciever_id = $1', interaction.user.id)
+              await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
+              await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+              await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+              await cursor.execute(f"DELETE FROM cooldowns WHERE opponent_id = {interaction.user.id}")
+              await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle! No XP gained by either party...", ephemeral=False) 
+            self.value = "FF"
+            self.stop()
 
     @nextcord.ui.button(label = "Sword Jab", style=nextcord.ButtonStyle.blurple)
     async def weak(self, button: nextcord.ui.Button, interaction: Interaction):
@@ -245,19 +245,19 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
     value=str(hp),
     inline=False)
   embed.add_field( # Field that shows the weak attack for that class and damage according the value of that user's evaluation.
-    name="Sword Jab (Weak) **No Cooldown**",
+    name="Sword Jab (Weak) **No Cooldown; Hit Chance: 99.9%**",
     value=str(attacks[1]["Sword Jab"][evaluation]),
     inline=False)
   embed.add_field( # Field that shows the normal attack for that class and damage according the value of that user's evaluation.
-    name=f"Sword Slash (Normal) **Cooldown: {normal_c}**",
+    name=f"Sword Slash (Normal) **Cooldown: {normal_c}; Hit Chance: 80%**",
     value=str(attacks[1]["Sword Slash"][evaluation]),
     inline=False)
   embed.add_field( # Field that shows the special attack for that class and damage according the value of that user's evaluation.
-    name=f"Dual Sword Attack (Special) **Cooldown: {special_c}**",
+    name=f"Dual Sword Attack (Special) **Cooldown: {special_c}; ; Hit Chance: 50%**",
     value=str(attacks[1]["Dual Sword Attack"][evaluation]),
     inline=False)
   embed.add_field( # Field that shows the weak avalon blessing attack for that class and damage according the value of that user's evaluation.
-    name=f"Sliced and Diced (Avalon's Blessing) **Cooldown: {avalonbless_c}**",
+    name=f"Sliced and Diced (Avalon's Blessing) **Cooldown: {avalonbless_c}; Hit Chance: 25%**",
     value=str(attacks[1]["Sliced and Diced"][evaluation]),
     inline=False)            
   embed.set_thumbnail(url="https://i.imgur.com/soNMbTL.png")  # Shows image of knight.

@@ -3,20 +3,29 @@
 import nextcord
 from nextcord.embeds import Embed
 import nextcord.interactions
+from nextcord import Interaction
 
 # The function below creates the about page for the archer class in an embed for the about command, giving a description of the class, its stats, attacks, and who its strong or weak against, with a field for each respectively.
 
-async def about(interaction):
+async def about(interaction: Interaction, bot_name, bot_avatar_url):
+    botName=bot_name
+    bot_avatar_url = bot_avatar_url
     embed_archer = Embed(   
-      title = "About the Archer:", 
+      title = "__Starter Manual (pg. 3)__", 
       color = nextcord.Color.green())
+    embed_archer.set_author(name=botName,
+      icon_url=bot_avatar_url)
+    embed_archer.add_field(    
+      name="About the Archer", 
+      value="",
+      inline=False)
     embed_archer.add_field(    
       name="Brief Description:", 
       value="The Archer has low HP and deals high damage.", 
       inline=False)
     embed_archer.add_field(    
       name="HP:", 
-      value="75",
+      value="100",
       inline=False)
     embed_archer.add_field(    
       name="Attacks:", 
@@ -24,19 +33,19 @@ async def about(interaction):
       inline=False)
     embed_archer.add_field(
       name="Weak Arrow (Weak)",
-      value="Weak -7 HP; Normal -12 HP; Strong -15 HP",
+      value="Weak -15 HP; Normal -20 HP; Strong -25 HP",
       inline=True)
     embed_archer.add_field(
       name="Piercing Shot (Normal)",
-      value="Weak -20 HP; Normal -25 HP; Strong -35 HP",
+      value="Weak -25 HP; Normal -35 HP; Strong -45 HP",
       inline=False)
     embed_archer.add_field(
       name="Triple Shot (Special)",
-      value="Weak -45 HP; Normal -50 HP; Strong -60 HP",
+      value="Weak -50 HP; Normal -70 HP; Strong -90 HP",
       inline=False)
     embed_archer.add_field(
       name="Make it Rain! (Avalon's Blessing)",
-      value="Weak -75 HP; Normal -90 HP; Strong -100 HP",
+      value="Weak -85 HP; Normal -125 HP; Strong -150 HP",
       inline=False)
     embed_archer.add_field(
       name="Weaknesses/Strengths",
@@ -45,8 +54,4 @@ async def about(interaction):
     embed_archer.set_thumbnail(
       url="https://i.imgur.com/NcJsHO3.png"
     ) 
-    await interaction.response.defer()
-    await interaction.followup.send(embed=embed_archer)
-
-# We also included a little pixel-art in the embed resembling the archer class.
-# We then proceed to defer the need to respond to the interaction and then followup by sending the embed for the archer.
+    return embed_archer

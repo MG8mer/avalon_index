@@ -10,130 +10,13 @@ from nextcord import Interaction
 # Function to send an embed to the user when they use battle if they picked mage.
 async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn, starter_hp_value, reciever_hp_value, startrand_mage, recieverand_mage, battle_screen, db_pool):
   if startrand_mage == 7 or recieverand_mage == 7:
-        # Dicts to store class info:
-
-        # Class health
-        health = {
-          1: 125,
-          2: 75,
-          3: 100
-        }
-        # Battle evaluation:
-          # Ex: 12; if a knight fights an archer it's weak for the knight.
-          # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
-        evaluation = {
-          "11": "Normal",
-          "22": "Normal",
-          "33": "Normal",
-          "12": "Weak",
-          "13": "Strong",
-          "21": "Strong",
-          "23": "Weak",
-          "31": "Weak",
-          "32": "Strong",
-        }
-        # Dict order:
-          # Class
-            # Attacks:
-              # Damage dependent on evaluation.
-        attacks = {
-          1: {
-            "Sword Jab": {
-              "Weak": -4,
-              "Normal": -8,
-              "Strong": -12
-            },
-            "Sword Slash": {
-              "Weak": -8,
-              "Normal": -16,
-              "Strong": -20
-            },
-            "Dual Sword Attack": {
-              "Weak": -32,
-              "Normal": -38,
-              "Strong": -50
-            },
-            "Sliced and Diced": {
-              "Weak": -55,
-              "Normal": -60,
-              "Strong": -65
-            }
-          },
-          2: {
-            "Weak Arrow": {
-              "Weak": -7,
-              "Normal": -12,
-              "Strong": -15
-            },
-            "Piercing Shot": {
-              "Weak": -20,
-              "Normal": -25,
-              "Strong": -35
-            },
-            "Triple Shot": {
-              "Weak": -45,
-              "Normal": -50,
-              "Strong": -60
-            },
-            "Make it Rain": {
-              "Weak": -75,
-              "Normal": -90,
-              "Strong": -100
-            }
-          },
-          3: {
-          "Zap": {
-            "Weak": -6,
-            "Normal": -11,
-            "Strong": -14
-          },
-          "Fireball": {
-            "Weak": -15,
-            "Normal": -25,
-            "Strong": -30
-          },
-          "Arcane Mania": {
-            "Weak": -42,
-            "Normal": -47,
-            "Strong": -55
-          },
-          "Biden Blast": {
-            "Weak": -70,
-            "Normal": -75,
-            "Strong": -80
-          }
-        },
-        4: {
-        "THUNDERBOLT": {
-          "Weak": -9,
-          "Normal": -17,
-          "Strong": -21
-        },
-        "SUPER FIREBALL": {
-          "Weak": -23,
-          "Normal": -38,
-          "Strong": -45
-        },
-        "THE SORCERER'S WRATH": {
-          "Weak": -63,
-          "Normal": -71,
-          "Strong": -83,
-        },
-        "TRUE BIDEN BLAST!!!": {
-          "Weak": -999,
-          "Normal": -999,
-          "Strong": -999,
-        }
-      }
-    }
-  else:
-      # Dicts to store class info:
+    # Dicts to store class info:
 
       # Class health
       health = {
-        1: 125,
-        2: 75,
-        3: 100
+        1: 150,
+        2: 100,
+        3: 125
       }
 
       # Battle evaluation:
@@ -155,75 +38,194 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         # Class
           # Attacks:
             # Damage dependent on evaluation.
-
       attacks = {
         1: {
           "Sword Jab": {
-            "Weak": -4,
-            "Normal": -8,
-            "Strong": -12
-          },
-          "Sword Slash": {
-            "Weak": -8,
-            "Normal": -16,
+            "Weak": -10,
+            "Normal": -15,
             "Strong": -20
           },
+          "Sword Slash": {
+            "Weak": -15,
+            "Normal": -25,
+            "Strong": -35
+          },
           "Dual Sword Attack": {
-            "Weak": -32,
-            "Normal": -38,
-            "Strong": -50
+            "Weak": -30,
+            "Normal": -45,
+            "Strong": -60
           },
           "Sliced and Diced": {
-            "Weak": -55,
-            "Normal": -60,
-            "Strong": -65
+            "Weak": -50,
+            "Normal": -75,
+            "Strong": -100
           }
         },
         2: {
           "Weak Arrow": {
-            "Weak": -7,
-            "Normal": -12,
-            "Strong": -15
+            "Weak": -15,
+            "Normal": -20,
+            "Strong": -25
           },
           "Piercing Shot": {
-            "Weak": -20,
-            "Normal": -25,
-            "Strong": -35
+            "Weak": -25,
+            "Normal": -35,
+            "Strong": -45
           },
           "Triple Shot": {
-            "Weak": -45,
-            "Normal": -50,
-            "Strong": -60
+            "Weak": -50,
+            "Normal": -70,
+            "Strong": -90
           },
           "Make it Rain": {
-            "Weak": -75,
-            "Normal": -90,
-            "Strong": -100
+            "Weak": -85,
+            "Normal": -125,
+            "Strong": -150
           }
         },
         3: {
         "Zap": {
-          "Weak": -6,
-          "Normal": -11,
-          "Strong": -14
+          "Weak": -12,
+          "Normal": -18,
+          "Strong": -22
         },
         "Fireball": {
-          "Weak": -15,
-          "Normal": -25,
-          "Strong": -30
+          "Weak": -22,
+          "Normal": -32,
+          "Strong": -42
         },
         "Arcane Mania": {
-          "Weak": -42,
-          "Normal": -47,
-          "Strong": -55
+          "Weak": -45,
+          "Normal": -65,
+          "Strong": -80
         },
         "Biden Blast": {
-          "Weak": -70,
-          "Normal": -75,
-          "Strong": -80
+          "Weak": -75,
+          "Normal": -100,
+          "Strong": -125
         }
+      },
+      4: {
+      "THUNDERBOLT": {
+        "Weak": -15,
+        "Normal": -20,
+        "Strong": -25
+      },
+      "SUPER FIREBALL": {
+        "Weak": -25,
+        "Normal": -35,
+        "Strong": -45
+      },
+      "THE SORCERER'S WRATH": {
+        "Weak": -50,
+        "Normal": -70,
+        "Strong": -90,
+      },
+      "TRUE BIDEN BLAST!!!": {
+        "Weak": -999,
+        "Normal": -999,
+        "Strong": -999,
       }
-     }
+    }
+    }
+  else:
+    # Dicts to store class info: 
+
+    # Class health
+    health = {
+      1: 150,
+      2: 100,
+      3: 125
+    }
+
+    # Battle evaluation:
+      # Ex: 12; if a knight fights an archer it's weak for the knight.
+      # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
+    evaluation = {
+      "11": "Normal",
+      "22": "Normal",
+      "33": "Normal",
+      "12": "Weak",
+      "13": "Strong",
+      "21": "Strong",
+      "23": "Weak",
+      "31": "Weak",
+      "32": "Strong",
+    }
+
+    # Dict order:
+      # Class
+        # Attacks:
+          # Damage dependent on evaluation.
+
+    attacks = {
+      1: {
+        "Sword Jab": {
+          "Weak": -10,
+          "Normal": -15,
+          "Strong": -20
+        },
+        "Sword Slash": {
+          "Weak": -15,
+          "Normal": -25,
+          "Strong": -35
+        },
+        "Dual Sword Attack": {
+          "Weak": -30,
+          "Normal": -45,
+          "Strong": -60
+        },
+        "Sliced and Diced": {
+          "Weak": -50,
+          "Normal": -75,
+          "Strong": -100
+        }
+      },
+      2: {
+        "Weak Arrow": {
+          "Weak": -15,
+          "Normal": -20,
+          "Strong": -25
+        },
+        "Piercing Shot": {
+          "Weak": -25,
+          "Normal": -35,
+          "Strong": -45
+        },
+        "Triple Shot": {
+          "Weak": -50,
+          "Normal": -70,
+          "Strong": -90,
+        },
+        "Make it Rain": {
+          "Weak": -85,
+          "Normal": -125,
+          "Strong": -150,
+        }
+      },
+      3: {
+      "Zap": {
+        "Weak": -12,
+        "Normal": -18,
+        "Strong": -22
+      },
+      "Fireball": {
+        "Weak": -22,
+        "Normal": -32,
+        "Strong": -42
+      },
+      "Arcane Mania": {
+        "Weak": -45,
+        "Normal": -65,
+        "Strong": -80,
+      },
+      "Biden Blast": {
+        "Weak": -75,
+        "Normal": -100,
+        "Strong": -125,
+      }
+    }
+    }
   id_user = interaction.user.id 
   id_member = member.id
   async with db_pool.acquire() as cursor:
@@ -244,25 +246,26 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
           super().__init__(timeout=120)
           self.value = None
 
-        @nextcord.ui.button(label="Forfeit", style=nextcord.ButtonStyle.red)
-        async def ff(self, button: nextcord.ui.Button, interaction: Interaction):
-          if switch == False and interaction.user.id != id_user:
-              await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-          elif switch == True and interaction.user.id != id_member:
-              await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-          else:
-              async with db_pool.acquire() as cursor:
-                if switch is False: 
-                  await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
-                elif switch is True: 
-                   await cursor.execute('DELETE FROM battles WHERE reciever_id = $1', interaction.user.id)
-                await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
-                await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
-                await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
-                await cursor.execute(f"DELETE FROM cooldowns WHERE opponent_id = {interaction.user.id}")
-                await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle!", ephemeral=False) 
-              self.value = "FF"
-              self.stop()
+        if turn <= 3:
+          @nextcord.ui.button(label="Forfeit", style=nextcord.ButtonStyle.red)
+          async def ff(self, button: nextcord.ui.Button, interaction: Interaction):
+            if switch == False and interaction.user.id != id_user:
+                await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+            elif switch == True and interaction.user.id != id_member:
+                await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+            else:
+                async with db_pool.acquire() as cursor:
+                  if switch is False: 
+                    await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
+                  elif switch is True: 
+                     await cursor.execute('DELETE FROM battles WHERE reciever_id = $1', interaction.user.id)
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM cooldowns WHERE opponent_id = {interaction.user.id}")
+                  await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle! No XP gained by either party...", ephemeral=False) 
+                self.value = "FF"
+                self.stop()
 
         @nextcord.ui.button(label = "THUNDERBOLT", style=nextcord.ButtonStyle.blurple)
         async def weak(self, button: nextcord.ui.Button, interaction: Interaction):
@@ -344,25 +347,26 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
           super().__init__(timeout=120)
           self.value = None
 
-        @nextcord.ui.button(label="Forfeit", style=nextcord.ButtonStyle.red)
-        async def ff(self, button: nextcord.ui.Button, interaction: Interaction):
-          if switch == False and interaction.user.id != id_user:
-              await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-          elif switch == True and interaction.user.id != id_member:
-              await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-          else:
-              async with db_pool.acquire() as cursor:
-                if switch is False: 
-                  await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
-                elif switch is True: 
-                   await cursor.execute('DELETE FROM battles WHERE reciever_id = $1', interaction.user.id)
-                await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
-                await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
-                await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
-                await cursor.execute(f"DELETE FROM cooldowns WHERE opponent_id = {interaction.user.id}")
-                await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle!", ephemeral=False) 
-              self.value = "FF"
-              self.stop()
+        if turn <= 3:
+          @nextcord.ui.button(label="Forfeit", style=nextcord.ButtonStyle.red)
+          async def ff(self, button: nextcord.ui.Button, interaction: Interaction):
+            if switch == False and interaction.user.id != id_user:
+                await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+            elif switch == True and interaction.user.id != id_member:
+                await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+            else:
+                async with db_pool.acquire() as cursor:
+                  if switch is False: 
+                    await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
+                  elif switch is True: 
+                     await cursor.execute('DELETE FROM battles WHERE reciever_id = $1', interaction.user.id)
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM cooldowns WHERE opponent_id = {interaction.user.id}")
+                  await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle! No XP gained by either party...", ephemeral=False) 
+                self.value = "FF"
+                self.stop()
 
         @nextcord.ui.button(label = "Zap", style=nextcord.ButtonStyle.blurple)
         async def weak(self, button: nextcord.ui.Button, interaction: Interaction):
@@ -438,32 +442,33 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
 
                 self.value = True
                 self.stop()
-                
+
   elif switch == True:
     if recieverand_mage == 7:
       class ChooseFour(nextcord.ui.View):
         def __init__(self):
           super().__init__(timeout=120)
 
-        @nextcord.ui.button(label="Forfeit", style=nextcord.ButtonStyle.red)
-        async def ff(self, button: nextcord.ui.Button, interaction: Interaction):
-          if switch == False and interaction.user.id != id_user:
-              await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-          elif switch == True and interaction.user.id != id_member:
-              await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-          else:
-              async with db_pool.acquire() as cursor:
-                if switch is False: 
-                  await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
-                elif switch is True: 
-                   await cursor.execute('DELETE FROM battles WHERE reciever_id = $1', interaction.user.id)
-                await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
-                await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
-                await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
-                await cursor.execute(f"DELETE FROM cooldowns WHERE opponent_id = {interaction.user.id}")
-                await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle!", ephemeral=False) 
-              self.value = "FF"
-              self.stop()
+        if turn <= 3:
+          @nextcord.ui.button(label="Forfeit", style=nextcord.ButtonStyle.red)
+          async def ff(self, button: nextcord.ui.Button, interaction: Interaction):
+            if switch == False and interaction.user.id != id_user:
+                await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+            elif switch == True and interaction.user.id != id_member:
+                await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+            else:
+                async with db_pool.acquire() as cursor:
+                  if switch is False: 
+                    await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
+                  elif switch is True: 
+                     await cursor.execute('DELETE FROM battles WHERE reciever_id = $1', interaction.user.id)
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM cooldowns WHERE opponent_id = {interaction.user.id}")
+                  await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle! No XP gained by either party...", ephemeral=False) 
+                self.value = "FF"
+                self.stop()
 
         @nextcord.ui.button(label = "THUNDERBOLT", style=nextcord.ButtonStyle.blurple)
         async def weak(self, button: nextcord.ui.Button, interaction: Interaction):
@@ -545,25 +550,26 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
           super().__init__(timeout=120)
           self.value = None
 
-        @nextcord.ui.button(label="Forfeit", style=nextcord.ButtonStyle.red)
-        async def ff(self, button: nextcord.ui.Button, interaction: Interaction):
-          if switch == False and interaction.user.id != id_user:
-              await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-          elif switch == True and interaction.user.id != id_member:
-              await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
-          else:
-              async with db_pool.acquire() as cursor:
-                if switch is False: 
-                  await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
-                elif switch is True: 
-                   await cursor.execute('DELETE FROM battles WHERE reciever_id = $1', interaction.user.id)
-                await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
-                await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
-                await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
-                await cursor.execute(f"DELETE FROM cooldowns WHERE opponent_id = {interaction.user.id}")
-                await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle!", ephemeral=False) 
-              self.value = "FF"
-              self.stop()
+        if turn <= 3:
+          @nextcord.ui.button(label="Forfeit", style=nextcord.ButtonStyle.red)
+          async def ff(self, button: nextcord.ui.Button, interaction: Interaction):
+            if switch == False and interaction.user.id != id_user:
+                await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+            elif switch == True and interaction.user.id != id_member:
+                await interaction.response.send_message("Buddy you can't choose their move for them!", ephemeral=True)
+            else:
+                async with db_pool.acquire() as cursor:
+                  if switch is False: 
+                    await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
+                  elif switch is True: 
+                     await cursor.execute('DELETE FROM battles WHERE reciever_id = $1', interaction.user.id)
+                  await cursor.execute(f"DELETE FROM moves WHERE user_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM moves WHERE opponent_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
+                  await cursor.execute(f"DELETE FROM cooldowns WHERE opponent_id = {interaction.user.id}")
+                  await interaction.response.send_message(f"{interaction.user.mention} has run away from the battle! No XP gained by either party...", ephemeral=False) 
+                self.value = "FF"
+                self.stop()
 
         @nextcord.ui.button(label = "Zap", style=nextcord.ButtonStyle.blurple)
         async def weak(self, button: nextcord.ui.Button, interaction: Interaction):
@@ -598,7 +604,6 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
                     await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES ($1, $2, $3, $4)", id_user, member.id, move, turn)
                   elif switch == True:
                     await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES ($1, $2, $3, $4)", member.id, id_user, move, turn)
-
                 self.value = True
                 self.stop()
 
@@ -665,19 +670,19 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         value=str(hp),
         inline=True)
       embed.add_field( # Field that shows the weak attack for that class and damage according the value of that user's evaluation.
-        name="THUNDERBOLT (Weak) **No Cooldown**",
+        name="THUNDERBOLT (Weak) **No Cooldown; Hit Chance: 50%**",
         value=str(attacks[4]["THUNDERBOLT"][evaluation]),
         inline=True)
       embed.add_field( # Field that shows the normal attack for that class and damage according the value of that user's evaluation.
-        name=f"SUPER FIREBALL (Normal) **Cooldown: {normal_c}**",
+        name=f"SUPER FIREBALL (Normal) **Cooldown: {normal_c}; Hit Chance: 40%**",
         value=str(attacks[4]["SUPER FIREBALL"][evaluation]),
         inline=False)
       embed.add_field( # Field that shows the special attack for that class and damage according the value of that user's evaluation.
-        name=f"THE SORCERER'S WRATH (Special) **Cooldown: {special_c}**",
+        name=f"THE SORCERER'S WRATH (Special) **Cooldown: {special_c}; Hit Chance: 25%**",
         value=str(attacks[4]["THE SORCERER'S WRATH"][evaluation]),
         inline=False)
       embed.add_field( # Field that shows the weak avalon blessing attack for that class and damage according the value of that user's evaluation.
-        name=f"TRUE BIDEN BLAST!!! (Avalon's Blessing) **Cooldown: {avalonbless_c}**",
+        name=f"TRUE BIDEN BLAST!!! (Avalon's Blessing) **Cooldown: {avalonbless_c}; Hit Chance: 1%**",
         value=str(attacks[4]["TRUE BIDEN BLAST!!!"][evaluation]),
         inline=False)        
       embed.set_thumbnail(url="https://i.imgur.com/aIikkUR.png")
@@ -691,19 +696,19 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         value=str(hp),
         inline=True)
       embed.add_field( # Field that shows the weak attack for that class and damage according the value of that user's evaluation.
-        name="Zap (Weak) **No Cooldown**",
+        name="Zap (Weak) **No Cooldown; Hit Chance: 99.9%**",
         value=str(attacks[3]["Zap"][evaluation]),
         inline=True)
       embed.add_field( # Field that shows the normal attack for that class and damage according the value of that user's evaluation.
-        name=f"Fireball (Normal) **Cooldown: {normal_c}**",
+        name=f"Fireball (Normal) **Cooldown: {normal_c}; Hit Chance: 80%**",
         value=str(attacks[3]["Fireball"][evaluation]),
         inline=False)
       embed.add_field( # Field that shows the special attack for that class and damage according the value of that user's evaluation.
-        name=f"Arcane Mania (Special) **Cooldown: {special_c}**",
+        name=f"Arcane Mania (Special) **Cooldown: {special_c}; Hit Chance: 50%**",
         value=str(attacks[3]["Arcane Mania"][evaluation]),
         inline=False)
       embed.add_field( # Field that shows the weak avalon blessing attack for that class and damage according the value of that user's evaluation.
-        name=f"Biden Blast (Avalon's Blessing) **Cooldown: {avalonbless_c}**",
+        name=f"Biden Blast (Avalon's Blessing) **Cooldown: {avalonbless_c}; Hit Chance: 25%**",
         value=str(attacks[3]["Biden Blast"][evaluation]),
         inline=False)
       embed.set_thumbnail(url="https://i.imgur.com/0DpJe0b.png")  # Shows image of mage.
@@ -718,19 +723,19 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         value=str(hp),
         inline=True)
       embed.add_field( # Field that shows the weak attack for that class and damage according the value of that user's evaluation.
-        name="THUNDERBOLT (Weak) **No Cooldown**",
+        name="THUNDERBOLT (Weak) **No Cooldown; Hit Chance: 50%**",
         value=str(attacks[4]["THUNDERBOLT"][evaluation]),
         inline=True)
       embed.add_field( # Field that shows the normal attack for that class and damage according the value of that user's evaluation.
-        name=f"SUPER FIREBALL (Normal) **Cooldown: {normal_c}**",
+        name=f"SUPER FIREBALL (Normal) **Cooldown: {normal_c}; Hit Chance: 40%**",
         value=str(attacks[4]["SUPER FIREBALL"][evaluation]),
         inline=False)
       embed.add_field( # Field that shows the special attack for that class and damage according the value of that user's evaluation.
-        name=f"THE SORCERER'S WRATH (Special) **Cooldown: {special_c}**",
+        name=f"THE SORCERER'S WRATH (Special) **Cooldown: {special_c}; Hit Chance: 25%**",
         value=str(attacks[4]["THE SORCERER'S WRATH"][evaluation]),
         inline=False)
       embed.add_field( # Field that shows the weak avalon blessing attack for that class and damage according the value of that user's evaluation.
-        name=f"TRUE BIDEN BLAST!!! (Avalon's Blessing) **Cooldown: {avalonbless_c}**",
+        name=f"TRUE BIDEN BLAST!!! (Avalon's Blessing) **Cooldown: {avalonbless_c}; Hit Chance: 1%**",
         value=str(attacks[4]["TRUE BIDEN BLAST!!!"][evaluation]),
         inline=False)        
       embed.set_thumbnail(url="https://i.imgur.com/aIikkUR.png")
@@ -744,19 +749,19 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         value=str(hp),
         inline=True)
       embed.add_field( # Field that shows the weak attack for that class and damage according the value of that user's evaluation.
-        name="Zap (Weak) **No Cooldown**",
+        name="Zap (Weak) **No Cooldown; Hit Chance: 99.9%**",
         value=str(attacks[3]["Zap"][evaluation]),
         inline=True)
       embed.add_field( # Field that shows the normal attack for that class and damage according the value of that user's evaluation.
-        name=f"Fireball (Normal) **Cooldown: {normal_c}**",
+        name=f"Fireball (Normal) **Cooldown: {normal_c}; Hit Chance: 80%**",
         value=str(attacks[3]["Fireball"][evaluation]),
         inline=False)
       embed.add_field( # Field that shows the special attack for that class and damage according the value of that user's evaluation.
-        name=f"Arcane Mania (Special) **Cooldown: {special_c}**",
+        name=f"Arcane Mania (Special) **Cooldown: {special_c}; Hit Chance: 50%**",
         value=str(attacks[3]["Arcane Mania"][evaluation]),
         inline=False)
       embed.add_field( # Field that shows the weak avalon blessing attack for that class and damage according the value of that user's evaluation.
-        name=f"Biden Blast (Avalon's Blessing) **Cooldown: {avalonbless_c}**",
+        name=f"Biden Blast (Avalon's Blessing) **Cooldown: {avalonbless_c}; Hit Chance: 25%**",
         value=str(attacks[3]["Biden Blast"][evaluation]),
         inline=False)
       embed.set_thumbnail(url="https://i.imgur.com/0DpJe0b.png")  # Shows image of mage.

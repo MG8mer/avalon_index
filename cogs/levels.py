@@ -4,53 +4,114 @@ from nextcord.ext import commands
 import math
 import random
 import asyncpg
+import time
+import logging
+from main import ensure_db_pool
+from collections import defaultdict
+from shared import role_designation
 
 client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # define client
+
+last_message_time = defaultdict(lambda: 0)
+
+message_between_time = 60
 
 class Leveling(commands.Cog):#level system function
   def __init__(self, client):
     self.client = client
     self.db_pool = client.db_pool
+
   @commands.Cog.listener()
   async def on_message(self, message):
+    current_time = time.time()
     if message.author.bot or message.content == ".shutdown":
       return
     else:
-      async with self.db_pool.acquire() as cursor:
-        await cursor.execute("""CREATE TABLE IF NOT EXISTS levels(user_id BIGINT, guild_id BIGINT, exp INTEGER, level INTEGER, last_lvl INTEGER)""") # Create levels table if it doesn't exist.
-      try: #will try to grab the exp, levels, and etc. from database
-        async with self.db_pool.acquire() as cursor:
-          result = await cursor.fetchval(f"SELECT user_id, guild_id, exp, level, last_lvl FROM levels WHERE user_id = {message.author.id} AND guild_id = {message.guild.id}")
-      except AttributeError:
-        return
+      await ensure_db_pool(self.db_pool)
       async with self.db_pool.acquire() as cursor:
         start_value = await cursor.fetchval(f'SELECT start FROM users WHERE user_id = {message.author.id}')
-      if result is None:  #if there is no data in result, it will add the base levels and exp to that particular user
+      if start_value == 1:
         async with self.db_pool.acquire() as cursor:
-          await cursor.execute(f"INSERT INTO levels (user_id, guild_id, exp, level, last_lvl) VALUES ({message.author.id},{message.guild.id}, 0, 0, 0)")
-      elif start_value == (1,): #if the user has already started the bot, it will store the existing levels, exp, and etc. in their respective variables below
-        exp = result[2]
-        lvl = result[3]
-        last_lvl = result[4]
-        exp_gained = random.randint(1, 5)
-        exp += exp_gained #adds the exp gained to the exp variable
-        lvl = 0.1 * math.sqrt(exp)
+          no_roles = await cursor.fetch("SELECT role_id FROM no_exp_roles WHERE guild_id = $1", message.guild.id)
+        if no_roles != []:
+            formatted_roles = []
+            user_roles = [role.id for role in message.author.roles if role.name != "@everyone"]
+            for id_role in no_roles:
+              formatted_roles.append(id_role['role_id'])
+
+            for roles in user_roles:
+              if roles in formatted_roles:
+                return
+
         async with self.db_pool.acquire() as cursor:
-          await cursor.execute(f"UPDATE levels SET exp = {exp}, level = {lvl}, last_lvl = {last_lvl} WHERE user_id = {message.author.id}") #updates the user's exp, level, and last level
-        if int(lvl // 1) == last_lvl + 1: 
-          last_lvl = int(lvl // 1)
-          async with self.self.db_pool.acquire() as cursor:
-            await cursor.execute(f"UPDATE levels SET last_lvl = {last_lvl} WHERE user_id = {message.author.id}") #updates database to their new level
-          embed = nextcord.Embed(title=f"**__Congratulations!__**",
-            description=f"You have reached level {last_lvl}!",
-            colour=0x00b0f4)
-          embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
-          embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
-          await message.author.send(embed=embed) #sends the embed in dms to notify the user that they have reached a new leve
+          no_channels = await cursor.fetch("SELECT channel_id FROM no_exp_channels WHERE guild_id = $1", message.guild.id)
+        if no_channels != []:
+            formatted_channels = []
+            for id_channel in no_channels:
+              formatted_channels.append(id_channel['channel_id'])
+
+            for channels in formatted_channels:
+              if message.channel.id in formatted_channels:
+                return
+        try:
+          async with self.db_pool.acquire() as cursor:
+            server_result = await cursor.fetchrow(f"SELECT exp, level, exp_needed FROM server_levels WHERE user_id = {message.author.id} AND guild_id = {message.guild.id}")
+        except AttributeError:
+          return
+
+        if server_result is None: 
+          async with self.db_pool.acquire() as cursor:
+            exp_needed = round(100*(pow(1, 1.1)))
+            await cursor.execute(f"INSERT INTO server_levels (user_id, guild_id, exp, level, exp_needed) VALUES ({message.author.id}, {message.guild.id}, 0, 0, {exp_needed})")
+
+        if current_time - last_message_time[message.author.id] >= message_between_time:
+          last_message_time[message.author.id] = current_time
+          exp_gained = random.randint(5, 10)
+          if server_result is not None:
+              server_exp = server_result[0]
+              server_lvl = server_result[1]
+              server_exp_needed = server_result[2]
+              msg_words = message.content.split()
+              if len(msg_words) > 10:
+                exp_gained = exp_gained*2
+
+              async with self.db_pool.acquire() as cursor:
+                boosted_roles = await cursor.fetch("SELECT role_id FROM exp_boosted_roles WHERE guild_id = $1", message.guild.id)
+              if boosted_roles != []:
+                  formatted_roles = []
+                  user_roles = [role.id for role in message.author.roles if role.name != "@everyone"]
+                  for id_role in boosted_roles:
+                    formatted_roles.append(id_role['role_id'])
+
+                  for roles in user_roles:
+                    if roles in formatted_roles:
+                       async with self.db_pool.acquire() as cursor:
+                         boost_val = await cursor.fetchval(f"SELECT boost_percent FROM exp_boosted_roles WHERE role_id = {roles} AND guild_id = {message.guild.id}")
+                         boosted_role = nextcord.utils.get(message.guild.roles, id=roles)
+                         exp_gained = exp_gained * round(boost_val/100)
+
+
+              server_exp += exp_gained 
+              async with self.db_pool.acquire() as cursor:
+                await cursor.execute(f"UPDATE server_levels SET exp = {server_exp} WHERE user_id = {message.author.id} AND guild_id = {message.guild.id}") 
+
+              while server_exp >= server_exp_needed: 
+                  server_lvl += 1
+                  exp_surplus = server_exp - server_exp_needed
+                  server_exp_needed = round(100*(pow((server_lvl+1), 1.1)))
+                  async with self.db_pool.acquire() as cursor:
+                    await cursor.execute(f"UPDATE server_levels SET exp = {exp_surplus}, level = {server_lvl}, exp_needed = {server_exp_needed} WHERE user_id = {message.author.id} AND guild_id = {message.guild.id}") 
+                  embed = nextcord.Embed(title=f"**__Congratulations!__**",
+                    description=f"You have reached level {server_lvl} on the **__{message.guild}__** server!",
+                    colour=0x00b0f4)
+                  embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
+                  embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
+                  await message.author.send(embed=embed)
+                  await role_designation(message.author, message.author.id, message.guild, message.guild.id, message.channel, server_lvl, self.db_pool)
       else:
         return
 
 def setup(client):
   client.add_cog(Leveling(client)) # Add cog for leveling
 
-# Leveling system above from https://youtu.be/55KLwf8P1ec?si=vROVGsVjML_iUazm
+# Leveling system above inspired from https://youtu.be/55KLwf8P1ec?si=vROVGsVjML_iUazm
