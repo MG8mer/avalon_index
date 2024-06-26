@@ -39,21 +39,20 @@ async def start(interaction: Interaction, bot_name, bot_avatar_url, db_pool):
     value="You must pick **1** out of the **3** currently available classes to accompany you on your journey. Use ``/pick`` command once ready.",
     inline=False)
   embed.add_field(name="**Knight** `1`",
-    value="The Knight is the tankiest class in the game, with high HP, but low damagae.",
+    value="The Knight is the tankiest class in the game, with high HP, but low damage.",
     inline=True)
   embed.add_field(name="**Archer** `2`",
-    value="The Archer has high damage but lacks in terms of health.",
+    value="The Archer has high damage, but lacks in terms of health.",
     inline=True)
   embed.add_field(name="**Mage** `3`",
     value="The Mage is a class with reliable damage and HP.",
     inline=True)
-  embed.add_field(name="**Having Trouble Picking A Class?**",
-    value="We've provided you with the base stats of each class to help you pick the best fit class! Use ``/about`` command to display the base stats of a class.",
+  embed.add_field(name="Want to Learn More?",
+    value="We've provided you with the `/avi_manual` command, which provides you with a General page that talks more about the functionality of Avalon Index, mainly being battling and levelling *(More coming soon!)*. There are also pages for each of the classes so you can learn more about each class before picking one to stick with. \n \n **__NOTE__**: Once you pick a class, you cannot change it unless you use `/reset` to wipe your global level and class to start over, so choose wisely!",
     inline=False)
   embed.add_field(name="**Need Help?**",
-    value="If you need further guidance with proper command usage, use ``/help`` command to gain more knowledge before heading off.",
+    value="If you need further guidance with proper command usage, use `/help` command to gain more knowledge before heading off.",
     inline=False)
-  # embed.set_image(url=bot_avatar_url)
   embed.set_image(url=url)
   embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
   embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")

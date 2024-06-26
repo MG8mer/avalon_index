@@ -3,6 +3,7 @@
 import nextcord
 from nextcord.embeds import Embed
 import nextcord.interactions
+from datetime import datetime
 import randGIF
 
 
@@ -14,8 +15,9 @@ async def help(interaction, bot_name, bot_avatar_url):
   url = randGIF.randgif("HELP ME")
   embed = Embed(    #main embed field, with title and description
     title = f"**{botName}'s Help Menu (pg. 1)**", 
-    description = f"All the necessary commands to play the game to your heart's content! {interaction.user.mention}", 
-    color = nextcord.Color.blue())
+    description=f"All the commands for Avalon Index, including moderator and user ones! {interaction.user.mention}", 
+    color = nextcord.Color.blurple(),
+    timestamp=datetime.now())
   embed.set_author(    #author field
     name=botName,
     icon_url=bot_avatar_url)
@@ -36,12 +38,12 @@ async def help(interaction, bot_name, bot_avatar_url):
     value="",
     inline=False)
   embed.add_field(    #.about embed
-    name="> /about", 
-    value="Learn more about each class!",
+    name="> /avi_manual", 
+    value="Learn more about the game Avalon Index and each class!",
     inline=True)
   embed.add_field(    #.about embed, additional field for correct usage
     name="> Syntax", 
-    value="```\n/about <class: Knight *or* Archer *or* Mage>```\n", 
+    value="```\n/about <page: General (general info on Avalon Index) *or* Knight *or* Archer *or* Mage>```\n", 
     inline=True)
   embed.add_field(    #blank embed to seperate
     name="",
@@ -61,23 +63,22 @@ async def help(interaction, bot_name, bot_avatar_url):
     inline=False)
   embed.add_field(    #.stats embed
     name="> /stats", 
-    value="Displays stats of your character", 
+    value="Displays somebody's stats (class/levelling).", 
     inline=True)
   embed.add_field(    #.stats embed, additional field for correct usage
     name="> Syntax", 
     value="```\n/stats <member: **must be present within the same server!**>\n```", 
     inline=True)
-  embed.add_field(    #.moves embed
+  embed.add_field(    
     name="> /reset", 
     value="Reset your stats and start from scratch!", 
     inline=False)
-  embed.add_field(    #.ff embed
-    name="> FF",     
-    value="Forfeiting a battle can now be done by simply pressing the red `FF` button on your battle embed!", 
-    inline=False)
+  embed.add_field(name="> /gif", #.gif embed
+    value="Use this command to generate a gif of your choice!",
+    inline=True)
+  embed.add_field(name="> Syntax", #.gif embed, additional field for correct usage
+    value="```\n/gif <search_term>\n```",
+    inline=True)
   embed.set_thumbnail(url=f"{url}")
-  embed.set_image(url=f"{bot_avatar_url}")
   embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/SuXNrLh3RW0AAAAi/ebichu-help-me.gif")
-  # We then proceed to defer the need to respond to the interaction and then followup by sending the embed for the first help page.
-  await interaction.response.defer()
-  await interaction.followup.send(embed=embed)    #.help command, lists all possible commands in this game
+  return embed

@@ -9,18 +9,19 @@ import pick_move
 import asyncpg
 import battle_page
 from random import randint
+from shared import role_designation
 
 # Useful source throughout: https://discordpy.readthedocs.io/en/stable/interactions/api.html
 
 client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # Define client.
 
-# Dicts to store class info:
+# Dicts to store class info: 
 
 # Class health
 health = {
-  1: 125,
-  2: 75,
-  3: 100
+  1: 150,
+  2: 100,
+  3: 125
 }
 
 # Battle evaluation:
@@ -46,68 +47,68 @@ evaluation = {
 attacks = {
   1: {
     "Sword Jab": {
-      "Weak": -4,
-      "Normal": -8,
-      "Strong": -12
-    },
-    "Sword Slash": {
-      "Weak": -8,
-      "Normal": -16,
+      "Weak": -10,
+      "Normal": -15,
       "Strong": -20
     },
+    "Sword Slash": {
+      "Weak": -15,
+      "Normal": -25,
+      "Strong": -35
+    },
     "Dual Sword Attack": {
-      "Weak": -32,
-      "Normal": -38,
-      "Strong": -45,
+      "Weak": -30,
+      "Normal": -45,
+      "Strong": -60
     },
     "Sliced and Diced": {
-      "Weak": -55,
-      "Normal": -60,
-      "Strong": -65,
+      "Weak": -50,
+      "Normal": -75,
+      "Strong": -100
     }
   },
   2: {
     "Weak Arrow": {
-      "Weak": -7,
-      "Normal": -12,
-      "Strong": -15
+      "Weak": -15,
+      "Normal": -20,
+      "Strong": -25
     },
     "Piercing Shot": {
-      "Weak": -20,
-      "Normal": -25,
-      "Strong": -35
+      "Weak": -25,
+      "Normal": -35,
+      "Strong": -45
     },
     "Triple Shot": {
-      "Weak": -45,
-      "Normal": -50,
-      "Strong": -60,
+      "Weak": -50,
+      "Normal": -70,
+      "Strong": -90,
     },
     "Make it Rain": {
-      "Weak": -75,
-      "Normal": -90,
-      "Strong": -100,
+      "Weak": -85,
+      "Normal": -125,
+      "Strong": -150,
     }
   },
   3: {
   "Zap": {
-    "Weak": -6,
-    "Normal": -11,
-    "Strong": -14
+    "Weak": -12,
+    "Normal": -18,
+    "Strong": -22
   },
   "Fireball": {
-    "Weak": -15,
-    "Normal": -25,
-    "Strong": -30
+    "Weak": -22,
+    "Normal": -32,
+    "Strong": -42
   },
   "Arcane Mania": {
-    "Weak": -42,
-    "Normal": -47,
-    "Strong": -55,
+    "Weak": -45,
+    "Normal": -65,
+    "Strong": -80,
   },
   "Biden Blast": {
-    "Weak": -70,
-    "Normal": -75,
-    "Strong": -80,
+    "Weak": -75,
+    "Normal": -100,
+    "Strong": -125,
   }
 }
 
@@ -149,7 +150,7 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
         await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", member.id, interaction.user.id, "Weak Arrow", 0, "Piercing Shot", 0, "Triple Shot", 2, "Make it Rain", 3)
     elif class_value_reciever == 3:
         await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", member.id, interaction.user.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3)
-        recieverand_mage = randint(1, 10)
+        recieverand_mage = 7
 
     starter_hp_value = await cursor.fetchval('SELECT starter_hp FROM battles WHERE starter_id = $1', interaction.user.id)
     reciever_hp_value = await cursor.fetchval('SELECT reciever_hp FROM battles WHERE reciever_id = $1', member.id)
@@ -161,11 +162,18 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
   hp_reciever = reciever_hp_value
   dmg_msg = None
   battle_screen = None
+  starter_av_blessing_hits = 0
+  reciever_av_blessing_hits = 0
+  starter_crit_num = 0
+  reciever_crit_num = 0
   while hp_starter > 0 and hp_reciever > 0:
     # Below https://stackoverflow.com/questions/21837208/check-if-a-number-is-odd-or-even-in-python
     if turn == 0 or turn % 2 == 0: # if turn is even, define switch_value, insertting switch into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
-        switch_value, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn, battle_screen, db_pool)
+        switch_value, dmg, move, crit_hit, starter_crit_num, reciever_crit_num, starter_av_blessing_hits, reciever_av_blessing_hits = await pick_move.move(
+          interaction, member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever,
+          starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn,
+          battle_screen, db_pool, starter_crit_num, reciever_crit_num, starter_av_blessing_hits, reciever_av_blessing_hits)
       except TypeError:
         return
       else:
@@ -186,7 +194,7 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
 
     else:  # if turn is odd, define switch, insertting switch_value into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
-        switch, dmg, move, crit_hit = await pick_move.move(interaction, member, start_rand, startrand_mage, recieverand_mage,  class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch_value, turn, battle_screen, db_pool)
+        switch, dmg, move, crit_hit, starter_crit_num, reciever_crit_num, starter_av_blessing_hits, reciever_av_blessing_hits = await pick_move.move(interaction, member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch_value, turn, battle_screen, db_pool, starter_crit_num, reciever_crit_num, starter_av_blessing_hits, reciever_av_blessing_hits)
       except TypeError:
         return
       else:
@@ -216,8 +224,212 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
       await cursor.execute(f"DELETE FROM moves WHERE user_id = {member.id} AND opponent_id = {interaction.user.id}")
       await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {interaction.user.id}")
       await cursor.execute(f"DELETE FROM cooldowns WHERE user_id = {member.id}")
-
     if hp_starter <= 0:
-      await interaction.followup.send(f"The battle has concluded and {member.mention} has won!")
+      server_no_exp = False
+      no_exp_role = None
+      async with db_pool.acquire() as cursor:
+        no_roles = await cursor.fetch("SELECT role_id FROM no_exp_roles WHERE guild_id = $1", interaction.guild_id)
+      if no_roles != []:
+          formatted_roles = []
+          user_roles = [role.id for role in member.roles if role.name != "@everyone"]
+          for id_role in no_roles:
+            formatted_roles.append(id_role['role_id'])
+
+          for roles in user_roles:
+            if roles in formatted_roles:
+              server_no_exp = True
+              no_exp_role = nextcord.utils.get(interaction.guild.roles, id=roles) 
+      if recieverand_mage == 7:
+        wildcard_mage_bonus = 25
+      else:
+        wildcard_mage_bonus = 0
+      base_score = randint(50, 100)
+      hp_bonus = round((hp_reciever/reciever_hp_value)*100)
+      crit_bonus = reciever_crit_num*10
+      av_blessing_bonus = reciever_av_blessing_hits*5
+      battle_score=base_score+hp_bonus+crit_bonus+av_blessing_bonus+wildcard_mage_bonus
+      async with db_pool.acquire() as cursor:
+        global_result = await cursor.fetchrow(f"SELECT exp, level, exp_needed FROM global_levels WHERE user_id = {member.id}")
+        server_result = await cursor.fetchrow(f"SELECT exp, level, exp_needed FROM server_levels WHERE user_id = {member.id} AND guild_id = {interaction.guild_id}")
+
+      if global_result is None: 
+        async with db_pool.acquire() as cursor:
+          exp_needed = round(100*(pow(1, 1.1)))
+          await cursor.execute(f"INSERT INTO global_levels (user_id, exp, level, exp_needed) VALUES ({member.id}, 0, 0, {exp_needed})")
+
+      if server_result is None: 
+        if server_no_exp == False:
+          async with db_pool.acquire() as cursor:
+            exp_needed = round(100*(pow(1, 1.1)))
+            await cursor.execute(f"INSERT INTO server_levels (user_id, guild_id, exp, level, exp_needed) VALUES ({member.id}, {interaction.guild_id}, 0, 0, {exp_needed})")
+
+      async with db_pool.acquire() as cursor:
+        global_result = await cursor.fetchrow(f"SELECT exp, level, exp_needed FROM global_levels WHERE user_id = {member.id}")
+        if server_no_exp == False:
+          server_result = await cursor.fetchrow(f"SELECT exp, level, exp_needed FROM server_levels WHERE user_id = {member.id} AND guild_id = {interaction.guild_id}")
+
+      global_exp = global_result[0]
+      global_lvl = global_result[1]
+      global_exp_needed = global_result[2]
+      global_exp += battle_score
+      async with db_pool.acquire() as cursor:
+        await cursor.execute(f"UPDATE global_levels SET exp = {global_exp} WHERE user_id = {member.id}")
+      while global_exp >= global_exp_needed: 
+          global_lvl += 1
+          exp_surplus = global_exp - global_exp_needed
+          global_exp_needed = round(100*(pow((global_lvl+1), 1.1))) 
+          async with db_pool.acquire() as cursor:
+            await cursor.execute(f"UPDATE global_levels SET exp = {exp_surplus}, level = {global_lvl}, exp_needed = {global_exp_needed} WHERE user_id = {member.id}")
+          global_exp = exp_surplus
+          if global_exp >= global_exp_needed:
+            pass
+          else:
+            embed = nextcord.Embed(title=f"**__Congratulations!__**",
+              description=f"You have reached level {global_lvl} on **__Avalon Index!__**",
+              colour=0x00b0f4)
+            embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
+            embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
+            await member.send(embed=embed)
+
+      if server_no_exp == False:
+        server_exp = server_result[0]
+        server_lvl = server_result[1]
+        server_exp_needed = server_result[2]
+        server_exp += battle_score
+        async with db_pool.acquire() as cursor:
+          await cursor.execute(f"UPDATE server_levels SET exp = {server_exp} WHERE user_id = {member.id} AND guild_id = {interaction.guild_id} ")
+        while server_exp >= server_exp_needed: 
+            server_lvl += 1
+            exp_surplus = server_exp - server_exp_needed
+            server_exp_needed = round(100*(pow((server_lvl+1), 1.1)))
+            async with db_pool.acquire() as cursor:
+              await cursor.execute(f"UPDATE server_levels SET exp = {exp_surplus}, level = {server_lvl}, exp_needed = {server_exp_needed} WHERE user_id = {member.id} AND guild_id = {interaction.guild_id}") 
+            server_exp = exp_surplus
+            if server_exp >= server_exp_needed:
+              pass
+            else:
+              embed = nextcord.Embed(title=f"**__Congratulations!__**",
+                description=f"You have reached level {server_lvl} on the **__{interaction.guild}__** server!",
+                colour=0x00b0f4)
+              embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
+              embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
+              await member.send(embed=embed)
+              await role_designation(member, member.id, interaction.guild, interaction.guild_id, interaction.channel, server_lvl, db_pool)
+
+      result_battle = Embed(   
+        title = "Battle Results",
+        description = f"The battle has concluded and {member.mention} has won!",
+        color = nextcord.Color.blue())
+      result_battle.add_field(    
+        name="Score Breakdown", 
+        value=f">**__Base Score__**: {base_score} \n >HP Bonus: +{hp_bonus} \n >Crit Bonus: +{crit_bonus} \n >Avalon Blessing Bonus: +{av_blessing_bonus} \n >Wilcard Mage Bonus: +{wildcard_mage_bonus} \n \n **__Total Score__**: {battle_score}", 
+        inline=False)
+      if server_no_exp == True:
+        result_battle.set_footer(text = f"NOTE: You have gained no XP on {interaction.guild} as you have the {no_exp_role} role, which cannot gain any XP on this server.")
+      await interaction.followup.send(embed=result_battle)
     elif hp_reciever <= 0:
-      await interaction.followup.send(f"The battle has concluded and {interaction.user.mention} has won!")
+      server_no_exp = False
+      no_exp_role = None
+      async with db_pool.acquire() as cursor:
+        no_roles = await cursor.fetch("SELECT role_id FROM no_exp_roles WHERE guild_id = $1", interaction.guild_id)
+      if no_roles != []:
+          formatted_roles = []
+          user_roles = [role.id for role in interaction.user.roles if role.name != "@everyone"]
+          for id_role in no_roles:
+            formatted_roles.append(id_role['role_id'])
+
+
+          for roles in user_roles:
+            if roles in formatted_roles:
+              server_no_exp = True
+              no_exp_role = nextcord.utils.get(interaction.guild.roles, id=roles) 
+      if startrand_mage == 7:
+        wildcard_mage_bonus = 25
+      else:
+        wildcard_mage_bonus = 0
+      base_score = randint(50, 100)
+      hp_bonus = round((hp_starter/starter_hp_value)*100)
+      crit_bonus = starter_crit_num*10
+      av_blessing_bonus = starter_av_blessing_hits*5
+      battle_score=base_score+hp_bonus+crit_bonus+av_blessing_bonus+wildcard_mage_bonus
+      async with db_pool.acquire() as cursor:
+        global_result = await cursor.fetchrow(f"SELECT exp, level, exp_needed FROM global_levels WHERE user_id = {interaction.user.id}")
+        server_result = await cursor.fetchrow(f"SELECT exp, level, exp_needed FROM server_levels WHERE user_id = {interaction.user.id} AND guild_id = {interaction.guild_id}")
+
+      if global_result is None: 
+          async with db_pool.acquire() as cursor:
+            exp_needed = round(100*(pow(1, 1.1)))
+            await cursor.execute(f"INSERT INTO global_levels (user_id, exp, level, exp_needed) VALUES ({interaction.user.id}, 0, 0, {exp_needed})")
+
+
+      if server_result is None: 
+        if server_no_exp == False:
+          async with db_pool.acquire() as cursor:
+            exp_needed = round(100*(pow(1, 1.1)))
+            await cursor.execute(f"INSERT INTO server_levels (user_id, guild_id, exp, level, exp_needed) VALUES ({interaction.user.id}, {interaction.guild_id}, 0, 0, {exp_needed})")
+
+      async with db_pool.acquire() as cursor:
+        global_result = await cursor.fetchrow(f"SELECT exp, level, exp_needed FROM global_levels WHERE user_id = {interaction.user.id}")
+        if server_no_exp == False:
+            server_result = await cursor.fetchrow(f"SELECT exp, level, exp_needed FROM server_levels WHERE user_id = {interaction.user.id} AND guild_id = {interaction.guild_id}")
+
+      global_exp = global_result[0]
+      global_lvl = global_result[1]
+      global_exp_needed = global_result[2]
+      global_exp += battle_score
+      async with db_pool.acquire() as cursor:
+        await cursor.execute(f"UPDATE global_levels SET exp = {global_exp} WHERE user_id = {interaction.user.id}")
+      while global_exp >= global_exp_needed: 
+          global_lvl += 1
+          exp_surplus = global_exp - global_exp_needed
+          global_exp_needed = round(100*(pow((global_lvl+1), 1.1))) 
+          async with db_pool.acquire() as cursor:
+            await cursor.execute(f"UPDATE global_levels SET exp = {exp_surplus}, level = {global_lvl}, exp_needed = {global_exp_needed} WHERE user_id = {interaction.user.id}")
+          global_exp = exp_surplus
+          if global_exp >= global_exp_needed:
+            pass
+          else:
+            embed = nextcord.Embed(title=f"**__Congratulations!__**",
+              description=f"You have reached level {global_lvl} on **__Avalon Index!__**",
+              colour=0x00b0f4)
+            embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
+            embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
+            await interaction.user.send(embed=embed)
+
+      if server_no_exp == False:
+        server_exp = server_result[0]
+        server_lvl = server_result[1]
+        server_exp_needed = server_result[2]
+        server_exp += battle_score
+        async with db_pool.acquire() as cursor:
+          await cursor.execute(f"UPDATE server_levels SET exp = {server_exp} WHERE user_id = {interaction.user.id} AND guild_id = {interaction.guild_id}")
+        while server_exp >= server_exp_needed: 
+            server_lvl += 1
+            exp_surplus = server_exp - server_exp_needed
+            server_exp_needed = round(100*(pow((server_lvl+1), 1.1)))
+            async with db_pool.acquire() as cursor:
+              await cursor.execute(f"UPDATE server_levels SET exp = {exp_surplus}, level = {server_lvl}, exp_needed = {server_exp_needed} WHERE user_id = {interaction.user.id} AND guild_id = {interaction.guild_id}") 
+            server_exp = exp_surplus
+            if server_exp >= server_exp_needed:
+              pass
+            else:
+              embed = nextcord.Embed(title=f"**__Congratulations!__**",
+                description=f"You have reached level {server_lvl} on the **__{interaction.guild}__** server!",
+                colour=0x00b0f4)
+              embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
+              embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
+              await interaction.user.send(embed=embed)
+              await role_designation(interaction.user, interaction.user.id, interaction.guild, interaction.guild_id, interaction.channel, server_lvl, db_pool)
+
+      result_battle = Embed(   
+        title = "Battle Results",
+        description = f"The battle has concluded and {interaction.user.mention} has won!",
+        color = nextcord.Color.blue())
+      result_battle.add_field(    
+        name="Score Breakdown", 
+        value=f">**__Base Score__**: {base_score} \n >HP Bonus: +{hp_bonus} \n >Crit Bonus: +{crit_bonus} \n >Avalon Blessing Bonus: +{av_blessing_bonus} \n >Wilcard Mage Bonus: +{wildcard_mage_bonus} \n \n **__Total Score__**: {battle_score}", 
+        inline=False)
+      if server_no_exp == True:
+          result_battle.set_footer(text = f"NOTE: You have gained no XP on {interaction.guild} as you have the {no_exp_role} role, which cannot gain any XP on this server.")
+
+      await interaction.followup.send(embed=result_battle)

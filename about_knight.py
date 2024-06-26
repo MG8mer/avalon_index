@@ -2,21 +2,30 @@
 
 import nextcord
 from nextcord.embeds import Embed
+from nextcord import Interaction
 import nextcord.interactions  
 
 # The function below creates the about page for the knight class in an embed for the about command, giving a description of the class, its stats, attacks, and who its strong/weak against, with a field for each respectively.
 
-async def about(interaction):
+async def about(interaction: Interaction, bot_name, bot_avatar_url):
+  botName=bot_name
+  bot_avatar_url = bot_avatar_url
   embed_knight = Embed(   
-    title = "About the Knight:", 
+    title = "__Starter Manual (pg. 2)__", 
     color = nextcord.Color.dark_gray())
+  embed_knight.set_author(name=botName,
+    icon_url=bot_avatar_url)
+  embed_knight.add_field(    
+    name="About the Knight", 
+    value="",
+    inline=False)
   embed_knight.add_field(    
     name="Brief Description:", 
     value="The Knight is the tankiest class in the game, but deals low damage.", 
     inline=False)
   embed_knight.add_field(    
     name="HP:", 
-    value="125",
+    value="150",
     inline=False)
   embed_knight.add_field(    
     name="Attacks:", 
@@ -24,25 +33,23 @@ async def about(interaction):
     inline=False)
   embed_knight.add_field(
     name="Sword Jab (Weak)",
-    value="Weak -4 HP; Normal -8 HP; Strong -12 HP",
+    value="Weak -10 HP; Normal -15 HP; Strong -20 HP",
     inline=True)
   embed_knight.add_field(
     name="Sword Slash (Normal)",
-    value="Weak -8 HP; Normal -16 HP; Strong -20 HP",
+    value="Weak -15 HP; Normal -25 HP; Strong -35 HP",
     inline=False)
   embed_knight.add_field(
     name="Dual Sword Attack (Special)",
-    value="Weak -32 HP; Normal -38 HP; Strong -45 HP",
+    value="Weak -30 HP; Normal -45 HP; Strong -60 HP",
     inline=False)
   embed_knight.add_field(
     name="Sliced and Diced (Avalon's Blessing)",
-    value="Weak -55 HP; Normal -60 HP; Strong -65 HP",
+    value="Weak -50 HP; Normal -75 HP; Strong -100 HP",
     inline=False)
   embed_knight.add_field(
     name="Weaknesses/Strengths",
     value="The Knight is **STRONG** against the Mage but **WEAK** against the Archer (**NORMAL** against itself).",
     inline=False)
-  embed_knight.set_thumbnail(url="https://i.imgur.com/soNMbTL.png")# We also included a little pixel-art in the embed resembling the knight class.
-  # We then proceed to defer the need to respond to the interaction and then followup by sending the embed for the knight.
-  await interaction.response.defer()
-  await interaction.followup.send(embed=embed_knight)
+  embed_knight.set_thumbnail(url="https://i.imgur.com/soNMbTL.png")
+  return embed_knight
