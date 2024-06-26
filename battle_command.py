@@ -150,7 +150,7 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
         await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", member.id, interaction.user.id, "Weak Arrow", 0, "Piercing Shot", 0, "Triple Shot", 2, "Make it Rain", 3)
     elif class_value_reciever == 3:
         await cursor.execute(f"INSERT INTO cooldowns (user_id, opponent_id, weak, w_cooldown, normal, n_cooldown, special, s_cooldown, avalon_blessing, ab_cooldown) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)", member.id, interaction.user.id, "Zap", 0, "Fireball", 0, "Arcane Mania", 2, "Biden Blast", 3)
-        recieverand_mage = 7
+        recieverand_mage = randint(1, 10)
 
     starter_hp_value = await cursor.fetchval('SELECT starter_hp FROM battles WHERE starter_id = $1', interaction.user.id)
     reciever_hp_value = await cursor.fetchval('SELECT reciever_hp FROM battles WHERE reciever_id = $1', member.id)

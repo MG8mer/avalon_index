@@ -322,7 +322,6 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
             else:
               starter_av_blessing_hits += 1
 
-
     elif class_value_starter == 3: # If the class of the starter is the mage.
         move = await mage_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value, startrand_mage, recieverand_mage, battle_screen, db_pool)
         if move == False:
@@ -418,7 +417,6 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
                     dmg = 0
                   else:
                     reciever_av_blessing_hits += 1
-
     elif class_value_reciever == 2: # If the class of the reciever is the archer.
         move = await archer_battle.battle_embd(interaction, member, switch, turn, starter_hp_value, reciever_hp_value, battle_screen, db_pool)
         if move == False:

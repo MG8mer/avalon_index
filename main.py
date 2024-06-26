@@ -874,8 +874,6 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
     else:
       return
 
-# UPDATE: Stats command updated.
-
 # The stats command diplays the stats of a user that is mentioned, for now displaying the user's class only. The function checks that the start value is one for the user so stats can be actually displayed for the user. Then the value of the class column for that user is checked to display their class, which is then proceeded to deferring the need to respond to the interaction and then following up by sending the embed for the user's stats, which is for now only their class. If the user has not used the pick function ypet, the class displayed will simply be N/A.
 @client.slash_command(name = "stats", description = "Display the stats for any person on the server!")
 async def st(interaction: Interaction, member: nextcord.Member):    #.stats command, displays the stats of user's chosen class in an embed

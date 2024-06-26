@@ -47,7 +47,7 @@ async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_
     health_L = 'custom_assets/health_L_25.png'
   elif hp_percentage_starter <= 0:
     health_L = 'custom_assets/health_L_0.png'
-
+    
   if hp_percentage_reciever <= 75 and hp_percentage_reciever > 50:
     health_R = 'custom_assets/health_R_75.png'
   elif hp_percentage_reciever <= 50 and hp_percentage_reciever > 25:

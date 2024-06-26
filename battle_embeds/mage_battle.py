@@ -442,6 +442,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
 
                 self.value = True
                 self.stop()
+
   elif switch == True:
     if recieverand_mage == 7:
       class ChooseFour(nextcord.ui.View):
@@ -603,7 +604,6 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
                     await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES ($1, $2, $3, $4)", id_user, member.id, move, turn)
                   elif switch == True:
                     await cursor.execute(f"INSERT INTO moves (user_id, opponent_id, move_used, turn_num) VALUES ($1, $2, $3, $4)", member.id, id_user, move, turn)
-
                 self.value = True
                 self.stop()
 
