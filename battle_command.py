@@ -227,6 +227,8 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
     if hp_starter <= 0:
       server_no_exp = False
       no_exp_role = None
+      server_boost_exp = False
+      boosted_exp_role = None
       async with db_pool.acquire() as cursor:
         no_roles = await cursor.fetch("SELECT role_id FROM no_exp_roles WHERE guild_id = $1", interaction.guild_id)
       if no_roles != []:
@@ -239,6 +241,38 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
             if roles in formatted_roles:
               server_no_exp = True
               no_exp_role = nextcord.utils.get(interaction.guild.roles, id=roles) 
+
+      if server_no_exp is False:
+        async with db_pool.acquire() as cursor:
+          boosted_roles = await cursor.fetch("SELECT role_id FROM exp_boosted_roles WHERE guild_id = $1", interaction.guild_id)
+        if boosted_roles != []:
+            formatted_roles = []
+            user_roles = [role.id for role in member.roles if role.name != "@everyone"]
+            for id_role in boosted_roles:
+              formatted_roles.append(id_role['role_id'])
+
+            boosted_exp_roles = []
+
+            for roles in user_roles:
+              if roles in formatted_roles:
+                boosted_exp_roles.append(roles)
+
+            if boosted_exp_roles != []:
+              boost_percents = []
+              async with db_pool.acquire() as cursor:
+                for role_id in boosted_exp_roles:
+                    boost_val = await cursor.fetchval(
+                        f"SELECT boost_percent FROM exp_boosted_roles WHERE role_id = {role_id} AND guild_id = {interaction.guild_id}")
+                    boost_percents.append((role_id, boost_val))
+
+              boost_percents.sort(key=lambda x: x[1], reverse=True)
+              boosted_exp_roles = [role_id for role_id, _ in boost_percents]
+
+              async with db_pool.acquire() as cursor:
+                 boost_val = await cursor.fetchval(f"SELECT boost_percent FROM exp_boosted_roles WHERE role_id = {boosted_exp_roles[0]} AND guild_id = {interaction.guild_id}")
+
+              boosted_exp_role = nextcord.utils.get(interaction.guild.roles, id=boosted_exp_roles[0])
+              server_boost_exp = True
       if recieverand_mage == 7:
         wildcard_mage_bonus = 25
       else:
@@ -295,7 +329,12 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
         server_exp = server_result[0]
         server_lvl = server_result[1]
         server_exp_needed = server_result[2]
-        server_exp += battle_score
+        if server_boost_exp is True:
+          new_battle_score = round(battle_score * ((boost_val/100) + 1))
+          server_exp += new_battle_score
+        else:
+          server_exp += battle_score
+
         async with db_pool.acquire() as cursor:
           await cursor.execute(f"UPDATE server_levels SET exp = {server_exp} WHERE user_id = {member.id} AND guild_id = {interaction.guild_id} ")
         while server_exp >= server_exp_needed: 
@@ -316,20 +355,40 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
               await member.send(embed=embed)
               await role_designation(member, member.id, interaction.guild, interaction.guild_id, interaction.channel, server_lvl, db_pool)
 
-      result_battle = Embed(   
-        title = "Battle Results",
-        description = f"The battle has concluded and {member.mention} has won!",
-        color = nextcord.Color.blue())
-      result_battle.add_field(    
-        name="Score Breakdown", 
-        value=f">**__Base Score__**: {base_score} \n >HP Bonus: +{hp_bonus} \n >Crit Bonus: +{crit_bonus} \n >Avalon Blessing Bonus: +{av_blessing_bonus} \n >Wilcard Mage Bonus: +{wildcard_mage_bonus} \n \n **__Total Score__**: {battle_score}", 
-        inline=False)
-      if server_no_exp == True:
-        result_battle.set_footer(text = f"NOTE: You have gained no XP on {interaction.guild} as you have the {no_exp_role} role, which cannot gain any XP on this server.")
+      if server_boost_exp is True:
+        result_battle = Embed(   
+          title = "Battle Results",
+          description = f"The battle has concluded and {member.mention} has won!",
+          color = nextcord.Color.blue())
+        result_battle.add_field(
+          name="Server XP Boost",
+          value=f"The **{boosted_exp_role}** will boost your battle XP for your server XP (not global) by **{boost_val}%!**",
+          inline=False)
+        result_battle.add_field(    
+          name="Score Breakdown", 
+          value=f">**__Base XP__**: +{base_score} \n >HP Bonus: +{hp_bonus} \n >Crit Bonus: +{crit_bonus} \n >Avalon Blessing Bonus: +{av_blessing_bonus} \n >Wilcard Mage Bonus: +{wildcard_mage_bonus} \n \n  **__Total XP (Global)__**: {battle_score} \n **__Total XP (Server)__**: {new_battle_score}", 
+          inline=False)
+      else:
+        result_battle = Embed(   
+          title = "Battle Results",
+          description = f"The battle has concluded and {member.mention} has won!",
+          color = nextcord.Color.blue())
+        result_battle.add_field(
+          name="Server XP Boost",
+          value='*You have no roles to boost your battle XP gained for your server level, or you have a no XP role on this server nullifying your XP boost from your boosted XP role on this server.*',
+          inline=False)
+        result_battle.add_field(    
+          name="Score Breakdown", 
+          value=f">**__Base XP__**: +{base_score} \n >HP Bonus: +{hp_bonus} \n >Crit Bonus: +{crit_bonus} \n >Avalon Blessing Bonus: +{av_blessing_bonus} \n >Wilcard Mage Bonus: +{wildcard_mage_bonus} \n \n **__Total XP__**: {battle_score}", 
+          inline=False)
+        if server_no_exp == True:
+          result_battle.set_footer(text = f"NOTE: You have gained no XP on {interaction.guild} as you have the {no_exp_role} role, which cannot gain any XP on this server.")
       await interaction.followup.send(embed=result_battle)
     elif hp_reciever <= 0:
       server_no_exp = False
       no_exp_role = None
+      server_boost_exp = False 
+      boosted_exp_role = None 
       async with db_pool.acquire() as cursor:
         no_roles = await cursor.fetch("SELECT role_id FROM no_exp_roles WHERE guild_id = $1", interaction.guild_id)
       if no_roles != []:
@@ -338,11 +397,42 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
           for id_role in no_roles:
             formatted_roles.append(id_role['role_id'])
 
-
           for roles in user_roles:
             if roles in formatted_roles:
               server_no_exp = True
-              no_exp_role = nextcord.utils.get(interaction.guild.roles, id=roles) 
+              no_exp_role = nextcord.utils.get(interaction.guild.roles, id=roles)
+
+      if server_no_exp is False:
+        async with db_pool.acquire() as cursor:
+          boosted_roles = await cursor.fetch("SELECT role_id FROM exp_boosted_roles WHERE guild_id = $1", interaction.guild_id)
+        if boosted_roles != []:
+            formatted_roles = []
+            user_roles = [role.id for role in interaction.user.roles if role.name != "@everyone"]
+            for id_role in boosted_roles:
+              formatted_roles.append(id_role['role_id'])
+
+            boosted_exp_roles = []
+
+            for roles in user_roles:
+              if roles in formatted_roles:
+                boosted_exp_roles.append(roles)
+
+            if boosted_exp_roles != []:
+              boost_percents = []
+              async with db_pool.acquire() as cursor:
+                for role_id in boosted_exp_roles:
+                    boost_val = await cursor.fetchval(
+                        f"SELECT boost_percent FROM exp_boosted_roles WHERE role_id = {role_id} AND guild_id = {interaction.guild_id}")
+                    boost_percents.append((role_id, boost_val))
+              boost_percents.sort(key=lambda x: x[1], reverse=True)
+
+              boosted_exp_roles = [role_id for role_id, _ in boost_percents]
+
+              async with db_pool.acquire() as cursor:
+                 boost_val = await cursor.fetchval(f"SELECT boost_percent FROM exp_boosted_roles WHERE role_id = {boosted_exp_roles[0]} AND guild_id = {interaction.guild_id}")
+
+              boosted_exp_role = nextcord.utils.get(interaction.guild.roles, id=boosted_exp_roles[0])
+              server_boost_exp = True
       if startrand_mage == 7:
         wildcard_mage_bonus = 25
       else:
@@ -360,8 +450,6 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
           async with db_pool.acquire() as cursor:
             exp_needed = round(100*(pow(1, 1.1)))
             await cursor.execute(f"INSERT INTO global_levels (user_id, exp, level, exp_needed) VALUES ({interaction.user.id}, 0, 0, {exp_needed})")
-
-
       if server_result is None: 
         if server_no_exp == False:
           async with db_pool.acquire() as cursor:
@@ -400,7 +488,13 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
         server_exp = server_result[0]
         server_lvl = server_result[1]
         server_exp_needed = server_result[2]
-        server_exp += battle_score
+
+        if server_boost_exp is True:
+          new_battle_score = round(battle_score * ((boost_val/100) + 1))
+          server_exp += new_battle_score
+        else:
+          server_exp += battle_score
+
         async with db_pool.acquire() as cursor:
           await cursor.execute(f"UPDATE server_levels SET exp = {server_exp} WHERE user_id = {interaction.user.id} AND guild_id = {interaction.guild_id}")
         while server_exp >= server_exp_needed: 
@@ -421,15 +515,32 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
               await interaction.user.send(embed=embed)
               await role_designation(interaction.user, interaction.user.id, interaction.guild, interaction.guild_id, interaction.channel, server_lvl, db_pool)
 
-      result_battle = Embed(   
-        title = "Battle Results",
-        description = f"The battle has concluded and {interaction.user.mention} has won!",
-        color = nextcord.Color.blue())
-      result_battle.add_field(    
-        name="Score Breakdown", 
-        value=f">**__Base Score__**: {base_score} \n >HP Bonus: +{hp_bonus} \n >Crit Bonus: +{crit_bonus} \n >Avalon Blessing Bonus: +{av_blessing_bonus} \n >Wilcard Mage Bonus: +{wildcard_mage_bonus} \n \n **__Total Score__**: {battle_score}", 
-        inline=False)
-      if server_no_exp == True:
+      if server_boost_exp is True:
+        result_battle = Embed(   
+          title = "Battle Results",
+          description = f"The battle has concluded and {interaction.user.mention} has won!",
+          color = nextcord.Color.blue())
+        result_battle.add_field(
+          name="Server XP Boost",
+          value=f"The **{boosted_exp_role}** will boost your battle XP for your server XP (not global) by **{boost_val}%!**",
+          inline=False)
+        result_battle.add_field(    
+          name="Score Breakdown", 
+          value=f">**__Base XP__**: +{base_score} \n >HP Bonus: +{hp_bonus} \n >Crit Bonus: +{crit_bonus} \n >Avalon Blessing Bonus: +{av_blessing_bonus} \n >Wilcard Mage Bonus: +{wildcard_mage_bonus} \n \n  **__Total XP (Global)__**: {battle_score} \n **__Total XP (Server)__**: {new_battle_score}", 
+          inline=False)
+      else:
+        result_battle = Embed(   
+          title = "Battle Results",
+          description = f"The battle has concluded and {interaction.user.mention} has won!",
+          color = nextcord.Color.blue())
+        result_battle.add_field(
+          name="Server XP Boost",
+          value='*You have no roles to boost your battle XP gained for your server level, or you have a no XP role on this server nullifying your XP boost from your boosted XP role on this server.*',
+          inline=False)
+        result_battle.add_field(    
+          name="Score Breakdown", 
+          value=f">**__Base XP__**: +{base_score} \n >HP Bonus: +{hp_bonus} \n >Crit Bonus: +{crit_bonus} \n >Avalon Blessing Bonus: +{av_blessing_bonus} \n >Wilcard Mage Bonus: +{wildcard_mage_bonus} \n \n **__Total XP__**: {battle_score}", 
+          inline=False)
+        if server_no_exp == True:
           result_battle.set_footer(text = f"NOTE: You have gained no XP on {interaction.guild} as you have the {no_exp_role} role, which cannot gain any XP on this server.")
-
       await interaction.followup.send(embed=result_battle)
