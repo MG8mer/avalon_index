@@ -372,7 +372,6 @@ async def assignnoexp(interaction: Interaction, role: nextcord.Role):
     await interaction.response.send_message("You need the Manage Roles permission to use this command, which you don't have.", ephemeral=True)
     return
   await interaction.response.defer()
-
   async with db_pool.acquire() as cursor:
     role_result = await cursor.fetchval("SELECT role_id FROM no_exp_roles WHERE guild_id = $1 AND role_id = $2", interaction.guild_id, role.id)
 

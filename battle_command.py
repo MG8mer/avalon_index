@@ -273,7 +273,6 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
 
               boosted_exp_role = nextcord.utils.get(interaction.guild.roles, id=boosted_exp_roles[0])
               server_boost_exp = True
-
       if recieverand_mage == 7:
         wildcard_mage_bonus = 25
       else:
@@ -434,7 +433,6 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
 
               boosted_exp_role = nextcord.utils.get(interaction.guild.roles, id=boosted_exp_roles[0])
               server_boost_exp = True
-
       if startrand_mage == 7:
         wildcard_mage_bonus = 25
       else:
@@ -452,7 +450,6 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
           async with db_pool.acquire() as cursor:
             exp_needed = round(100*(pow(1, 1.1)))
             await cursor.execute(f"INSERT INTO global_levels (user_id, exp, level, exp_needed) VALUES ({interaction.user.id}, 0, 0, {exp_needed})")
-
       if server_result is None: 
         if server_no_exp == False:
           async with db_pool.acquire() as cursor:
