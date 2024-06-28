@@ -38,7 +38,7 @@ async def help(interaction, bot_name, bot_avatar_url):
     inline=True)
   embed.add_field(   
     name="> Syntax", 
-    value="```\n/assign_exp_boosted_role <role: a role on this server> <boost_percent: the number as a percentage to boost the server XP gained for that role *cannot be greater than 100 or less than 1!*>```\n", 
+    value="```\n/assign_exp_boosted_role <role: a role on this server> <boost_percent: the number as a percentage to boost the server XP gained for that role *cannot be greater than 200 or less than 1!*>```\n", 
     inline=True)
   embed.add_field(    
     name="Permissions", 

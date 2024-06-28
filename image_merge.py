@@ -1,6 +1,3 @@
-#this python file is responsible for merging images together; this is mainly for the battle sequence and so the users have some sort of visual representation of the battle field and their health making the battles more fun 
-#still haven't implemented into the bot yet
-
 from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw

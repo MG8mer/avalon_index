@@ -73,7 +73,7 @@ class Leveling(commands.Cog):#level system function
               server_exp_needed = server_result[2]
               msg_words = message.content.split()
               if len(msg_words) > 10:
-                exp_gained = exp_gained*2
+                exp_gained = round(exp_gained * 1.2)
 
               async with self.db_pool.acquire() as cursor:
                 boosted_roles = await cursor.fetch("SELECT role_id FROM exp_boosted_roles WHERE guild_id = $1", message.guild.id)
@@ -83,13 +83,26 @@ class Leveling(commands.Cog):#level system function
                   for id_role in boosted_roles:
                     formatted_roles.append(id_role['role_id'])
 
+                  boosted_exp_roles = []
+
                   for roles in user_roles:
                     if roles in formatted_roles:
-                       async with self.db_pool.acquire() as cursor:
-                         boost_val = await cursor.fetchval(f"SELECT boost_percent FROM exp_boosted_roles WHERE role_id = {roles} AND guild_id = {message.guild.id}")
-                         boosted_role = nextcord.utils.get(message.guild.roles, id=roles)
-                         exp_gained = exp_gained * round(boost_val/100)
+                      boosted_exp_roles.append(roles)
 
+                  if boosted_exp_roles != []:
+                    boost_percents = []
+                    async with self.db_pool.acquire() as cursor:
+                        for role_id in boosted_exp_roles:
+                            boost_val = await cursor.fetchval(
+                                f"SELECT boost_percent FROM exp_boosted_roles WHERE role_id = {role_id} AND guild_id = {message.guild.id}")
+                            boost_percents.append((role_id, boost_val))
+
+                    boosted_exp_roles = [role_id for role_id, _ in boost_percents]
+                    async with self.db_pool.acquire() as cursor:
+                       boost_val = await cursor.fetchval(f"SELECT boost_percent FROM exp_boosted_roles WHERE role_id = {boosted_exp_roles[0]} AND guild_id = {message.guild.id}")
+
+                    boosted_role = nextcord.utils.get(message.guild.roles, id=boosted_exp_roles[0])
+                    exp_gained = round(exp_gained * ((boost_val/100)+1))
 
               server_exp += exp_gained 
               async with self.db_pool.acquire() as cursor:

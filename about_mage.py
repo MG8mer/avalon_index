@@ -13,13 +13,13 @@ async def about(interaction: Interaction, bot_name, bot_avatar_url):
     botName=bot_name
     bot_avatar_url = bot_avatar_url
     embed_mage = Embed(   
-        title = "__Starter Manual (pg. 4)__", 
+        title = "__Starter Manual (pg. 5)__", 
         color = nextcord.Color.purple())
     embed_mage.set_author(name=botName,
         icon_url=bot_avatar_url)
     embed_mage.add_field(    
-        name="About the Mage", 
-        value="",
+        name="__About the Mage__", 
+        value="", 
         inline=False)
     embed_mage.add_field(    
         name="About:", 

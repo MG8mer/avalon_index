@@ -41,7 +41,8 @@ import help_pageTWO
 import help_pageTHREE
 import help_pageFOUR
 import help_pageFIVE
-import about_general
+import about_battling
+import about_levelling
 import start_page
 import battle_command
 from randGIF import randgif
@@ -130,7 +131,7 @@ async def keep_db_alive():
 
 @client.event
 async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
-    logging.info("Bot is up and ready.") #prints when bot is online from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
+    logging.info("Bot is up and ready.") #prints when bot is online from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python 
     global db_pool
     await create_db_pool()
     client.db_pool = db_pool
@@ -282,16 +283,21 @@ async def rolelvl(interaction: Interaction, level: int, role: nextcord.Role):
     await interaction.response.send_message("You need the Manage Roles permission to use this command, which you don't have.", ephemeral=True)
     return
   await interaction.response.defer()
+
+  if level < 1:
+    await interaction.followup.send("`You cannot assign a role to a level that is less than 1!`")
+    return
+
   async with db_pool.acquire() as cursor:
     level_result = await cursor.fetchval("SELECT role_id FROM level_roles WHERE guild_id = $1 AND level = $2", interaction.guild_id, level)
     role_result = await cursor.fetchval("SELECT level FROM level_roles WHERE guild_id = $1 AND role_id = $2", interaction.guild_id, role.id)
 
     if level_result is not None or role_result is not None:
       if level_result is not None:
-        await interaction.followup.send(f"`Cannot assign level {level} to a role when it has already been assigned to one! Try again.`")
+        await interaction.followup.send(f"`Cannot assign level {level} to a role when it has already been assigned to one!`")
 
       if role_result is not None:
-         await interaction.followup.send(f"`Cannot assign role {role} to a level when it has already been assigned to one! Try again.`")
+         await interaction.followup.send(f"`Cannot assign role {role} to a level when it has already been assigned to one!`")
       return
 
   async with db_pool.acquire() as cursor:
@@ -339,8 +345,9 @@ async def seelvlroles(interaction: Interaction):
   role_levels_formatted = []
 
   for record in role_levels:
-    role_levels_formatted.append(record['level'])
-    role_levels_formatted.append(record['role_id'])
+    role_levels_formatted.append([record['role_id'], record['level']])
+
+  role_levels_formatted.sort(key=lambda x: x[1])
 
   i = 0
   embed_description = ""
@@ -348,9 +355,9 @@ async def seelvlroles(interaction: Interaction):
     embed_description = "No level roles to show."
   else:
     while i < len(role_levels_formatted):
-      role = nextcord.utils.get(interaction.guild.roles, id=role_levels_formatted[i+1])
-      embed_description = embed_description + "Level " + str(role_levels_formatted[i]) + ": " + str(role.mention) + "\n"
-      i += 2
+      role = nextcord.utils.get(interaction.guild.roles, id=role_levels_formatted[i][0])
+      embed_description = embed_description + "Level " + str(role_levels_formatted[i][1]) + ": " + str(role.mention) + "\n"
+      i += 1
 
   embed = nextcord.Embed(
     title=f"Level Roles for {interaction.guild}",
@@ -365,11 +372,19 @@ async def assignnoexp(interaction: Interaction, role: nextcord.Role):
     await interaction.response.send_message("You need the Manage Roles permission to use this command, which you don't have.", ephemeral=True)
     return
   await interaction.response.defer()
+
   async with db_pool.acquire() as cursor:
     role_result = await cursor.fetchval("SELECT role_id FROM no_exp_roles WHERE guild_id = $1 AND role_id = $2", interaction.guild_id, role.id)
 
     if role_result is not None:
-      await interaction.followup.send(f"`That role has already been assigned to not earn any XP, try again.`")
+      await interaction.followup.send(f"`That role has already been assigned to not earn any XP.`")
+      return
+
+  async with db_pool.acquire() as cursor:
+    boosted_xp_result = await cursor.fetchval(f"SELECT boost_percent FROM exp_boosted_roles WHERE role_id = {role.id}")
+
+    if boosted_xp_result is not None:
+      await interaction.followup.send(f"`Cannot assign **{role}** to be a no XP role when it is already a boosted XP role!`")
       return
 
   async with db_pool.acquire() as cursor:
@@ -445,7 +460,7 @@ async def assignnochannel(interaction: Interaction, channel: nextcord.TextChanne
     channel_result = await cursor.fetchval("SELECT channel_id FROM no_exp_channels WHERE guild_id = $1 AND channel_id = $2", interaction.guild_id, channel.id)
 
     if channel_result is not None:
-      await interaction.followup.send(f"`That channel has already been assigned to not earn any XP in it, try again.`")
+      await interaction.followup.send(f"`That channel has already been assigned to not earn any XP in it.`")
       return
 
   async with db_pool.acquire() as cursor:
@@ -519,18 +534,26 @@ async def assignextraexp(interaction: Interaction, role: nextcord.Role, boost_pe
     await interaction.response.send_message("You need the Manage Roles permission to use this command, which you don't have.", ephemeral=True)
     return
   await interaction.response.defer()
+
   async with db_pool.acquire() as cursor:
     role_result = await cursor.fetchval("SELECT role_id FROM exp_boosted_roles WHERE guild_id = $1 AND role_id = $2", interaction.guild_id, role.id)
 
     if role_result is not None:
-      await interaction.followup.send(f"`That role has already been assigned to earn extra XP, try again.`")
+      await interaction.followup.send(f"`That role has already been assigned to earn extra XP.`")
       return
 
-  if boost_percent > 100:
-    await interaction.followup.send("`Your boost percent cannot be bigger than 100%, try again.`")
+  async with db_pool.acquire() as cursor:
+    no_xp_result = await cursor.fetchval(f"SELECT guild_id FROM no_exp_roles WHERE role_id = {role.id}")
+
+    if no_xp_result is not None:
+      await interaction.followup.send(f"`Cannot assign **{role}** to be a boosted XP role when it is already a no XP role!`")
+      return
+
+  if boost_percent > 200:
+    await interaction.followup.send("`Your boost percent cannot be bigger than 200%.`")
     return
   elif boost_percent < 1:
-    await interaction.followup.send("`Your boost percent cannot be smaller than 1%, try again.`")
+    await interaction.followup.send("`Your boost percent cannot be smaller than 1%.`")
     return
 
   async with db_pool.acquire() as cursor:
@@ -574,23 +597,24 @@ async def clearextraexp(interaction: Interaction):
 async def seeextraxp(interaction: Interaction):
   await interaction.response.defer()
   async with db_pool.acquire() as cursor:
-    roles_boosted_exp = await cursor.fetch("SELECT role_id FROM exp_boosted_roles WHERE guild_id = $1", interaction.guild_id)
-
+    roles_boosted_exp = await cursor.fetch("SELECT role_id, boost_percent FROM exp_boosted_roles WHERE guild_id = $1", interaction.guild_id)
 
   role_boosted_exp_formatted = []
 
   for record in roles_boosted_exp:
-    role_boosted_exp_formatted.append(record['role_id'])
+     role_boosted_exp_formatted.append([record['role_id'], record['boost_percent']])
 
+  role_boosted_exp_formatted.sort(key=lambda x: x[1], reverse=True)
+
+  i = 0
   embed_description = ""
   if role_boosted_exp_formatted == []:
     embed_description = "No boosted XP roles to show."
   else:
-    for id in role_boosted_exp_formatted:
-      async with db_pool.acquire() as cursor:
-        boost_val = await cursor.fetchval(f"SELECT boost_percent FROM exp_boosted_roles WHERE role_id = {id} AND guild_id = {interaction.guild_id}")
-      role = nextcord.utils.get(interaction.guild.roles, id=id)
-      embed_description = embed_description + str(role.mention) + ": " + f"{boost_val}%" "\n"
+    while i < len(role_boosted_exp_formatted):
+      role = nextcord.utils.get(interaction.guild.roles, id=role_boosted_exp_formatted[i][0])
+      embed_description = embed_description + str(role.mention) + ": " + f"{role_boosted_exp_formatted[i][1]}%" "\n"
+      i += 1
 
   embed = nextcord.Embed(
     title=f"Boosted XP Roles for {interaction.guild}",
@@ -620,6 +644,7 @@ async def count(interaction: Interaction):
 
 @client.slash_command(name = "gif", description = "Generate a GIF! Idek why we have this feature its just there.") 
 async def gif(interaction: Interaction, query: str = SlashOption(description="Search for the GIF that you want to generate!")): #prefix command to grab gif based on arg
+  await interaction.response.defer()
   media_filter = "gif, tinygif"
   random = True
   SECRET_KEY = os.environ["TENOR_API_KEY"]
@@ -631,7 +656,7 @@ async def gif(interaction: Interaction, query: str = SlashOption(description="Se
       f"https://tenor.googleapis.com/v2/search?q={query}&key={SECRET_KEY}&client_key={ckey}&limit={lim}&media_filter={media_filter}&random={random}") #requests api for an obj containing our results
     r.raise_for_status()
   except requests.exceptions.RequestException as e:
-    await ctx.send("Error fetching GIF. Please try again later.")
+    await interaction.followup.send("Error fetching GIF. Please try again later.")
     return
 
   if r.status_code == 200:
@@ -690,15 +715,16 @@ async def help(interaction: Interaction, page: int = SlashOption(name="page", ch
     await interaction.followup.send(embed=help_pages[page-1], view=view)
 
 @client.slash_command(name = "avi_manual", description = "Learn a little more about Avalon Index and its specific classes!")
-async def about(interaction: Interaction, page: int = SlashOption(name = "page", choices = {"General": 1, "Knight": 2, "Archer": 3, "Mage": 4})):
+async def about(interaction: Interaction, page: int = SlashOption(name = "page", choices = {"Battling": 1, "Levelling": 2, "Knight": 3, "Archer": 4, "Mage": 5})):
         await interaction.response.defer()
         bot_name = client.user.name
         bot_avatar_url = client.user.avatar.url
-        ab_general = await (about_general.about(interaction, bot_name, bot_avatar_url))
+        ab_levelling = await (about_levelling.about(interaction, bot_name, bot_avatar_url))
+        ab_battling = await (about_battling.about(interaction, bot_name, bot_avatar_url))
         ab_knight = await (about_knight.about(interaction, bot_name, bot_avatar_url))
         ab_archer = await (about_archer.about(interaction, bot_name, bot_avatar_url))
         ab_mage = await (about_mage.about(interaction, bot_name, bot_avatar_url))
-        ab_pages = [ab_general, ab_knight, ab_archer, ab_mage]
+        ab_pages = [ab_battling, ab_levelling, ab_knight, ab_archer, ab_mage]
         view = PaginationView(ab_pages, page-1, interaction.user.id)
         await interaction.followup.send(embed=ab_pages[page-1], view=view)
 
@@ -837,7 +863,7 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
   elif check_battle_one == 1 or check_battle_two == 1: # Is the user in a battle?
     await interaction.followup.send("Cannot initiate another battle during a battle! Wait until the battle ends or forfeit the battle!")
   elif check_battle_three == 1 or check_battle_four == 1 or requested_battle == 0: # Is the reciever in a battle or has been requested for one already?
-    await interaction.followup.send("Cannot battle someone who is already in a battle or has requested for a battle! Try again later.")
+    await interaction.followup.send("Cannot battle someone who is already in a battle or has requested for a battle!")
   elif member.id == interaction.user.id: # Is the starter attempting to battle himself?
     await interaction.followup.send("You cannot battle yourself!")
   elif class_value_final != 1 and class_value_final != 2 and class_value_final != 3: # Has the reciever picked a class?
