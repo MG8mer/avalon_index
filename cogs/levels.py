@@ -66,7 +66,7 @@ class Leveling(commands.Cog):#level system function
 
         if current_time - last_message_time[message.author.id] >= message_between_time:
           last_message_time[message.author.id] = current_time
-          exp_gained = random.randint(5, 10)
+          exp_gained = random.randint(25, 50)
           if server_result is not None:
               server_exp = server_result[0]
               server_lvl = server_result[1]
@@ -119,7 +119,10 @@ class Leveling(commands.Cog):#level system function
                     colour=0x00b0f4)
                   embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
                   embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
-                  await message.author.send(embed=embed)
+                  try:
+                    await message.author.send(embed=embed)
+                  except nextcord.errors.Forbidden:
+                    await message.channel.send(f"The Bot was not able to send {message.author} the level up embed in DMs, so the embed was sent here instead.", embed=embed)
                   await role_designation(message.author, message.author.id, message.guild, message.guild.id, message.channel, server_lvl, self.db_pool)
       else:
         return

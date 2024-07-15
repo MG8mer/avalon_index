@@ -76,7 +76,8 @@ async def create_db_pool():
         port = DATABASE_PORT,
         user = DATABASE_USER,
         password = DATABASE_PASSWORD,
-        database = DATABASE_NAME
+        database = DATABASE_NAME,
+        statement_cache_size=0 
       )
     except Exception as e:
       logging.error(f"Error creating database connection pool: {e}")
@@ -132,13 +133,12 @@ async def keep_db_alive():
 @client.event
 async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
     logging.info("Bot is up and ready.") #prints when bot is online from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python 
-    global db_pool
     await create_db_pool()
     client.db_pool = db_pool
     client.load_extension("cogs.levels")
     async with db_pool.acquire() as cursor:
       await cursor.execute('CREATE TABLE IF NOT EXISTS users(user_id BIGINT, guild_id BIGINT, class INTEGER, start INTEGER)')
-      await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id BIGINT, starter_hp INTEGER, reciever_id BIGINT, reciever_hp INTEGER, evaluation_starter TEXT, evaluation_reciever TEXT)')
+      await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id BIGINT, starter_hp INTEGER, reciever_id BIGINT, reciever_hp INTEGER)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS moves(user_id BIGINT, opponent_id BIGINT, move_used TEXT, turn_num INTEGER)')
       await cursor.execute('CREATE TABLE IF NOT EXISTS cooldowns(user_id BIGINT, opponent_id BIGINT, weak TEXT, w_cooldown INTEGER, normal TEXT, n_cooldown INTEGER, special TEXT, s_cooldown INTEGER, avalon_blessing TEXT, ab_cooldown INTEGER)')
       await cursor.execute("""CREATE TABLE IF NOT EXISTS global_levels(user_id BIGINT, exp INTEGER, level INTEGER, exp_needed INTEGER)""")
@@ -855,8 +855,10 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
 
   if start_value != 1: # Has the user used start?
     await interaction.followup.send("Please use /start and try again.")
+    return
   elif class_value_initial != 1 and class_value_initial != 2 and class_value_initial != 3: # Has the starter picked a class?
     await interaction.followup.send("Please use /pick and try again.")
+    return
   elif battle_requested == 0 or requesting_battle == 0: # Has the starter requested or been requested for a battle?
     await interaction.followup.send("You have already requested or been requested for a battle! Please await for your request to timeout or be accepted/rejected or accept/reject your request to try again.")
   elif check_battle_one == 1 or check_battle_two == 1: # Is the user in a battle?
@@ -886,7 +888,7 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
 
         return 
 
-      if msg.content.lower() in  ["yes", "ye", "yeah", "sure", "ok", "y", "k", "okay"]: # However, if the reciever strictly says "yes", do what is below.
+      if msg.content.lower() in  ["yes", "ye", "yeah", "sure", "ok", "y", "k", "okay", "yeh", "ya", "kk",  "why not", "yess", "yah"]: # However, if the reciever strictly says "yes", do what is below.
           start_rand = random.choice([1,2]) #currently, we are deciding the person who gets first move by random
           await interaction.followup.send("Starting battle...") # Inform the users that the battle is starting.
           await battle_command.battle(interaction, member, start_rand, db_pool) # Call the battle function in the battle_command file and proceed.
@@ -970,6 +972,11 @@ async def st(interaction: Interaction, member: nextcord.Member):    #.stats comm
 async def on_disconnect():
     try:
       logging.info("Commencing cleanup procedure...")
+      async with db_pool.acquire() as cursor:
+        logging.info("Ending ALL battles...")
+        await cursor.execute("DELETE FROM battles")
+        await cursor.execute("DELETE FROM cooldowns")
+        await cursor.execute("DELETE FROM moves")
       await close_pool()
       client.unload_extension("cogs.levels")
     except Exception as e:

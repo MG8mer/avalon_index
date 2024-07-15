@@ -33,23 +33,19 @@ async def about(interaction: Interaction, bot_name, bot_avatar_url):
       inline=False)
     embed_archer.add_field(
       name="Weak Arrow (Weak)",
-      value="Weak -15 HP; Normal -20 HP; Strong -25 HP",
+      value="-20 HP",
       inline=True)
     embed_archer.add_field(
       name="Piercing Shot (Normal)",
-      value="Weak -25 HP; Normal -35 HP; Strong -45 HP",
+      value="-30 HP",
       inline=False)
     embed_archer.add_field(
       name="Triple Shot (Special)",
-      value="Weak -50 HP; Normal -70 HP; Strong -90 HP",
+      value="-45 HP",
       inline=False)
     embed_archer.add_field(
       name="Make it Rain! (Avalon's Blessing)",
-      value="Weak -85 HP; Normal -125 HP; Strong -150 HP",
-      inline=False)
-    embed_archer.add_field(
-      name="Weaknesses/Strengths",
-      value="Archer is **STRONG** against the Knight but **WEAK** against the Mage (**NORMAL** against itself).",
+      value="-75 HP",
       inline=False)
     embed_archer.set_thumbnail(
       url="https://i.imgur.com/NcJsHO3.png"

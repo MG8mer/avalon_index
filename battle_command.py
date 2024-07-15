@@ -24,95 +24,30 @@ health = {
   3: 125
 }
 
-# Battle evaluation:
-  # Ex: 12; if a knight fights an archer it's weak for the knight.
-  # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
-evaluation = {
-  "11": "Normal",
-  "22": "Normal",
-  "33": "Normal",
-  "12": "Weak",
-  "13": "Strong",
-  "21": "Strong",
-  "23": "Weak",
-  "31": "Weak",
-  "32": "Strong",
-}
-
 # Dict order:
   # Class
-    # Attacks:
-      # Damage dependent on evaluation.
+    # Attacks: Damage:
 
 attacks = {
-  1: {
-    "Sword Jab": {
-      "Weak": -10,
-      "Normal": -15,
-      "Strong": -20
+    1: {
+      "Sword Jab": -10,
+      "Sword Slash": -20,
+      "Dual Sword Attack": -35,
+      "Sliced and Diced": -65
     },
-    "Sword Slash": {
-      "Weak": -15,
-      "Normal": -25,
-      "Strong": -35
+    2: {
+      "Weak Arrow": -20,
+      "Piercing Shot": -30,
+      "Triple Shot": -45,
+      "Make it Rain": -75
     },
-    "Dual Sword Attack": {
-      "Weak": -30,
-      "Normal": -45,
-      "Strong": -60
-    },
-    "Sliced and Diced": {
-      "Weak": -50,
-      "Normal": -75,
-      "Strong": -100
+    3: {
+      "Zap": -15,
+      "Fireball": -25,
+      "Arcane Mania": -40,
+      "Biden Blast": -70,
     }
-  },
-  2: {
-    "Weak Arrow": {
-      "Weak": -15,
-      "Normal": -20,
-      "Strong": -25
-    },
-    "Piercing Shot": {
-      "Weak": -25,
-      "Normal": -35,
-      "Strong": -45
-    },
-    "Triple Shot": {
-      "Weak": -50,
-      "Normal": -70,
-      "Strong": -90,
-    },
-    "Make it Rain": {
-      "Weak": -85,
-      "Normal": -125,
-      "Strong": -150,
-    }
-  },
-  3: {
-  "Zap": {
-    "Weak": -12,
-    "Normal": -18,
-    "Strong": -22
-  },
-  "Fireball": {
-    "Weak": -22,
-    "Normal": -32,
-    "Strong": -42
-  },
-  "Arcane Mania": {
-    "Weak": -45,
-    "Normal": -65,
-    "Strong": -80,
-  },
-  "Biden Blast": {
-    "Weak": -75,
-    "Normal": -100,
-    "Strong": -125,
   }
-}
-
-}
 
 # Define important variables to be used globally.
 class_evaluation_reciever = None # Eval of reciever
@@ -130,9 +65,7 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
 
     class_value_starter = await cursor.fetchval('SELECT class FROM users WHERE user_id = $1', interaction.user.id)
     class_value_reciever = await cursor.fetchval('SELECT class FROM users WHERE user_id = $1', member.id)
-    class_evaluation_starter = str(class_value_starter) + str(class_value_reciever) # Concatenate strings of class values to see their evaluation according to the assigned dictionary.
-    class_evaluation_reciever = str(class_value_reciever) + str(class_value_starter) # Concatenate strings of class values to see their evaluation according to the assigned dictionary.
-    await cursor.execute('UPDATE battles SET battle = $1, starter_hp = $2, reciever_hp = $3, evaluation_starter = $4, evaluation_reciever = $5 WHERE starter_id = $6 AND reciever_id = $7', 1, health[class_value_starter], health[class_value_reciever], evaluation[class_evaluation_starter], evaluation[class_evaluation_reciever], interaction.user.id, member.id) # Update the battle row of both users, insertting values such as their health, evaluation determined by insertting the concatenated string above into the dict, and their ids.
+    await cursor.execute('UPDATE battles SET battle = $1, starter_hp = $2, reciever_hp = $3 WHERE starter_id = $4 AND reciever_id = $5', 1, health[class_value_starter], health[class_value_reciever], interaction.user.id, member.id) # Update the battle row of both users, insertting values such as their health, evaluation determined by insertting the concatenated string above into the dict, and their ids.
 
     startrand_mage = None
     recieverand_mage = None
@@ -172,7 +105,7 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
       try:
         switch_value, dmg, move, crit_hit, starter_crit_num, reciever_crit_num, starter_av_blessing_hits, reciever_av_blessing_hits = await pick_move.move(
           interaction, member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever,
-          starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn,
+          starter_hp_value, reciever_hp_value, switch, turn,
           battle_screen, db_pool, starter_crit_num, reciever_crit_num, starter_av_blessing_hits, reciever_av_blessing_hits)
       except TypeError:
         return
@@ -194,7 +127,7 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
 
     else:  # if turn is odd, define switch, insertting switch_value into the move function in the pick_move file to return switch later and await whosever turn it is to pick a move.
       try:
-        switch, dmg, move, crit_hit, starter_crit_num, reciever_crit_num, starter_av_blessing_hits, reciever_av_blessing_hits = await pick_move.move(interaction, member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch_value, turn, battle_screen, db_pool, starter_crit_num, reciever_crit_num, starter_av_blessing_hits, reciever_av_blessing_hits)
+        switch, dmg, move, crit_hit, starter_crit_num, reciever_crit_num, starter_av_blessing_hits, reciever_av_blessing_hits = await pick_move.move(interaction, member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, switch_value, turn, battle_screen, db_pool, starter_crit_num, reciever_crit_num, starter_av_blessing_hits, reciever_av_blessing_hits)
       except TypeError:
         return
       else:
@@ -323,7 +256,10 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
               colour=0x00b0f4)
             embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
             embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
-            await member.send(embed=embed)
+            try:
+              await member.send(embed=embed)
+            except nextcord.errors.Forbidden:
+              await interaction.followup.send(f"The Bot was not able to send **__{member}__** the level up embed in DMs, so the embed was sent here instead.", embed=embed)
 
       if server_no_exp == False:
         server_exp = server_result[0]
@@ -352,7 +288,10 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
                 colour=0x00b0f4)
               embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
               embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
-              await member.send(embed=embed)
+              try:
+                await member.send(embed=embed)
+              except nextcord.errors.Forbidden:
+                await interaction.followup.send(f"The Bot was not able to send **__{member}__** the level up embed in DMs, so the embed was sent here instead.", embed=embed)
               await role_designation(member, member.id, interaction.guild, interaction.guild_id, interaction.channel, server_lvl, db_pool)
 
       if server_boost_exp is True:
@@ -482,7 +421,10 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
               colour=0x00b0f4)
             embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
             embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
-            await interaction.user.send(embed=embed)
+            try:
+              await interaction.user.send(embed=embed)
+            except nextcord.errors.Forbidden:
+              await interaction.followup.send(f"The Bot was not able to send **__{interaction.user}__** the level up embed in DMs, so the embed was sent here instead.", embed=embed)
 
       if server_no_exp == False:
         server_exp = server_result[0]
@@ -512,7 +454,10 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
                 colour=0x00b0f4)
               embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
               embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
-              await interaction.user.send(embed=embed)
+              try:
+                await interaction.user.send(embed=embed)
+              except nextcord.errors.Forbidden:
+                await interaction.followup.send(f"The Bot was not able to send {interaction.user} the level up embed in DMs, so the embed was sent here instead.", embed=embed)
               await role_designation(interaction.user, interaction.user.id, interaction.guild, interaction.guild_id, interaction.channel, server_lvl, db_pool)
 
       if server_boost_exp is True:

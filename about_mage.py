@@ -35,23 +35,19 @@ async def about(interaction: Interaction, bot_name, bot_avatar_url):
         inline=False)
     embed_mage.add_field(
         name="Zap (Weak)",
-        value="Weak -12 HP; Normal -18 HP; Strong -22 HP",
+        value="-15 HP",
         inline=True)
     embed_mage.add_field(
         name="Fireball (Normal)",
-        value="Weak -22 HP; Normal -32 HP; Strong -42 HP",
+        value="-25 HP",
         inline=False)
     embed_mage.add_field(
         name="Arcane Mania (Special)",
-        value="Weak -45 HP; Normal -65 HP; Strong -80 HP",
+        value="-40 HP",
         inline=False)
     embed_mage.add_field(
         name="Biden Blast! (Avalon's Blessing)",
-        value="Weak -75 HP; Normal -100 HP; Strong -125 HP",
-        inline=False)
-    embed_mage.add_field(
-        name="Weaknesses/Strengths",
-        value="Mage is **STRONG** against the Archer but **WEAK** against the Knight (**NORMAL** against itself).",
+        value="-70 HP",
         inline=False)
     embed_mage.set_thumbnail(url="https://i.imgur.com/0DpJe0b.png")
     return embed_mage

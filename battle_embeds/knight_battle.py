@@ -16,94 +16,29 @@ health = {
   3: 125
 }
 
-# Battle evaluation:
-  # Ex: 12; if a knight fights an archer it's weak for the knight.
-  # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
-evaluation = {
-  "11": "Normal",
-  "22": "Normal",
-  "33": "Normal",
-  "12": "Weak",
-  "13": "Strong",
-  "21": "Strong",
-  "23": "Weak",
-  "31": "Weak",
-  "32": "Strong",
-}
-
 # Dict order:
   # Class
-    # Attacks:
-      # Damage dependent on evaluation.
+    # Attacks: Damage:
 
 attacks = {
-  1: {
-    "Sword Jab": {
-      "Weak": -10,
-      "Normal": -15,
-      "Strong": -20
+    1: {
+      "Sword Jab": -10,
+      "Sword Slash": -20,
+      "Dual Sword Attack": -35,
+      "Sliced and Diced": -65
     },
-    "Sword Slash": {
-      "Weak": -15,
-      "Normal": -25,
-      "Strong": -35
+    2: {
+      "Weak Arrow": -20,
+      "Piercing Shot": -30,
+      "Triple Shot": -45,
+      "Make it Rain": -75
     },
-    "Dual Sword Attack": {
-      "Weak": -30,
-      "Normal": -45,
-      "Strong": -60
-    },
-    "Sliced and Diced": {
-      "Weak": -50,
-      "Normal": -75,
-      "Strong": -100
+    3: {
+      "Zap": -15,
+      "Fireball": -25,
+      "Arcane Mania": -40,
+      "Biden Blast": -70,
     }
-  },
-  2: {
-    "Weak Arrow": {
-      "Weak": -15,
-      "Normal": -20,
-      "Strong": -25
-    },
-    "Piercing Shot": {
-      "Weak": -25,
-      "Normal": -35,
-      "Strong": -45
-    },
-    "Triple Shot": {
-      "Weak": -50,
-      "Normal": -70,
-      "Strong": -90,
-    },
-    "Make it Rain": {
-      "Weak": -85,
-      "Normal": -125,
-      "Strong": -150,
-    }
-  },
-  3: {
-  "Zap": {
-    "Weak": -12,
-    "Normal": -18,
-    "Strong": -22
-  },
-  "Fireball": {
-    "Weak": -22,
-    "Normal": -32,
-    "Strong": -42
-  },
-  "Arcane Mania": {
-    "Weak": -45,
-    "Normal": -65,
-    "Strong": -80,
-  },
-  "Biden Blast": {
-    "Weak": -75,
-    "Normal": -100,
-    "Strong": -125,
-  }
-}
-
 }
 
 # Function to send an embed to the user when they use battle if they picked knight.
@@ -230,11 +165,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
     if switch == False: # If it's the starter's turn
       user = interaction.user
       hp = await cursor.fetchval(f"SELECT starter_hp FROM battles WHERE starter_id = {interaction.user.id}") # Get hp value of that user
-      evaluation = await cursor.fetchval(f"SELECT evaluation_starter FROM battles WHERE starter_id = {interaction.user.id}") # Get the evaluation of that user
     elif switch == True: # If it's the reciever's turn
       user = member
       hp = await cursor.fetchval(f"SELECT reciever_hp FROM battles WHERE starter_id = {interaction.user.id}") # Get hp value of that user
-      evaluation = await cursor.fetchval(f"SELECT evaluation_reciever FROM battles WHERE starter_id = {interaction.user.id}") # Get the evaluation of that user
 
   embed = Embed( # Title and description, indicating user to pick a move.
     title = f"{user} Moves",
@@ -246,19 +179,19 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
     inline=False)
   embed.add_field( # Field that shows the weak attack for that class and damage according the value of that user's evaluation.
     name="Sword Jab (Weak) **No Cooldown; Hit Chance: 99.9%**",
-    value=str(attacks[1]["Sword Jab"][evaluation]),
+    value=str(attacks[1]["Sword Jab"]),
     inline=False)
   embed.add_field( # Field that shows the normal attack for that class and damage according the value of that user's evaluation.
     name=f"Sword Slash (Normal) **Cooldown: {normal_c}; Hit Chance: 80%**",
-    value=str(attacks[1]["Sword Slash"][evaluation]),
+    value=str(attacks[1]["Sword Slash"]),
     inline=False)
   embed.add_field( # Field that shows the special attack for that class and damage according the value of that user's evaluation.
-    name=f"Dual Sword Attack (Special) **Cooldown: {special_c}; ; Hit Chance: 50%**",
-    value=str(attacks[1]["Dual Sword Attack"][evaluation]),
+    name=f"Dual Sword Attack (Special) **Cooldown: {special_c}; ; Hit Chance: 60%**",
+    value=str(attacks[1]["Dual Sword Attack"]),
     inline=False)
   embed.add_field( # Field that shows the weak avalon blessing attack for that class and damage according the value of that user's evaluation.
-    name=f"Sliced and Diced (Avalon's Blessing) **Cooldown: {avalonbless_c}; Hit Chance: 25%**",
-    value=str(attacks[1]["Sliced and Diced"][evaluation]),
+    name=f"Sliced and Diced (Avalon's Blessing) **Cooldown: {avalonbless_c}; Hit Chance: 35%**",
+    value=str(attacks[1]["Sliced and Diced"]),
     inline=False)            
   embed.set_thumbnail(url="https://i.imgur.com/soNMbTL.png")  # Shows image of knight.
   if switch == False: # If it's the starter's turn, send the embed in their dm.

@@ -14,7 +14,7 @@
     pkgs.freetype
     pkgs.libopus
     pkgs.ffmpeg-full
-		pkgs.nodePackages.prettier
+    pkgs.nodePackages.prettier
   ];
   env = {
     PYTHON_LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath [

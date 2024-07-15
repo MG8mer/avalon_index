@@ -20,127 +20,47 @@ client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # De
 
 # Move function that returns what turn it is, taking the arguments interaction for who used battle, member for who recieved battle, start_rand for who starts in the battle, the class of the starter, and the class of the reciever.
 
-async def move(interaction: Interaction, member: nextcord.Member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, class_evaluation_starter, class_evaluation_reciever, switch, turn, battle_screen, db_pool, starter_crit_num, reciever_crit_num, starter_av_blessing_hits, reciever_av_blessing_hits):
+async def move(interaction: Interaction, member: nextcord.Member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, switch, turn, battle_screen, db_pool, starter_crit_num, reciever_crit_num, starter_av_blessing_hits, reciever_av_blessing_hits):
   if startrand_mage == 7 or recieverand_mage == 7:
-      # Dicts to store class info:
-
+      # Dicts to store class info: 
+  
       # Class health
       health = {
         1: 150,
         2: 100,
         3: 125
       }
-
-      # Battle evaluation:
-        # Ex: 12; if a knight fights an archer it's weak for the knight.
-        # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
-      evaluation = {
-        "11": "Normal",
-        "22": "Normal",
-        "33": "Normal",
-        "12": "Weak",
-        "13": "Strong",
-        "21": "Strong",
-        "23": "Weak",
-        "31": "Weak",
-        "32": "Strong",
-      }
-
+  
       # Dict order:
         # Class
-          # Attacks:
-            # Damage dependent on evaluation.
+          # Attacks: Damage:
 
       attacks = {
         1: {
-          "Sword Jab": {
-            "Weak": -10,
-            "Normal": -15,
-            "Strong": -20
-          },
-          "Sword Slash": {
-            "Weak": -15,
-            "Normal": -25,
-            "Strong": -35
-          },
-          "Dual Sword Attack": {
-            "Weak": -30,
-            "Normal": -45,
-            "Strong": -60
-          },
-          "Sliced and Diced": {
-            "Weak": -50,
-            "Normal": -75,
-            "Strong": -100
-          }
+          "Sword Jab": -10,
+          "Sword Slash": -20,
+          "Dual Sword Attack": -35,
+          "Sliced and Diced": -65
         },
         2: {
-          "Weak Arrow": {
-            "Weak": -15,
-            "Normal": -20,
-            "Strong": -25
-          },
-          "Piercing Shot": {
-            "Weak": -25,
-            "Normal": -35,
-            "Strong": -45
-          },
-          "Triple Shot": {
-            "Weak": -50,
-            "Normal": -70,
-            "Strong": -90
-          },
-          "Make it Rain": {
-            "Weak": -85,
-            "Normal": -125,
-            "Strong": -150
-          }
+          "Weak Arrow": -20,
+          "Piercing Shot": -30,
+          "Triple Shot": -45,
+          "Make it Rain": -75
         },
         3: {
-        "Zap": {
-          "Weak": -12,
-          "Normal": -18,
-          "Strong": -22
+          "Zap": -15,
+          "Fireball": -25,
+          "Arcane Mania": -40,
+          "Biden Blast": -70,
         },
-        "Fireball": {
-          "Weak": -22,
-          "Normal": -32,
-          "Strong": -42
-        },
-        "Arcane Mania": {
-          "Weak": -45,
-          "Normal": -65,
-          "Strong": -80
-        },
-        "Biden Blast": {
-          "Weak": -75,
-          "Normal": -100,
-          "Strong": -125
+        4: {
+          "THUNDERBOLT": -25,
+          "SUPER FIREBALL": -40,
+          "THE SORCERER'S WRATH": -70,
+          "TRUE BIDEN BLAST!!!": -999
         }
-      },
-      4: {
-      "THUNDERBOLT": {
-        "Weak": -15,
-        "Normal": -20,
-        "Strong": -25
-      },
-      "SUPER FIREBALL": {
-        "Weak": -25,
-        "Normal": -35,
-        "Strong": -45
-      },
-      "THE SORCERER'S WRATH": {
-        "Weak": -50,
-        "Normal": -70,
-        "Strong": -90
-      },
-      "TRUE BIDEN BLAST!!!": {
-        "Weak": -999,
-        "Normal": -999,
-        "Strong": -999
       }
-    }
-    }
   else:
     # Dicts to store class info: 
 
@@ -151,95 +71,30 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
       3: 125
     }
 
-    # Battle evaluation:
-      # Ex: 12; if a knight fights an archer it's weak for the knight.
-      # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
-    evaluation = {
-      "11": "Normal",
-      "22": "Normal",
-      "33": "Normal",
-      "12": "Weak",
-      "13": "Strong",
-      "21": "Strong",
-      "23": "Weak",
-      "31": "Weak",
-      "32": "Strong",
-    }
-
     # Dict order:
       # Class
-        # Attacks:
-          # Damage dependent on evaluation.
+        # Attacks: Damage:
 
     attacks = {
-      1: {
-        "Sword Jab": {
-          "Weak": -10,
-          "Normal": -15,
-          "Strong": -20
+        1: {
+          "Sword Jab": -10,
+          "Sword Slash": -20,
+          "Dual Sword Attack": -35,
+          "Sliced and Diced": -65
         },
-        "Sword Slash": {
-          "Weak": -15,
-          "Normal": -25,
-          "Strong": -35
+        2: {
+          "Weak Arrow": -20,
+          "Piercing Shot": -30,
+          "Triple Shot": -45,
+          "Make it Rain": -75
         },
-        "Dual Sword Attack": {
-          "Weak": -30,
-          "Normal": -45,
-          "Strong": -60
-        },
-        "Sliced and Diced": {
-          "Weak": -50,
-          "Normal": -75,
-          "Strong": -100
+        3: {
+          "Zap": -15,
+          "Fireball": -25,
+          "Arcane Mania": -40,
+          "Biden Blast": -70,
         }
-      },
-      2: {
-        "Weak Arrow": {
-          "Weak": -15,
-          "Normal": -20,
-          "Strong": -25
-        },
-        "Piercing Shot": {
-          "Weak": -25,
-          "Normal": -35,
-          "Strong": -45
-        },
-        "Triple Shot": {
-          "Weak": -50,
-          "Normal": -70,
-          "Strong": -90,
-        },
-        "Make it Rain": {
-          "Weak": -85,
-          "Normal": -125,
-          "Strong": -150,
-        }
-      },
-      3: {
-      "Zap": {
-        "Weak": -12,
-        "Normal": -18,
-        "Strong": -22
-      },
-      "Fireball": {
-        "Weak": -22,
-        "Normal": -32,
-        "Strong": -42
-      },
-      "Arcane Mania": {
-        "Weak": -45,
-        "Normal": -65,
-        "Strong": -80,
-      },
-      "Biden Blast": {
-        "Weak": -75,
-        "Normal": -100,
-        "Strong": -125,
       }
-    }
-
-    }
 
   crit_hit = randint(1, 5)
   if switch == None:
@@ -266,22 +121,22 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
 
             return
         else:
-          dmg = attacks[class_value_starter][move][evaluation[class_evaluation_starter]]
+          dmg = attacks[class_value_starter][move]
           if move == 'Sword Jab':
-            miss = randint(1, 800)
+            miss = randint(1, 1000)
             if miss == 69:
               dmg = 0
           elif move == 'Sword Slash':
-             miss = randint(1, 4)
-             if miss == 2:
+             miss = randint(1, 100)
+             if miss <= 20:
                dmg = 0
           elif move == 'Dual Sword Attack':
-            miss = randint(1, 10)
-            if miss == 1 or miss == 3 or miss == 5 or miss == 7 or miss == 9 or miss == 10:
+            miss = randint(1, 100)
+            if miss <= 40:
               dmg = 0
           elif move == 'Sliced and Diced':
-            miss = randint(1, 10)
-            if miss == 1 or miss == 2 or miss == 3 or miss == 5 or miss == 6 or miss == 8 or miss == 9 or miss == 10:
+            miss = randint(1, 100)
+            if miss <= 65:
               dmg = 0
             else:
               starter_av_blessing_hits += 1
@@ -302,22 +157,22 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
 
               return
         else:
-          dmg = attacks[class_value_starter][move][evaluation[class_evaluation_starter]]
+          dmg = attacks[class_value_starter][move]
           if move == 'Weak Arrow':
              miss = randint(1, 1000)
              if miss == 69:
                 dmg = 0
           elif move == 'Piercing Shot':
-             miss = randint(1, 5)
-             if miss == 2:
+             miss = randint(1, 100)
+             if miss <= 20:
                dmg = 0
           elif move == 'Triple Shot':
-            miss = randint(1, 2)
-            if miss == 1:
+            miss = randint(1, 100)
+            if miss <= 40:
               dmg = 0
           elif move == 'Make it Rain':
-            miss = randint(1, 4)
-            if miss == 1 or miss == 3 or miss == 4:
+            miss = randint(1, 100)
+            if miss <= 65:
               dmg = 0
             else:
               starter_av_blessing_hits += 1
@@ -339,19 +194,19 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
             return
         else: 
             if startrand_mage == 7:
-              dmg = attacks[4][move][evaluation[class_evaluation_starter]]
+              dmg = attacks[4][move]
               if startrand_mage == 7:
                 if move == "THUNDERBOLT":
-                  miss = randint(1, 2)
-                  if miss == 1:
+                  miss = randint(1, 100)
+                  if miss <= 30:
                     dmg = 0
                 elif move == "SUPER FIREBALL":
-                  miss = randint(1, 10)
-                  if miss == 2 or miss == 4 or miss == 6 or miss == 8 or miss == 9 or miss == 10:
+                  miss = randint(1, 100)
+                  if miss <= 40:
                     dmg = 0
                 elif move == "THE SORCERER'S WRATH":
-                  miss = randint(1, 4)
-                  if miss == 2 or miss == 3 or miss == 4:
+                  miss = randint(1, 100)
+                  if miss <= 65:
                     dmg = 0
                 elif move == "TRUE BIDEN BLAST!!!":
                   miss = randint(1, 100)
@@ -360,22 +215,22 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
                   else:
                     starter_av_blessing_hits += 1
             else:
-              dmg = (attacks[class_value_starter][move][evaluation[class_evaluation_starter]])
+              dmg = (attacks[class_value_starter][move])
               if move == 'Zap':
                 miss = randint(1, 1000)
                 if miss == 69:
                   dmg = 0
               elif move == 'Fireball':
-                miss = randint(1, 5)
-                if miss == 2:
+                miss = randint(1, 100)
+                if miss <= 20:
                   dmg = 0 
               elif move == 'Arcane Mania':
-                miss = randint(1, 2)              
-                if miss == 1:
+                miss = randint(1, 100)              
+                if miss <= 40:
                   dmg = 0
               elif move == 'Biden Blast':
-                miss = randint(1, 4)
-                if miss == 1 or miss == 3 or miss == 4:
+                miss = randint(1, 100)
+                if miss <= 65:
                   dmg = 0
                 else:
                   starter_av_blessing_hits += 1
@@ -398,22 +253,22 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
 
               return
         else:
-                dmg = attacks[class_value_reciever][move][evaluation[class_evaluation_reciever]]
+                dmg = attacks[class_value_reciever][move]
                 if move == 'Sword Jab':
-                  miss = randint(1, 800)
+                  miss = randint(1, 1000)
                   if miss == 69:
                     dmg = 0
                 elif move == 'Sword Slash':
-                   miss = randint(1, 4)
-                   if miss == 2:
+                   miss = randint(1, 100)
+                   if miss <= 20:
                      dmg = 0
                 elif move == 'Dual Sword Attack':
-                  miss = randint(1, 10)
-                  if miss == 1 or miss == 3 or miss == 5 or miss == 7 or miss == 9 or miss == 10:
+                  miss = randint(1, 100)
+                  if miss <= 40:
                     dmg = 0
                 elif move == 'Sliced and Diced':
-                  miss = randint(1, 10)
-                  if miss == 1 or miss == 2 or miss == 3 or miss == 5 or miss == 6 or miss == 8 or miss == 9 or miss == 10:
+                  miss = randint(1, 100)
+                  if miss <= 65:
                     dmg = 0
                   else:
                     reciever_av_blessing_hits += 1
@@ -433,22 +288,22 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
 
                 return
         else:
-          dmg = attacks[class_value_reciever][move][evaluation[class_evaluation_reciever]]
+          dmg = attacks[class_value_reciever][move]
           if move == 'Weak Arrow':
              miss = randint(1, 1000)
              if miss == 69:
                 dmg = 0
           elif move == 'Piercing Shot':
-             miss = randint(1, 5)
-             if miss == 2:
+             miss = randint(1, 100)
+             if miss <= 20:
                dmg = 0
           elif move == 'Triple Shot':
-            miss = randint(1, 2)
-            if miss == 1:
+            miss = randint(1, 100)
+            if miss <= 40:
               dmg = 0
           elif move == 'Make it Rain':
-            miss = randint(1, 4)
-            if miss == 1 or miss == 3 or miss == 4:
+            miss = randint(1, 100)
+            if miss <= 65:
               dmg = 0
             else:
               reciever_av_blessing_hits += 1
@@ -471,18 +326,18 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
                   return
           else:
               if recieverand_mage == 7:
-                dmg = attacks[4][move][evaluation[class_evaluation_reciever]]
+                dmg = attacks[4][move]
                 if move == "THUNDERBOLT":
-                  miss = randint(1, 2)
-                  if miss == 1:
+                  miss = randint(1, 100)
+                  if miss <= 30:
                     dmg = 0
                 elif move == "SUPER FIREBALL":
-                  miss = randint(1, 10)
-                  if miss == 2 or miss == 4 or miss == 6 or miss == 8 or miss == 9 or miss == 10:
+                  miss = randint(1, 100)
+                  if miss <= 40:
                     dmg = 0
                 elif move == "THE SORCERER'S WRATH":
-                  miss = randint(1, 4)
-                  if miss == 2 or miss == 3 or miss == 4:
+                  miss = randint(1, 100)
+                  if miss <= 65:
                     dmg = 0
                 elif move == "TRUE BIDEN BLAST!!!":
                   miss = randint(1, 100)
@@ -491,22 +346,22 @@ async def move(interaction: Interaction, member: nextcord.Member, start_rand, st
                   else:
                     reciever_av_blessing_hits += 1
               else:
-                dmg = attacks[class_value_reciever][move][evaluation[class_evaluation_reciever]]
+                dmg = attacks[class_value_reciever][move]
                 if move == 'Zap':
                   miss = randint(1, 1000)
                   if miss == 69:
                     dmg = 0
                 elif move == 'Fireball':
-                  miss = randint(1, 5)
-                  if miss == 2:
+                  miss = randint(1, 100)
+                  if miss <= 20:
                     dmg = 0 
                 elif move == 'Arcane Mania':
-                  miss = randint(1, 2)              
-                  if miss == 1:
+                  miss = randint(1, 100)              
+                  if miss <= 40:
                     dmg = 0
                 elif move == 'Biden Blast':
-                  miss = randint(1, 4)
-                  if miss == 1 or miss == 3 or miss == 4:
+                  miss = randint(1, 100)
+                  if miss <= 65:
                     dmg = 0
                   else:
                     reciever_av_blessing_hits += 1
