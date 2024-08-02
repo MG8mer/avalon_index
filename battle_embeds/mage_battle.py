@@ -1,5 +1,6 @@
 import os
 import nextcord
+import asyncio
 from nextcord.embeds import Embed
 import nextcord.interactions  
 import asyncpg
@@ -622,6 +623,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       embed.set_thumbnail(url="https://i.imgur.com/0DpJe0b.png")  # Shows image of mage.
 
   if switch == False: # If it's the starter's turn, send the embed in their dm.
+    await asyncio.sleep(2)
     message = await interaction.followup.send(embed=embed, view=view)
     await view.wait()
     if view.value is None:
@@ -630,6 +632,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       return False
     await message.delete()
     if battle_screen != None:
+      await asyncio.sleep(1)
       await battle_screen.delete()
 
     async with db_pool.acquire() as cursor:
@@ -668,6 +671,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
           await cursor.execute(f'UPDATE cooldowns SET ab_cooldown = {(avalonbless_c - 1)} WHERE user_id = {interaction.user.id}')
       return move_final
   elif switch == True: # If it's the reciever's turn, send the embed in their dm.
+    await asyncio.sleep(2)
     message = await interaction.followup.send(embed=embed, view=view)
     await view.wait()
     if view.value is None:
@@ -676,6 +680,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       return False
     await message.delete()
     if battle_screen != None:
+      await asyncio.sleep(1)
       await battle_screen.delete()
     async with db_pool.acquire() as cursor:
 

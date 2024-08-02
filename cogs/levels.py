@@ -7,6 +7,7 @@ import asyncpg
 import time
 import logging
 from main import ensure_db_pool
+from nextcord.utils import get
 from collections import defaultdict
 from shared import role_designation
 
@@ -27,10 +28,7 @@ class Leveling(commands.Cog):#level system function
     if message.author.bot or message.content == ".shutdown":
       return
     else:
-      await ensure_db_pool(self.db_pool)
-      async with self.db_pool.acquire() as cursor:
-        start_value = await cursor.fetchval(f'SELECT start FROM users WHERE user_id = {message.author.id}')
-      if start_value == 1:
+        await ensure_db_pool(self.db_pool)
         async with self.db_pool.acquire() as cursor:
           no_roles = await cursor.fetch("SELECT role_id FROM no_exp_roles WHERE guild_id = $1", message.guild.id)
         if no_roles != []:
@@ -115,17 +113,19 @@ class Leveling(commands.Cog):#level system function
                   async with self.db_pool.acquire() as cursor:
                     await cursor.execute(f"UPDATE server_levels SET exp = {exp_surplus}, level = {server_lvl}, exp_needed = {server_exp_needed} WHERE user_id = {message.author.id} AND guild_id = {message.guild.id}") 
                   embed = nextcord.Embed(title=f"**__Congratulations!__**",
-                    description=f"You have reached level {server_lvl} on the **__{message.guild}__** server!",
+                    description=f"You have reached level {server_lvl}!",
                     colour=0x00b0f4)
                   embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
                   embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
-                  try:
-                    await message.author.send(embed=embed)
-                  except nextcord.errors.Forbidden:
-                    await message.channel.send(f"The Bot was not able to send {message.author} the level up embed in DMs, so the embed was sent here instead.", embed=embed)
+                  async with self.db_pool.acquire() as cursor:
+                    levelup_channel = await cursor.fetchval("SELECT channel_id FROM level_up_channel WHERE guild_id = $1", message.guild.id)
+
+                  if levelup_channel is None:
+                    await message.channel.send(f"{message.author.mention}", embed=embed)
+                  else:
+                    channel_set = get(message.guild.channels, id=levelup_channel)
+                    await channel_set.send(f"{message.author.mention}", embed=embed)
                   await role_designation(message.author, message.author.id, message.guild, message.guild.id, message.channel, server_lvl, self.db_pool)
-      else:
-        return
 
 def setup(client):
   client.add_cog(Leveling(client)) # Add cog for leveling

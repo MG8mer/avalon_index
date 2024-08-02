@@ -20,7 +20,7 @@ async def about(interaction: Interaction, bot_name, bot_avatar_url):
     value="",
     inline=False)
   embed.add_field(name="",
-    value="Currently in Avalon Index, each player has two types of levels: \n \n1. Global Levels \n2. Server Levels \n \n**NOTE**: Both levels utilize the same mechanism for levelling, it's just that both levels are levelled up in different ways. Let XP that levels up a user's global level be called **global XP** and XP that levels up server levels be called **server XP**. \n \n *Please note that in order to earn global XP/server XP for ANY server, `/start` MUST be used.*",
+    value="Currently in Avalon Index, each player has two types of levels: \n \n1. Global Levels \n2. Server Levels \n \n**NOTE**: Both levels utilize the same mechanism for levelling, it's just that both levels are levelled up in different ways. Let XP that levels up a user's global level be called **global XP** and XP that levels up server levels be called **server XP**. \n \n *Please note that messaging out of the box will earn you server XP without using `/start`. **HOWEVER**, to use `/battle` and gain global/server XP, you MUST use `/start` & `/pick` to pick your class.*",
     inline=False)
   embed.add_field(name="`Global`",
     value="A user's global level will be their centralized level on Avalon index in every server. Global XP can only be earned by battling users on __any server__ and cannot be earned via messaging. Additionally, global XP earned from battling is not boosted from *boosted XP roles* (roles on a server that boost server XP earned from messaging and battling) on a particular server, and global XP can be obtained even if a user has a *no XP role* on a server (roles on a server that prevent a user from earning server XP from battling and messaging) and even if a user battles in a *no XP channel* on a server (channels where server XP cannot be earned from messaging (not battling)) or both. Lastly, *level roles* (roles on a server earned when reaching a specific server level) CANNOT be earned based on global level.",
@@ -39,7 +39,7 @@ async def about(interaction: Interaction, bot_name, bot_avatar_url):
 """,
     inline=False)
   embed.add_field(name="`Mod Levelling Commands`",
-    value="""On Avalon Index exist many commands related to levelling. For more info on them, see pages `3-5` on `/help`. Here's some things to keep in mind, though: \n \n Level roles can be assigned to roles that are already *EITHER* *no XP roles* OR *XP boosted roles*, not both because of the following: \n \n - When assigning a *XP boosted role* on a server, the role CANNOT already be a *no XP role* (for logical reasons). \n \n- By the same logic, you cannot assign a no XP role to a role that is already a XP boosted role.""",
+    value="""On Avalon Index exist many commands related to levelling. For more info on them, see pages `3-6` on `/help`. Here's some things to keep in mind, though: \n \n - Level roles can be assigned to roles that are already *EITHER* *no XP roles* OR *XP boosted roles*, not both because of the following: \n \n- When assigning a *XP boosted role* on a server, the role CANNOT already be a *no XP role* (for logical reasons). \n \n- By the same logic, you cannot assign a no XP role to a role that is already a XP boosted role.""",
     inline=False)
   embed.set_thumbnail(url=f"{bot_avatar_url}")
 

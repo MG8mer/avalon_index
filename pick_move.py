@@ -23,14 +23,14 @@ client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # De
 async def move(interaction: Interaction, member: nextcord.Member, start_rand, startrand_mage, recieverand_mage, class_value_starter, class_value_reciever, starter_hp_value, reciever_hp_value, switch, turn, battle_screen, db_pool, starter_crit_num, reciever_crit_num, starter_av_blessing_hits, reciever_av_blessing_hits):
   if startrand_mage == 7 or recieverand_mage == 7:
       # Dicts to store class info: 
-  
+
       # Class health
       health = {
         1: 150,
         2: 100,
         3: 125
       }
-  
+
       # Dict order:
         # Class
           # Attacks: Damage:

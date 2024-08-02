@@ -34,7 +34,7 @@ async def help(interaction, bot_name, bot_avatar_url):
     inline=False)
   embed.add_field(   
     name="/remove_exp_boosted_role",
-    value="Remove a role that gains extra server XP from messaging (not battling) on this server.",
+    value="Remove a role that gains extra server XP from messaging & battling on this server.",
     inline=True)
   embed.add_field(   
     name="> Syntax", 

@@ -8,6 +8,7 @@ import asyncio
 import pick_move
 import asyncpg
 import battle_page
+from nextcord.utils import get
 from random import randint
 from shared import role_designation
 
@@ -252,14 +253,11 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
             pass
           else:
             embed = nextcord.Embed(title=f"**__Congratulations!__**",
-              description=f"You have reached level {global_lvl} on **__Avalon Index!__**",
+              description=f"You have reached level {global_lvl} on the **__Avalon Index!__** bot!",
               colour=0x00b0f4)
             embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
             embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
-            try:
-              await member.send(embed=embed)
-            except nextcord.errors.Forbidden:
-              await interaction.followup.send(f"The Bot was not able to send **__{member}__** the level up embed in DMs, so the embed was sent here instead.", embed=embed)
+            await interaction.followup.send(f"{member.mention}", embed=embed)
 
       if server_no_exp == False:
         server_exp = server_result[0]
@@ -279,20 +277,23 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
             server_exp_needed = round(100*(pow((server_lvl+1), 1.1)))
             async with db_pool.acquire() as cursor:
               await cursor.execute(f"UPDATE server_levels SET exp = {exp_surplus}, level = {server_lvl}, exp_needed = {server_exp_needed} WHERE user_id = {member.id} AND guild_id = {interaction.guild_id}") 
+              await role_designation(member, member.id, interaction.guild, interaction.guild_id, interaction.channel, server_lvl, db_pool)
             server_exp = exp_surplus
             if server_exp >= server_exp_needed:
               pass
             else:
               embed = nextcord.Embed(title=f"**__Congratulations!__**",
-                description=f"You have reached level {server_lvl} on the **__{interaction.guild}__** server!",
+                description=f"You have reached level {server_lvl}!",
                 colour=0x00b0f4)
               embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
               embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
-              try:
-                await member.send(embed=embed)
-              except nextcord.errors.Forbidden:
-                await interaction.followup.send(f"The Bot was not able to send **__{member}__** the level up embed in DMs, so the embed was sent here instead.", embed=embed)
-              await role_designation(member, member.id, interaction.guild, interaction.guild_id, interaction.channel, server_lvl, db_pool)
+              async with db_pool.acquire() as cursor:
+                levelup_channel = await cursor.fetchval("SELECT channel_id FROM level_up_channel WHERE guild_id = $1", interaction.guild_id)
+              if levelup_channel is None:
+                await interaction.followup.send(f"{member.mention}", embed=embed)
+              else:
+                channel_set = get(interaction.guild.channels, id=levelup_channel)
+                await channel_set.send(f"{member.mention}", embed=embed)
 
       if server_boost_exp is True:
         result_battle = Embed(   
@@ -417,14 +418,11 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
             pass
           else:
             embed = nextcord.Embed(title=f"**__Congratulations!__**",
-              description=f"You have reached level {global_lvl} on **__Avalon Index!__**",
+              description=f"You have reached level {global_lvl} on the **__Avalon Index!__** bot!",
               colour=0x00b0f4)
             embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
             embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
-            try:
-              await interaction.user.send(embed=embed)
-            except nextcord.errors.Forbidden:
-              await interaction.followup.send(f"The Bot was not able to send **__{interaction.user}__** the level up embed in DMs, so the embed was sent here instead.", embed=embed)
+            await interaction.followup.send(f"{interaction.user.mention}", embed=embed)
 
       if server_no_exp == False:
         server_exp = server_result[0]
@@ -445,20 +443,23 @@ async def battle(interaction: Interaction, member: nextcord.Member, start_rand, 
             server_exp_needed = round(100*(pow((server_lvl+1), 1.1)))
             async with db_pool.acquire() as cursor:
               await cursor.execute(f"UPDATE server_levels SET exp = {exp_surplus}, level = {server_lvl}, exp_needed = {server_exp_needed} WHERE user_id = {interaction.user.id} AND guild_id = {interaction.guild_id}") 
+              await role_designation(interaction.user, interaction.user.id, interaction.guild, interaction.guild_id, interaction.channel, server_lvl, db_pool)
             server_exp = exp_surplus
             if server_exp >= server_exp_needed:
               pass
             else:
               embed = nextcord.Embed(title=f"**__Congratulations!__**",
-                description=f"You have reached level {server_lvl} on the **__{interaction.guild}__** server!",
+                description=f"You have reached level {server_lvl}!",
                 colour=0x00b0f4)
               embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
               embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
-              try:
-                await interaction.user.send(embed=embed)
-              except nextcord.errors.Forbidden:
-                await interaction.followup.send(f"The Bot was not able to send {interaction.user} the level up embed in DMs, so the embed was sent here instead.", embed=embed)
-              await role_designation(interaction.user, interaction.user.id, interaction.guild, interaction.guild_id, interaction.channel, server_lvl, db_pool)
+              async with db_pool.acquire() as cursor:
+                levelup_channel = await cursor.fetchval("SELECT channel_id FROM level_up_channel WHERE guild_id = $1", interaction.guild_id)
+              if levelup_channel is None:
+                await interaction.followup.send(f"{interaction.user.mention}", embed=embed)
+              else:
+                channel_set = get(interaction.guild.channels, id=levelup_channel)
+                await channel_set.send(f"{interaction.user.mention}", embed=embed)
 
       if server_boost_exp is True:
         result_battle = Embed(   

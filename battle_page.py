@@ -1,4 +1,5 @@
 import nextcord
+import asyncio
 from nextcord.embeds import Embed
 import nextcord.interactions
 from image_merge import overlay_img
@@ -47,7 +48,7 @@ async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_
     health_L = 'custom_assets/health_L_25.png'
   elif hp_percentage_starter <= 0:
     health_L = 'custom_assets/health_L_0.png'
-    
+
   if hp_percentage_reciever <= 75 and hp_percentage_reciever > 50:
     health_R = 'custom_assets/health_R_75.png'
   elif hp_percentage_reciever <= 50 and hp_percentage_reciever > 25:
@@ -95,5 +96,6 @@ async def battle_page(interaction, member, hp_percentage_starter, hp_percentage_
       else:
         embed = Embed(title = "Battle Screen", color = nextcord.Color.blue(), description = f"{interaction.user.mention} used the move **{move}**, dealing **{dmg*-1}** damage! \n{member.mention} now has an HP of ***{hp_reciever}***\n {interaction.user.mention} has an HP of ***{hp_starter}***")
         embed.set_image(url = "attachment://battle_page.png")
+  await asyncio.sleep(2)
   battle_screen = await interaction.followup.send(embed = embed, file = file)
   return battle_screen
