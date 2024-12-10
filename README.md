@@ -35,4 +35,4 @@ Need help with the bot or have questions? Join the official [Avalon Index server
 
 This bot uses the nextcord library to interact with the Discord API. For more information, visit the [nextcord GitHub repository](https://github.com/nextcord/nextcord).
 
-(Created by Muhammad Hammouri (MG8mer; me), Po, and Avash; maintained by Muhammad Hammouri (MG8mer; me).
+(Created by Muhammad Hammouri (me), Po, and Avash; maintained by Muhammad Hammouri.)
