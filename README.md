@@ -17,7 +17,7 @@ Avalon Index also has a myriad of useful and fun features! Including:
 - 🎯 A `/start` & `/pick` command to initialize the bot for yourself and pick a class to use in battles.
 - 🎯 A `/stats` command allowing you to view your class and server/global levels.
 - 🎯 A `battle` command to allow you to fight friends in the server that you are in for global and server XP.
-- 🎯 A `/leaderboard` command to see the members with the highest levels and XP.
+- 🎯 A `/leaderboard` command to see the server members with the highest levels and XP.
 - 🎯 A `/reset` command to reset your global level and class.
 *And more!*
 
@@ -35,4 +35,4 @@ Need help with the bot or have questions? Join the official [Avalon Index server
 
 This bot uses the nextcord library to interact with the Discord API. For more information, visit the [nextcord GitHub repository](https://github.com/nextcord/nextcord).
 
-(Created by Muhammad Hammouri (me), Po, and Avash; maintained by Muhammad Hammouri).
+(Created by MG8mer (me), Po, and Avash; maintained by MG8mer).
