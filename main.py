@@ -54,7 +54,7 @@ import signal
 
 logging.basicConfig(level=logging.INFO)
 
-client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all())   #from https://youtu.be/ksAtGCFxrP8#si=A89Nokdcqfsy_tGZ
+client = commands.Bot(command_prefix=".", intents = nextcord.Intents.default())   #from https://youtu.be/ksAtGCFxrP8#si=A89Nokdcqfsy_tGZ
 client.remove_command('help') # Removing the built in help command 
 
 db_pool = None
@@ -149,6 +149,11 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
         await cursor.execute("""CREATE TABLE IF NOT EXISTS no_exp_channels(guild_id BIGINT, channel_id BIGINT)""")
         await cursor.execute("""CREATE TABLE IF NOT EXISTS exp_boosted_roles(guild_id BIGINT, role_id BIGINT, boost_percent INT)""")
         await cursor.execute("""CREATE TABLE IF NOT EXISTS level_up_channel(guild_id BIGINT, channel_id BIGINT)""")
+        unique_active_users = await cursor.fetchval('SELECT COUNT(DISTINCT user_id) FROM server_levels WHERE exp > 0;')
+        unique_total_users = await cursor.fetchval('SELECT COUNT(DISTINCT user_id) FROM server_levels;')
+        seeing_something = await cursor.fetchval('SELECT COUNT(DISTINCT user_id) FROM server_levels WHERE guild_id = 110373943822540800;')
+        seeing_something_two = await cursor.fetchval('SELECT COUNT(DISTINCT user_id) FROM server_levels WHERE guild_id = 110373943822540800 AND exp > 0;')
+
 
     if not keep_db_alive.is_running():
        keep_db_alive.start()
@@ -157,7 +162,12 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
     logging.info(f"{len(client.guilds)}")
     for i in range(len(client.guilds)):
        logging.info(f"{client.guilds[i].name}")
-       logging.info(f"{client.guilds[i].member_count}")  
+       logging.info(f"{client.guilds[i].member_count}") 
+    logging.info(f"Total unique ACTIVE users: {unique_active_users}")
+    logging.info(f"Total unique users: {unique_total_users}")
+    logging.info(f"Users in Discord Bots: {seeing_something}")
+    logging.info(f"ACTIVE Users in Discord Bots: {seeing_something_two}")
+
 
 @client.event
 async def on_resumed():
@@ -276,10 +286,27 @@ async def leaderboard(interaction: Interaction):
     for i in range(0, len(data), per_page):
         embed = nextcord.Embed(title=f"{interaction.guild} Server Leaderboard", color=nextcord.Color.blue())
         for j, record in enumerate(data[i:i+per_page], start=i+1):
-            user = interaction.guild.get_member(record['user_id'])
-            if user == interaction.user:
-              user_rank = j
-            embed.add_field(name=f"{j}. {user}", value=f"Level: {record['level']} | XP: {record['exp']}/{record['exp_needed']}", inline=False)
+            uid = int(record["user_id"])  
+            member = interaction.guild.get_member(uid)
+            display_name = None
+            if member is None:
+                try:
+                    member = await interaction.guild.fetch_member(uid)
+                except nextcord.NotFound:
+                    try:
+                        user_obj = await client.fetch_user(uid)
+                        display_name = user_obj.name
+                    except Exception:
+                        pass
+
+            if display_name is None and member is not None:
+                display_name = member.display_name
+            if display_name is None:  
+                display_name = f"<@{uid}>"
+
+            if uid == interaction.user.id:
+                user_rank = j
+            embed.add_field(name=f"{j}. {display_name}", value=f"Level: {record['level']} | XP: {record['exp']}/{record['exp_needed']}", inline=False)
         embed.set_footer(text=f"Page {len(embeds) + 1}/{(len(data) // per_page) + 1} | Your Rank: {user_rank}")
         embeds.append(embed)
     view = PaginationViewLeaderboard(embeds, interaction.user.id)
@@ -362,10 +389,14 @@ async def seelvlroles(interaction: Interaction):
   if role_levels == []:
     embed_description = "No level roles to show."
   else:
-    while i < len(role_levels_formatted):
-      role = nextcord.utils.get(interaction.guild.roles, id=role_levels_formatted[i][0])
-      embed_description = embed_description + "Level " + str(role_levels_formatted[i][1]) + ": " + str(role.mention) + "\n"
-      i += 1
+      while i < len(role_levels_formatted):
+        role = nextcord.utils.get(interaction.guild.roles, id=role_levels_formatted[i][0])
+        if role is None:
+          async with db_pool.acquire() as cursor:
+            await cursor.execute("DELETE FROM level_roles WHERE role_id = $1",role_levels_formatted[i][0])
+        else:
+          embed_description = embed_description + "Level " + str(role_levels_formatted[i][1]) + ": " + str(role.mention) + "\n"
+        i += 1
 
   embed = nextcord.Embed(
     title=f"Level Roles for {interaction.guild}",
@@ -446,9 +477,13 @@ async def seelvlroles(interaction: Interaction):
   if role_no_exp_formatted == []:
     embed_description = "All roles can earn XP on the server."
   else:
-    for id in role_no_exp_formatted:
-      role = nextcord.utils.get(interaction.guild.roles, id=id)
-      embed_description = embed_description + str(role.mention) + "\n"
+      for id in role_no_exp_formatted:
+        role = nextcord.utils.get(interaction.guild.roles, id=id)
+        if role is None:
+          async with db_pool.acquire() as cursor:
+            await cursor.execute("DELETE FROM no_exp_roles WHERE role_id = $1", id)
+        else:
+          embed_description = embed_description + str(role.mention) + "\n"
 
   embed = nextcord.Embed(
     title=f"No XP Roles for {interaction.guild}",
@@ -618,10 +653,14 @@ async def seeextraxp(interaction: Interaction):
   if role_boosted_exp_formatted == []:
     embed_description = "No boosted XP roles to show."
   else:
-    while i < len(role_boosted_exp_formatted):
-      role = nextcord.utils.get(interaction.guild.roles, id=role_boosted_exp_formatted[i][0])
-      embed_description = embed_description + str(role.mention) + ": " + f"{role_boosted_exp_formatted[i][1]}%" "\n"
-      i += 1
+      while i < len(role_boosted_exp_formatted):
+        role = nextcord.utils.get(interaction.guild.roles, id=role_boosted_exp_formatted[i][0])
+        if role is None:
+          async with db_pool.acquire() as cursor:
+            await cursor.execute("DELETE FROM exp_boosted_roles WHERE role_id = $1", role_boosted_exp_formatted[i][0])
+        else:
+          embed_description = embed_description + str(role.mention) + ": " + f"{role_boosted_exp_formatted[i][1]}%" "\n"
+        i += 1
 
   embed = nextcord.Embed(
     title=f"Boosted XP Roles for {interaction.guild}",
@@ -908,6 +947,28 @@ async def pck(interaction: Interaction, number: int = SlashOption(name="class", 
           elif number == 3:
             await interaction.followup.send("You picked the Mage class! This is the class you will use during battles. To pick a new class, you must reset your stats.") 
 
+class StartBattle(nextcord.ui.View):
+  def __init__(self, interaction_id):
+    super().__init__(timeout=30)
+    self.interaction_id = interaction_id
+    self.value = None
+
+  @nextcord.ui.button(label = 'Yes', style=nextcord.ButtonStyle.green)
+  async def y(self, button: nextcord.ui.Button, interaction: Interaction):
+      if interaction.user.id != self.interaction_id:
+          await interaction.response.send_message("You can't start a battle that you're not involved in!", ephemeral=True)
+      else:
+        await interaction.response.defer()
+        self.value = True
+        self.stop()
+
+  @nextcord.ui.button(label = 'No', style=nextcord.ButtonStyle.red)
+  async def n(self, button: nextcord.ui.Button, interaction: Interaction):
+    if interaction.user.id != self.interaction_id:
+        await interaction.response.send_message("You can't start a battle that you're not involved in!", ephemeral=True)
+    else:
+        self.value = False
+        self.stop()
 
 @client.slash_command(name = "battle", description = "Battle an opponent of your choice in this server!")   
 # gotten from: https://stackoverflow.com/questions/68646719/discord-py-set-user-id-as-an-
@@ -949,25 +1010,24 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
 
       await cursor.execute('INSERT INTO battles (battle, starter_id, reciever_id) VALUES ($1, $2, $3)', 0, interaction.user.id, member.id) # Insert these temporary values, in which 0 as the battle value means both the starter (interaction.user.id), and the reciever (member.id) are in a battle request state. Also, interaction.channel_id ensures that a command such as /ff can only be used in the channel where the battle between these users was started.
 
-    await interaction.followup.send(f"Before you fight {member.mention}, they must consent to your worthy request! \n {member.mention}, would you like to fight, {interaction.user.mention}? Respond `yes` or something similar to confirm, respond anything else to cancel.") # Send a message to inform both users of the battle and ask the reciever for their consent to the battle.  
-    if battle_requested != 0: # If the starter has not started a battle request or has been requested for a battle then do what is below.
-      # Below from https://www.youtube.com/watch?v=zamNFx3L7oA&t=2s&ab_channel=Dannycademy
-      try:
-        msg = await client.wait_for("message", timeout=60, check=lambda message: message.author.id == member.id and message.channel.id == interaction.channel_id) # Await for a message from the reciever.
-      except asyncio.TimeoutError: # If 60 seconds have passed and the reciever hasn't responded, inform that the reciever took too long to respond and cancel the battle.
-        await interaction.followup.send("User took too long to respond. Use /battle to try again.")
-      # Above from https://www.youtube.com/watch?v=zamNFx3L7oA&t=2s&ab_channel=Dannycademy
-        async with db_pool.acquire() as cursor:
+    view = StartBattle(member.id)
 
-          await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
+    await interaction.followup.send(f"Before you fight {member.mention}, they must consent to your worthy request! \n {member.mention}, would you like to fight, {interaction.user.mention}?", view=view) # Send a message to inform both users of the battle and ask the reciever for their consent to the battle.  
+    if battle_requested != 0: 
+        await view.wait()
+        if view.value is None:
+          await interaction.followup.send("User took too long to respond. Use /battle to try again.")
+          async with db_pool.acquire() as cursor:
+        
+            await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
+  
+          return 
 
-        return 
-
-      if msg.content.lower() in  ["yes", "ye", "yeah", "sure", "ok", "y", "k", "okay", "yeh", "ya", "kk",  "why not", "yess", "yah"]: # However, if the reciever strictly says "yes", do what is below.
+        if view.value:
           start_rand = random.choice([1,2]) #currently, we are deciding the person who gets first move by random
           await interaction.followup.send("Starting battle...") # Inform the users that the battle is starting.
           await battle_command.battle(interaction, member, start_rand, db_pool) # Call the battle function in the battle_command file and proceed.
-      else: # If the reciever responds with anything else, cancel the battle.
+        else:
           async with db_pool.acquire() as cursor:
 
             await interaction.followup.send("Battle request cancelled.")

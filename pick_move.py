@@ -13,7 +13,7 @@ from random import randint
 import math
 
 
-client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # Define client.
+client = commands.Bot(command_prefix=".", intents = nextcord.Intents.default()) # Define client.
 
 #start_value of 1 is the starter
 #start_value of 2 is the reciever

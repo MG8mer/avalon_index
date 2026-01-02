@@ -11,7 +11,7 @@ from nextcord.utils import get
 from collections import defaultdict
 from shared import role_designation
 
-client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # define client
+client = commands.Bot(command_prefix=".") # define client
 
 last_message_time = defaultdict(lambda: 0)
 
@@ -129,5 +129,3 @@ class Leveling(commands.Cog):#level system function
 
 def setup(client):
   client.add_cog(Leveling(client)) # Add cog for leveling
-
-# Leveling system above inspired from https://youtu.be/55KLwf8P1ec?si=vROVGsVjML_iUazm

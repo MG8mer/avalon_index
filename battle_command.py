@@ -14,7 +14,7 @@ from shared import role_designation
 
 # Useful source throughout: https://discordpy.readthedocs.io/en/stable/interactions/api.html
 
-client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all()) # Define client.
+client = commands.Bot(command_prefix=".", intents = nextcord.Intents.default()) # Define client.
 
 # Dicts to store class info: 
 
