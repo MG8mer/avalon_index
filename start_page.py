@@ -31,27 +31,12 @@ async def start(interaction: Interaction, bot_name, bot_avatar_url, db_pool):
   start_value, check_battle_one, check_battle_two, user_count = await check_assign(interaction, db_pool)
 
   embed = nextcord.Embed(title=f"**__Welcome to Avalon Index!__**",
-    description=f"Hey {interaction.user.mention}! **__Avalon Index__** is a simple turn-based RPG game developed by **Hamzeus, Po, and Avash**. Currently, there are **__{user_count} users registered, including yourself!__** To get started, follow the steps below. We hope you enjoy!", 
+    description=f"Hey {interaction.user.mention}! Thanks for being one of **__{user_count}__** users registered on the bot **(including yourself)!** \n \nTo use `/battle` to battle other users and gain server XP, use `/pick` to pick one of three clases: **Knight, Archer,** or **Mage**! \n \n**__NOTE__**: Once you pick a class, you cannot change it unless you use `/reset` to wipe your global level and class to start over, so choose wisely!", 
     colour=0x00b0f4)
   embed.set_author(name=botName,
     icon_url=bot_avatar_url)
-  embed.add_field(name="**Pick Your Class**",
-    value="You must pick **1** out of the **3** currently available classes to accompany you on your journey. Use ``/pick`` command once ready.",
-    inline=False)
-  embed.add_field(name="**Knight** `1`",
-    value="The Knight is the tankiest class in the game, with high HP, but low damage.",
-    inline=True)
-  embed.add_field(name="**Archer** `2`",
-    value="The Archer has high damage, but lacks in terms of health.",
-    inline=True)
-  embed.add_field(name="**Mage** `3`",
-    value="The Mage is a class with reliable damage and HP.",
-    inline=True)
-  embed.add_field(name="Want to Learn More?",
-    value="We've provided you with the `/avi_manual` command, which provides you with a General page that talks more about the functionality of Avalon Index, mainly being battling and levelling *(More coming soon!)*. There are also pages for each of the classes so you can learn more about each class before picking one to stick with. \n \n **__NOTE__**: Once you pick a class, you cannot change it unless you use `/reset` to wipe your global level and class to start over, so choose wisely!",
-    inline=False)
-  embed.add_field(name="**Need Help?**",
-    value="If you need further guidance with proper command usage, use `/help` command to gain more knowledge before heading off.",
+  embed.add_field(name="**Need Extra Help?**",
+    value="If you need further guidance with proper command usage, use `/help` command to gain more knowledge before heading off. For more info on Avalon Index, use `/avi_manual`, which features separate pages for info on **battling, leveling,** and **each of the three classes!** \n \nHappy battling and leveling!",
     inline=False)
   embed.set_image(url=url)
   embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")

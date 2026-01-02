@@ -1,5 +1,6 @@
 import nextcord
 from nextcord.ext import commands
+from nextcord.utils import get
 
 async def role_designation(user, user_id, guild, guild_id, channel, level, db_pool):
   async with db_pool.acquire() as cursor:
@@ -21,8 +22,14 @@ async def role_designation(user, user_id, guild, guild_id, channel, level, db_po
 
         await user.add_roles(role) 
         embed = nextcord.Embed(title=f"**__Congratulations!__**",
-          description=f"{user.mention} has been awarded the {role.name} role for reaching level {level}!",
+          description=f"You have been awarded the {role.name} role for reaching level {level}!",
           colour=0x00b0f4)
         embed.set_thumbnail(url="https://cdn3.emoji.gg/emojis/5416-hollowpeped.gif")
         embed.set_footer(text = "Via Tenor", icon_url = "https://media.tenor.com/PeRI5dkeLFkAAAAi/tower-defense-simulator-roblox.gif")
-        await channel.send(embed=embed)
+        async with db_pool.acquire() as cursor:
+          levelup_channel = await cursor.fetchval("SELECT channel_id FROM level_up_channel WHERE guild_id = $1", guild_id)
+        if levelup_channel is None:
+          await channel.send(f"{user.mention}", embed=embed)
+        else:
+          channel_set = get(guild.channels, id=levelup_channel)
+          await channel_set.send(f"{user.mention}", embed=embed)

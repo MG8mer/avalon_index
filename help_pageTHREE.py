@@ -34,7 +34,7 @@ async def help(interaction, bot_name, bot_avatar_url):
     inline=False)
   embed.add_field(   
     name="/assign_exp_boosted_role",
-    value="Assign a role that gains extra server XP on this server from messaging (not battling) (you can determine the boost %).",
+    value="Assign a role that gains extra server XP on this server from messaging & battling (you can determine the boost %).",
     inline=True)
   embed.add_field(   
     name="> Syntax", 

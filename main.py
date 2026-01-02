@@ -53,13 +53,13 @@ import signal
 
 logging.basicConfig(level=logging.INFO)
 
-client = commands.Bot(command_prefix=".", intents = nextcord.Intents.all())   #from https://youtu.be/ksAtGCFxrP8#si=A89Nokdcqfsy_tGZ
+client = commands.Bot(command_prefix=".", intents = nextcord.Intents.default())   #from https://youtu.be/ksAtGCFxrP8#si=A89Nokdcqfsy_tGZ
 client.remove_command('help') # Removing the built in help command 
 
 db_pool = None
 keep_db_alive_task = None
 
-run = "Main" 
+run = "Main"
 
 async def create_db_pool():
   # Function to establish database connection using asyncpg
@@ -76,7 +76,8 @@ async def create_db_pool():
         port = DATABASE_PORT,
         user = DATABASE_USER,
         password = DATABASE_PASSWORD,
-        database = DATABASE_NAME
+        database = DATABASE_NAME,
+        statement_cache_size=0 
       )
     except Exception as e:
       logging.error(f"Error creating database connection pool: {e}")
@@ -131,22 +132,27 @@ async def keep_db_alive():
 
 @client.event
 async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python
-    logging.info("Bot is up and ready.") #prints when bot is online from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python 
-    global db_pool
+    logging.info("Bot is up and ready.")   #prints when bot is online from https://docs.replit.com/tutorials/python/build-basic-discord-bot- python 
     await create_db_pool()
     client.db_pool = db_pool
     client.load_extension("cogs.levels")
     async with db_pool.acquire() as cursor:
-      await cursor.execute('CREATE TABLE IF NOT EXISTS users(user_id BIGINT, guild_id BIGINT, class INTEGER, start INTEGER)')
-      await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id BIGINT, starter_hp INTEGER, reciever_id BIGINT, reciever_hp INTEGER, evaluation_starter TEXT, evaluation_reciever TEXT)')
-      await cursor.execute('CREATE TABLE IF NOT EXISTS moves(user_id BIGINT, opponent_id BIGINT, move_used TEXT, turn_num INTEGER)')
-      await cursor.execute('CREATE TABLE IF NOT EXISTS cooldowns(user_id BIGINT, opponent_id BIGINT, weak TEXT, w_cooldown INTEGER, normal TEXT, n_cooldown INTEGER, special TEXT, s_cooldown INTEGER, avalon_blessing TEXT, ab_cooldown INTEGER)')
-      await cursor.execute("""CREATE TABLE IF NOT EXISTS global_levels(user_id BIGINT, exp INTEGER, level INTEGER, exp_needed INTEGER)""")
-      await cursor.execute("""CREATE TABLE IF NOT EXISTS server_levels(user_id BIGINT, guild_id BIGINT, exp INTEGER, level INTEGER, exp_needed INTEGER)""")
-      await cursor.execute("""CREATE TABLE IF NOT EXISTS level_roles(guild_id BIGINT, level INTEGER, role_id BIGINT)""")
-      await cursor.execute("""CREATE TABLE IF NOT EXISTS no_exp_roles(guild_id BIGINT, role_id BIGINT)""")
-      await cursor.execute("""CREATE TABLE IF NOT EXISTS no_exp_channels(guild_id BIGINT, channel_id BIGINT)""")
-      await cursor.execute("""CREATE TABLE IF NOT EXISTS exp_boosted_roles(guild_id BIGINT, role_id BIGINT, boost_percent INT)""")
+        await cursor.execute('CREATE TABLE IF NOT EXISTS users(user_id BIGINT, guild_id BIGINT, class INTEGER, start INTEGER)')
+        await cursor.execute('CREATE TABLE IF NOT EXISTS battles(battle INTEGER, starter_id BIGINT, starter_hp INTEGER, reciever_id BIGINT, reciever_hp INTEGER)')
+        await cursor.execute('CREATE TABLE IF NOT EXISTS moves(user_id BIGINT, opponent_id BIGINT, move_used TEXT, turn_num INTEGER)')
+        await cursor.execute('CREATE TABLE IF NOT EXISTS cooldowns(user_id BIGINT, opponent_id BIGINT, weak TEXT, w_cooldown INTEGER, normal TEXT, n_cooldown INTEGER, special TEXT, s_cooldown INTEGER, avalon_blessing TEXT, ab_cooldown INTEGER)')
+        await cursor.execute("""CREATE TABLE IF NOT EXISTS global_levels(user_id BIGINT, exp INTEGER, level INTEGER, exp_needed INTEGER)""")
+        await cursor.execute("""CREATE TABLE IF NOT EXISTS server_levels(user_id BIGINT, guild_id BIGINT, exp INTEGER, level INTEGER, exp_needed INTEGER)""")
+        await cursor.execute("""CREATE TABLE IF NOT EXISTS level_roles(guild_id BIGINT, level INTEGER, role_id BIGINT)""")
+        await cursor.execute("""CREATE TABLE IF NOT EXISTS no_exp_roles(guild_id BIGINT, role_id BIGINT)""")
+        await cursor.execute("""CREATE TABLE IF NOT EXISTS no_exp_channels(guild_id BIGINT, channel_id BIGINT)""")
+        await cursor.execute("""CREATE TABLE IF NOT EXISTS exp_boosted_roles(guild_id BIGINT, role_id BIGINT, boost_percent INT)""")
+        await cursor.execute("""CREATE TABLE IF NOT EXISTS level_up_channel(guild_id BIGINT, channel_id BIGINT)""")
+        unique_active_users = await cursor.fetchval('SELECT COUNT(DISTINCT user_id) FROM server_levels WHERE exp > 0;')
+        unique_total_users = await cursor.fetchval('SELECT COUNT(DISTINCT user_id) FROM server_levels;')
+        seeing_something = await cursor.fetchval('SELECT COUNT(DISTINCT user_id) FROM server_levels WHERE guild_id = 110373943822540800;')
+        seeing_something_two = await cursor.fetchval('SELECT COUNT(DISTINCT user_id) FROM server_levels WHERE guild_id = 110373943822540800 AND exp > 0;')
+
 
     if not keep_db_alive.is_running():
        keep_db_alive.start()
@@ -155,7 +161,12 @@ async def on_ready(): # from https://docs.replit.com/tutorials/python/build-basi
     logging.info(f"{len(client.guilds)}")
     for i in range(len(client.guilds)):
        logging.info(f"{client.guilds[i].name}")
-       logging.info(f"{client.guilds[i].member_count}")  
+       logging.info(f"{client.guilds[i].member_count}") 
+    logging.info(f"Total unique ACTIVE users: {unique_active_users}")
+    logging.info(f"Total unique users: {unique_total_users}")
+    logging.info(f"Users in Discord Bots: {seeing_something}")
+    logging.info(f"ACTIVE Users in Discord Bots: {seeing_something_two}")
+
 
 @client.event
 async def on_resumed():
@@ -230,7 +241,10 @@ class PaginationViewLeaderboard(View):
   async def previous(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
       if self.command_user != interaction.user.id:
         await interaction.response.send_message("You cannot modify another user's embed! Use the command yourself to modify your own embed.", ephemeral=True)
-      elif self.current > 0:
+      elif self.current >= 0:
+        if self.current == 0:
+          self.current = len(self.embeds) - 1
+        else:
           self.current -= 1
           await interaction.response.edit_message(embed=self.embeds[self.current], view=self)
       else:
@@ -240,8 +254,11 @@ class PaginationViewLeaderboard(View):
   async def next(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
       if self.command_user != interaction.user.id:
         await interaction.response.send_message("You cannot modify another user's embed! Use the command yourself to modify your own embed.", ephemeral=True)
-      elif self.current < len(self.embeds) - 1:
-          self.current += 1
+      elif self.current <= len(self.embeds) - 1:
+          if self.current == len(self.embeds) - 1:
+            self.current = 0
+          else:
+            self.current += 1
           await interaction.response.edit_message(embed=self.embeds[self.current], view=self)
       else:
           await interaction.response.defer()
@@ -268,10 +285,27 @@ async def leaderboard(interaction: Interaction):
     for i in range(0, len(data), per_page):
         embed = nextcord.Embed(title=f"{interaction.guild} Server Leaderboard", color=nextcord.Color.blue())
         for j, record in enumerate(data[i:i+per_page], start=i+1):
-            user = interaction.guild.get_member(record['user_id'])
-            if user == interaction.user:
-              user_rank = j
-            embed.add_field(name=f"{j}. {user}", value=f"Level: {record['level']} | XP: {record['exp']}/{record['exp_needed']}", inline=False)
+            uid = int(record["user_id"])  
+            member = interaction.guild.get_member(uid)
+            display_name = None
+            if member is None:
+                try:
+                    member = await interaction.guild.fetch_member(uid)
+                except nextcord.NotFound:
+                    try:
+                        user_obj = await client.fetch_user(uid)
+                        display_name = user_obj.name
+                    except Exception:
+                        pass
+
+            if display_name is None and member is not None:
+                display_name = member.display_name
+            if display_name is None:  
+                display_name = f"<@{uid}>"
+
+            if uid == interaction.user.id:
+                user_rank = j
+            embed.add_field(name=f"{j}. {display_name}", value=f"Level: {record['level']} | XP: {record['exp']}/{record['exp_needed']}", inline=False)
         embed.set_footer(text=f"Page {len(embeds) + 1}/{(len(data) // per_page) + 1} | Your Rank: {user_rank}")
         embeds.append(embed)
     view = PaginationViewLeaderboard(embeds, interaction.user.id)
@@ -438,9 +472,13 @@ async def seelvlroles(interaction: Interaction):
   if role_no_exp_formatted == []:
     embed_description = "All roles can earn XP on the server."
   else:
-    for id in role_no_exp_formatted:
-      role = nextcord.utils.get(interaction.guild.roles, id=id)
-      embed_description = embed_description + str(role.mention) + "\n"
+      for id in role_no_exp_formatted:
+        role = nextcord.utils.get(interaction.guild.roles, id=id)
+        if role is None:
+          async with db_pool.acquire() as cursor:
+            await cursor.execute("DELETE FROM no_exp_roles WHERE role_id = $1", id)
+        else:
+          embed_description = embed_description + str(role.mention) + "\n"
 
   embed = nextcord.Embed(
     title=f"No XP Roles for {interaction.guild}",
@@ -527,7 +565,7 @@ async def seechannelroles(interaction: Interaction):
 
 # EXP BOOST ROLE COMMANDS BELOW
 
-@client.slash_command(name = "assign_exp_boosted_role", description = "Assign a role that gains extra server XP on this server from messaging (not battling).")
+@client.slash_command(name = "assign_exp_boosted_role", description = "Assign a role that gains extra server XP on this server from messaging and battling.")
 async def assignextraexp(interaction: Interaction, role: nextcord.Role, boost_percent: int):
   if not interaction.user.guild_permissions.manage_roles:
     await interaction.response.send_message("You need the Manage Roles permission to use this command, which you don't have.", ephemeral=True)
@@ -560,7 +598,7 @@ async def assignextraexp(interaction: Interaction, role: nextcord.Role, boost_pe
 
   await interaction.followup.send(f"`Successfully set {role.name} to earn {boost_percent}% more XP on the server.`")
 
-@client.slash_command(name = "remove_exp_boosted_role", description = "Remove a role that gains extra server XP from messaging (not battling) on this server.")
+@client.slash_command(name = "remove_exp_boosted_role", description = "Remove a role that gains extra server XP from messaging and battling on this server.")
 async def removeextraexp(interaction: Interaction, role: nextcord.Role):
   if not interaction.user.guild_permissions.manage_roles:
     await interaction.response.send_message("You need the Manage Roles permission to use this command, which you don't have.", ephemeral=True)
@@ -592,7 +630,7 @@ async def clearextraexp(interaction: Interaction):
     await cursor.execute('DELETE FROM exp_boosted_roles WHERE guild_id = $1', interaction.guild_id)
     await interaction.followup.send(f"`Successfully reset all XP boosted roles on the server.`")
 
-@client.slash_command(name = "see_exp_boosted_roles", description = "See the roles that gain extra server XP when messaging on this server along with their % boost!")
+@client.slash_command(name = "see_exp_boosted_roles", description = "See the roles that gain extra server XP on this server along with their % boost!")
 async def seeextraxp(interaction: Interaction):
   await interaction.response.defer()
   async with db_pool.acquire() as cursor:
@@ -610,10 +648,14 @@ async def seeextraxp(interaction: Interaction):
   if role_boosted_exp_formatted == []:
     embed_description = "No boosted XP roles to show."
   else:
-    while i < len(role_boosted_exp_formatted):
-      role = nextcord.utils.get(interaction.guild.roles, id=role_boosted_exp_formatted[i][0])
-      embed_description = embed_description + str(role.mention) + ": " + f"{role_boosted_exp_formatted[i][1]}%" "\n"
-      i += 1
+      while i < len(role_boosted_exp_formatted):
+        role = nextcord.utils.get(interaction.guild.roles, id=role_boosted_exp_formatted[i][0])
+        if role is None:
+          async with db_pool.acquire() as cursor:
+            await cursor.execute("DELETE FROM exp_boosted_roles WHERE role_id = $1", role_boosted_exp_formatted[i][0])
+        else:
+          embed_description = embed_description + str(role.mention) + ": " + f"{role_boosted_exp_formatted[i][1]}%" "\n"
+        i += 1
 
   embed = nextcord.Embed(
     title=f"Boosted XP Roles for {interaction.guild}",
@@ -622,6 +664,66 @@ async def seeextraxp(interaction: Interaction):
 )
   await interaction.followup.send(embed=embed)
 
+@client.slash_command(name = "set_levelup_channel", description = "Assign a channel on this server where level up embeds are sent.")
+async def setlevelup(interaction: Interaction, channel: nextcord.TextChannel):
+  if not interaction.user.guild_permissions.manage_channels:
+    await interaction.response.send_message("You need the Manage Channels permission to use this command, which you don't have.", ephemeral=True)
+    return
+  await interaction.response.defer()
+
+  async with db_pool.acquire() as cursor:
+    levelup_channel = await cursor.fetchval("SELECT channel_id FROM level_up_channel WHERE guild_id = $1", interaction.guild_id)
+
+  async with db_pool.acquire() as cursor:
+    if levelup_channel is None:
+      await cursor.execute('INSERT INTO level_up_channel (guild_id, channel_id) VALUES ($1, $2)', interaction.guild_id, channel.id)
+    else:
+      await cursor.execute('UPDATE level_up_channel SET channel_id = $1 WHERE guild_id = $2', channel.id, interaction.guild_id)
+
+  await interaction.followup.send(f"`Successfully set #{channel.name} to be the channel where level up embeds are sent for this server.`")
+
+@client.slash_command(name = "levelup_config", description = "See leveling settings for this server.")
+async def levelupconfig(interaction: Interaction):
+  await interaction.response.defer()
+
+  async with db_pool.acquire() as cursor:
+    levelup_channel = await cursor.fetchval("SELECT channel_id FROM level_up_channel WHERE guild_id = $1", interaction.guild_id)
+
+  level_description = ""
+  if levelup_channel is None:
+    level_description = "*Level up embeds are set by default to be sent in the channel where the battle/message caused the level up. \n \n To set a channel where all level up embeds are sent, use the command `set_levelup_channel`.*"
+  else:
+    channel = get(interaction.guild.channels, id=levelup_channel)
+    level_description = f"{channel.mention}"
+
+  embed = nextcord.Embed(
+    title=f"Leveling Settings for {interaction.guild}",
+    description="",
+    color=nextcord.Color.blue())
+  embed.add_field(
+    name=f"Level Up Channel",
+    value=level_description
+  )
+
+  await interaction.followup.send(embed=embed)
+
+@client.slash_command(name = "reset_levelup_channel", description = "Reset level up embeds to be sent in the channel where the battle/message caused the level up.")
+async def resetlevelup(interaction: Interaction):
+  if not interaction.user.guild_permissions.manage_channels:
+    await interaction.response.send_message("You need the Manage Channels permission to use this command, which you don't have.", ephemeral=True)
+    return
+  await interaction.response.defer()
+
+  async with db_pool.acquire() as cursor:
+    levelup_channel = await cursor.fetchval("SELECT channel_id FROM level_up_channel WHERE guild_id = $1", interaction.guild_id)
+
+  if levelup_channel is None:
+    await interaction.followup.send("`Level up embeds are already set to be sent in the channel where the battle/message caused the level up.`")
+    return
+
+  async with db_pool.acquire() as cursor:
+    await cursor.execute("DELETE FROM level_up_channel WHERE guild_id = $1", interaction.guild_id)
+  await interaction.followup.send(f"`Level up embeds are now to be sent in the channel where the battle/message caused the level up rather than a specific channel.`")
 
 @client.slash_command(name = "playercount", description = "See how many users are registered with the bot!")
 async def count(interaction: Interaction):
@@ -683,8 +785,11 @@ class PaginationView(View):
     async def previous(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         if self.command_user != interaction.user.id:
           await interaction.response.send_message("You cannot modify another user's embed! Use the command yourself to modify your own embed.", ephemeral=True)
-        elif self.current > 0:
-            self.current -= 1
+        elif self.current >= 0:
+            if self.current == 0:
+              self.current = len(self.embeds) - 1
+            else:
+              self.current -= 1
             await interaction.response.edit_message(embed=self.embeds[self.current], view=self)
         else:
             await interaction.response.defer()
@@ -693,14 +798,17 @@ class PaginationView(View):
     async def next(self, button: nextcord.ui.Button, interaction: nextcord.Interaction):
         if self.command_user != interaction.user.id:
           await interaction.response.send_message("You cannot modify another user's embed! Use the command yourself to modify your own embed.", ephemeral=True)
-        elif self.current < len(self.embeds) - 1:
-            self.current += 1
+        elif self.current <= len(self.embeds) - 1:
+            if self.current == len(self.embeds) - 1:
+              self.current = 0
+            else:
+              self.current += 1
             await interaction.response.edit_message(embed=self.embeds[self.current], view=self)
         else:
             await interaction.response.defer()
 
 @client.slash_command(name = "help", description = "Are you confused?") #slash command to print out help pages
-async def help(interaction: Interaction, page: int = SlashOption(name="page", choices={"#1": 1, "#2": 2, "#3": 3, "#4": 4, "#5": 5})):
+async def help(interaction: Interaction, page: int = SlashOption(name="page", choices={"#1": 1, "#2": 2, "#3": 3, "#4": 4, "#5": 5, "#6": 6})):
     await interaction.response.defer()
     botName = client.user.name
     bot_avatar_url = client.user.avatar.url
@@ -709,7 +817,8 @@ async def help(interaction: Interaction, page: int = SlashOption(name="page", ch
     embed_pgthree = await help_pageTHREE.help(interaction, botName, bot_avatar_url)
     embed_pgfour = await help_pageFOUR.help(interaction, botName, bot_avatar_url)
     embed_pgfive = await help_pageFIVE.help(interaction, botName, bot_avatar_url)
-    help_pages = [embed_pgone, embed_pgtwo, embed_pgthree,  embed_pgfour, embed_pgfive]
+    embed_pgsix = await help_pageSIX.help(interaction, botName, bot_avatar_url)
+    help_pages = [embed_pgone, embed_pgtwo, embed_pgthree,  embed_pgfour, embed_pgfive, embed_pgsix]
     view = PaginationView(help_pages, page-1, interaction.user.id)
     await interaction.followup.send(embed=help_pages[page-1], view=view)
 
@@ -833,6 +942,28 @@ async def pck(interaction: Interaction, number: int = SlashOption(name="class", 
           elif number == 3:
             await interaction.followup.send("You picked the Mage class! This is the class you will use during battles. To pick a new class, you must reset your stats.") 
 
+class StartBattle(nextcord.ui.View):
+  def __init__(self, interaction_id):
+    super().__init__(timeout=30)
+    self.interaction_id = interaction_id
+    self.value = None
+
+  @nextcord.ui.button(label = 'Yes', style=nextcord.ButtonStyle.green)
+  async def y(self, button: nextcord.ui.Button, interaction: Interaction):
+      if interaction.user.id != self.interaction_id:
+          await interaction.response.send_message("You can't start a battle that you're not involved in!", ephemeral=True)
+      else:
+        await interaction.response.defer()
+        self.value = True
+        self.stop()
+
+  @nextcord.ui.button(label = 'No', style=nextcord.ButtonStyle.red)
+  async def n(self, button: nextcord.ui.Button, interaction: Interaction):
+    if interaction.user.id != self.interaction_id:
+        await interaction.response.send_message("You can't start a battle that you're not involved in!", ephemeral=True)
+    else:
+        self.value = False
+        self.stop()
 
 @client.slash_command(name = "battle", description = "Battle an opponent of your choice in this server!")   
 # gotten from: https://stackoverflow.com/questions/68646719/discord-py-set-user-id-as-an-
@@ -855,8 +986,10 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
 
   if start_value != 1: # Has the user used start?
     await interaction.followup.send("Please use /start and try again.")
+    return
   elif class_value_initial != 1 and class_value_initial != 2 and class_value_initial != 3: # Has the starter picked a class?
     await interaction.followup.send("Please use /pick and try again.")
+    return
   elif battle_requested == 0 or requesting_battle == 0: # Has the starter requested or been requested for a battle?
     await interaction.followup.send("You have already requested or been requested for a battle! Please await for your request to timeout or be accepted/rejected or accept/reject your request to try again.")
   elif check_battle_one == 1 or check_battle_two == 1: # Is the user in a battle?
@@ -872,25 +1005,24 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
 
       await cursor.execute('INSERT INTO battles (battle, starter_id, reciever_id) VALUES ($1, $2, $3)', 0, interaction.user.id, member.id) # Insert these temporary values, in which 0 as the battle value means both the starter (interaction.user.id), and the reciever (member.id) are in a battle request state. Also, interaction.channel_id ensures that a command such as /ff can only be used in the channel where the battle between these users was started.
 
-    await interaction.followup.send(f"Before you fight {member.mention}, they must consent to your worthy request! \n {member.mention}, would you like to fight, {interaction.user.mention}? Respond `yes` or something similar to confirm, respond anything else to cancel.") # Send a message to inform both users of the battle and ask the reciever for their consent to the battle.  
-    if battle_requested != 0: # If the starter has not started a battle request or has been requested for a battle then do what is below.
-      # Below from https://www.youtube.com/watch?v=zamNFx3L7oA&t=2s&ab_channel=Dannycademy
-      try:
-        msg = await client.wait_for("message", timeout=60, check=lambda message: message.author.id == member.id and message.channel.id == interaction.channel_id) # Await for a message from the reciever.
-      except asyncio.TimeoutError: # If 60 seconds have passed and the reciever hasn't responded, inform that the reciever took too long to respond and cancel the battle.
-        await interaction.followup.send("User took too long to respond. Use /battle to try again.")
-      # Above from https://www.youtube.com/watch?v=zamNFx3L7oA&t=2s&ab_channel=Dannycademy
-        async with db_pool.acquire() as cursor:
+    view = StartBattle(member.id)
 
-          await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
+    await interaction.followup.send(f"Before you fight {member.mention}, they must consent to your worthy request! \n {member.mention}, would you like to fight, {interaction.user.mention}?", view=view) # Send a message to inform both users of the battle and ask the reciever for their consent to the battle.  
+    if battle_requested != 0: 
+        await view.wait()
+        if view.value is None:
+          await interaction.followup.send("User took too long to respond. Use /battle to try again.")
+          async with db_pool.acquire() as cursor:
+        
+            await cursor.execute('DELETE FROM battles WHERE starter_id = $1', interaction.user.id)
+  
+          return 
 
-        return 
-
-      if msg.content.lower() in  ["yes", "ye", "yeah", "sure", "ok", "y", "k", "okay"]: # However, if the reciever strictly says "yes", do what is below.
+        if view.value:
           start_rand = random.choice([1,2]) #currently, we are deciding the person who gets first move by random
           await interaction.followup.send("Starting battle...") # Inform the users that the battle is starting.
           await battle_command.battle(interaction, member, start_rand, db_pool) # Call the battle function in the battle_command file and proceed.
-      else: # If the reciever responds with anything else, cancel the battle.
+        else:
           async with db_pool.acquire() as cursor:
 
             await interaction.followup.send("Battle request cancelled.")
@@ -901,8 +1033,10 @@ async def battle(interaction: Interaction, member: nextcord.Member):    #.battle
 
 # The stats command diplays the stats of a user that is mentioned, for now displaying the user's class only. The function checks that the start value is one for the user so stats can be actually displayed for the user. Then the value of the class column for that user is checked to display their class, which is then proceeded to deferring the need to respond to the interaction and then following up by sending the embed for the user's stats, which is for now only their class. If the user has not used the pick function ypet, the class displayed will simply be N/A.
 @client.slash_command(name = "stats", description = "Display the stats for any person on the server!")
-async def st(interaction: Interaction, member: nextcord.Member):    #.stats command, displays the stats of user's chosen class in an embed
+async def st(interaction: Interaction, member: nextcord.Member = None):    #.stats command, displays the stats of user's chosen class in an embed
   # member: nextcord.Member arg gotten from https://stackoverflow.com/questions/68646719/discord-py-set-user-id-as-an-argument
+      if member is None:
+        member = interaction.user
       async with db_pool.acquire() as cursor:
 
         class_value = await cursor.fetchval('SELECT class FROM users WHERE user_id = $1', member.id)
@@ -970,6 +1104,11 @@ async def st(interaction: Interaction, member: nextcord.Member):    #.stats comm
 async def on_disconnect():
     try:
       logging.info("Commencing cleanup procedure...")
+      async with db_pool.acquire() as cursor:
+        logging.info("Ending ALL battles...")
+        await cursor.execute("DELETE FROM battles")
+        await cursor.execute("DELETE FROM cooldowns")
+        await cursor.execute("DELETE FROM moves")
       await close_pool()
       client.unload_extension("cogs.levels")
     except Exception as e:

@@ -5,6 +5,7 @@ hidden = [".pythonlibs"]
 
 [nix]
 channel = "stable-23_05"
+packages = ["ffmpeg-full", "freetype", "lcms2", "libimagequant", "libjpeg", "libopus", "libtiff", "libwebp", "libxcrypt", "openjpeg", "postgresql", "tcl", "tk", "zlib"]
 
 [unitTest]
 language = "python3"
@@ -14,7 +15,14 @@ run = ["python3", "main.py"]
 deploymentTarget = "gce"
 ignorePorts = true
 
+[[ports]]
+localPort = 8080
+externalPort = 80
+
 [languages]
 
 [languages.python3.languageServer]
 start = "nice -1"
+
+[agent]
+expertMode = true

@@ -42,7 +42,7 @@ async def help(interaction, bot_name, bot_avatar_url):
     inline=False)
   embed.add_field(    
     name="> /see_exp_boosted_roles", 
-    value="See the roles that gain extra server XP when messaging on this server along with their % boost!", 
+    value="See the roles that gain extra server XP when messaging/battling on this server along with their % boost!", 
     inline=False)
   embed.add_field(  
     name="",

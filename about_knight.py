@@ -33,23 +33,19 @@ async def about(interaction: Interaction, bot_name, bot_avatar_url):
     inline=False)
   embed_knight.add_field(
     name="Sword Jab (Weak)",
-    value="Weak -10 HP; Normal -15 HP; Strong -20 HP",
+    value="-10 HP",
     inline=True)
   embed_knight.add_field(
     name="Sword Slash (Normal)",
-    value="Weak -15 HP; Normal -25 HP; Strong -35 HP",
+    value="-20 HP",
     inline=False)
   embed_knight.add_field(
     name="Dual Sword Attack (Special)",
-    value="Weak -30 HP; Normal -45 HP; Strong -60 HP",
+    value="-35 HP",
     inline=False)
   embed_knight.add_field(
     name="Sliced and Diced (Avalon's Blessing)",
-    value="Weak -50 HP; Normal -75 HP; Strong -100 HP",
-    inline=False)
-  embed_knight.add_field(
-    name="Weaknesses/Strengths",
-    value="The Knight is **STRONG** against the Mage but **WEAK** against the Archer (**NORMAL** against itself).",
+    value="-65 HP",
     inline=False)
   embed_knight.set_thumbnail(url="https://i.imgur.com/soNMbTL.png")
   return embed_knight

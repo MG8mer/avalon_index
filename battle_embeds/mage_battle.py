@@ -1,5 +1,6 @@
 import os
 import nextcord
+import asyncio
 from nextcord.embeds import Embed
 import nextcord.interactions  
 import asyncpg
@@ -10,123 +11,44 @@ from nextcord import Interaction
 # Function to send an embed to the user when they use battle if they picked mage.
 async def battle_embd(interaction: Interaction, member: nextcord.Member, switch, turn, starter_hp_value, reciever_hp_value, startrand_mage, recieverand_mage, battle_screen, db_pool):
   if startrand_mage == 7 or recieverand_mage == 7:
-    # Dicts to store class info:
+    # Dicts to store class info: 
 
-      # Class health
-      health = {
-        1: 150,
-        2: 100,
-        3: 125
-      }
+    # Class health
+    health = {
+      1: 150,
+      2: 100,
+      3: 125
+    }
 
-      # Battle evaluation:
-        # Ex: 12; if a knight fights an archer it's weak for the knight.
-        # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
-      evaluation = {
-        "11": "Normal",
-        "22": "Normal",
-        "33": "Normal",
-        "12": "Weak",
-        "13": "Strong",
-        "21": "Strong",
-        "23": "Weak",
-        "31": "Weak",
-        "32": "Strong",
-      }
+    # Dict order:
+      # Class
+        # Attacks: Damage:
 
-      # Dict order:
-        # Class
-          # Attacks:
-            # Damage dependent on evaluation.
-      attacks = {
-        1: {
-          "Sword Jab": {
-            "Weak": -10,
-            "Normal": -15,
-            "Strong": -20
-          },
-          "Sword Slash": {
-            "Weak": -15,
-            "Normal": -25,
-            "Strong": -35
-          },
-          "Dual Sword Attack": {
-            "Weak": -30,
-            "Normal": -45,
-            "Strong": -60
-          },
-          "Sliced and Diced": {
-            "Weak": -50,
-            "Normal": -75,
-            "Strong": -100
-          }
-        },
-        2: {
-          "Weak Arrow": {
-            "Weak": -15,
-            "Normal": -20,
-            "Strong": -25
-          },
-          "Piercing Shot": {
-            "Weak": -25,
-            "Normal": -35,
-            "Strong": -45
-          },
-          "Triple Shot": {
-            "Weak": -50,
-            "Normal": -70,
-            "Strong": -90
-          },
-          "Make it Rain": {
-            "Weak": -85,
-            "Normal": -125,
-            "Strong": -150
-          }
-        },
-        3: {
-        "Zap": {
-          "Weak": -12,
-          "Normal": -18,
-          "Strong": -22
-        },
-        "Fireball": {
-          "Weak": -22,
-          "Normal": -32,
-          "Strong": -42
-        },
-        "Arcane Mania": {
-          "Weak": -45,
-          "Normal": -65,
-          "Strong": -80
-        },
-        "Biden Blast": {
-          "Weak": -75,
-          "Normal": -100,
-          "Strong": -125
-        }
+    attacks = {
+      1: {
+        "Sword Jab": -10,
+        "Sword Slash": -20,
+        "Dual Sword Attack": -35,
+        "Sliced and Diced": -65
+      },
+      2: {
+        "Weak Arrow": -20,
+        "Piercing Shot": -30,
+        "Triple Shot": -45,
+        "Make it Rain": -75
+      },
+      3: {
+        "Zap": -15,
+        "Fireball": -25,
+        "Arcane Mania": -40,
+        "Biden Blast": -70,
       },
       4: {
-      "THUNDERBOLT": {
-        "Weak": -15,
-        "Normal": -20,
-        "Strong": -25
-      },
-      "SUPER FIREBALL": {
-        "Weak": -25,
-        "Normal": -35,
-        "Strong": -45
-      },
-      "THE SORCERER'S WRATH": {
-        "Weak": -50,
-        "Normal": -70,
-        "Strong": -90,
-      },
-      "TRUE BIDEN BLAST!!!": {
-        "Weak": -999,
-        "Normal": -999,
-        "Strong": -999,
+        "THUNDERBOLT": -25,
+        "SUPER FIREBALL": -40,
+        "THE SORCERER'S WRATH": -70,
+        "TRUE BIDEN BLAST!!!": -999
       }
-    }
     }
   else:
     # Dicts to store class info: 
@@ -138,93 +60,29 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       3: 125
     }
 
-    # Battle evaluation:
-      # Ex: 12; if a knight fights an archer it's weak for the knight.
-      # Ex 2: 32: if a mage fights an archer, it's strong for the mage.
-    evaluation = {
-      "11": "Normal",
-      "22": "Normal",
-      "33": "Normal",
-      "12": "Weak",
-      "13": "Strong",
-      "21": "Strong",
-      "23": "Weak",
-      "31": "Weak",
-      "32": "Strong",
-    }
-
     # Dict order:
       # Class
-        # Attacks:
-          # Damage dependent on evaluation.
+        # Attacks: Damage:
 
     attacks = {
-      1: {
-        "Sword Jab": {
-          "Weak": -10,
-          "Normal": -15,
-          "Strong": -20
+        1: {
+          "Sword Jab": -10,
+          "Sword Slash": -20,
+          "Dual Sword Attack": -35,
+          "Sliced and Diced": -65
         },
-        "Sword Slash": {
-          "Weak": -15,
-          "Normal": -25,
-          "Strong": -35
+        2: {
+          "Weak Arrow": -20,
+          "Piercing Shot": -30,
+          "Triple Shot": -45,
+          "Make it Rain": -75
         },
-        "Dual Sword Attack": {
-          "Weak": -30,
-          "Normal": -45,
-          "Strong": -60
-        },
-        "Sliced and Diced": {
-          "Weak": -50,
-          "Normal": -75,
-          "Strong": -100
+        3: {
+          "Zap": -15,
+          "Fireball": -25,
+          "Arcane Mania": -40,
+          "Biden Blast": -70,
         }
-      },
-      2: {
-        "Weak Arrow": {
-          "Weak": -15,
-          "Normal": -20,
-          "Strong": -25
-        },
-        "Piercing Shot": {
-          "Weak": -25,
-          "Normal": -35,
-          "Strong": -45
-        },
-        "Triple Shot": {
-          "Weak": -50,
-          "Normal": -70,
-          "Strong": -90,
-        },
-        "Make it Rain": {
-          "Weak": -85,
-          "Normal": -125,
-          "Strong": -150,
-        }
-      },
-      3: {
-      "Zap": {
-        "Weak": -12,
-        "Normal": -18,
-        "Strong": -22
-      },
-      "Fireball": {
-        "Weak": -22,
-        "Normal": -32,
-        "Strong": -42
-      },
-      "Arcane Mania": {
-        "Weak": -45,
-        "Normal": -65,
-        "Strong": -80,
-      },
-      "Biden Blast": {
-        "Weak": -75,
-        "Normal": -100,
-        "Strong": -125,
-      }
-    }
     }
   id_user = interaction.user.id 
   id_member = member.id
@@ -653,11 +511,9 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
     if switch == False: # If it's the starter's turn
       user = interaction.user
       hp = await cursor.fetchval(f"SELECT starter_hp FROM battles WHERE starter_id = {interaction.user.id}")
-      evaluation = await cursor.fetchval(f"SELECT evaluation_starter FROM battles WHERE starter_id = {interaction.user.id}") # Get the evaluation of that user
     elif switch == True: # If it's the reciever's turn
       user = member
       hp = await cursor.fetchval(f"SELECT reciever_hp FROM battles WHERE starter_id = {interaction.user.id}") # Get hp value of that user 
-      evaluation = await cursor.fetchval(f"SELECT evaluation_reciever FROM battles WHERE starter_id = {interaction.user.id}") # Get the evaluation of that user
 
   if switch == False:
     if startrand_mage == 7:
@@ -670,20 +526,20 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         value=str(hp),
         inline=True)
       embed.add_field( # Field that shows the weak attack for that class and damage according the value of that user's evaluation.
-        name="THUNDERBOLT (Weak) **No Cooldown; Hit Chance: 50%**",
-        value=str(attacks[4]["THUNDERBOLT"][evaluation]),
+        name="THUNDERBOLT (Weak) **No Cooldown; Hit Chance: 70%**",
+        value=str(attacks[4]["THUNDERBOLT"]),
         inline=True)
       embed.add_field( # Field that shows the normal attack for that class and damage according the value of that user's evaluation.
-        name=f"SUPER FIREBALL (Normal) **Cooldown: {normal_c}; Hit Chance: 40%**",
-        value=str(attacks[4]["SUPER FIREBALL"][evaluation]),
+        name=f"SUPER FIREBALL (Normal) **Cooldown: {normal_c}; Hit Chance: 60%**",
+        value=str(attacks[4]["SUPER FIREBALL"]),
         inline=False)
       embed.add_field( # Field that shows the special attack for that class and damage according the value of that user's evaluation.
-        name=f"THE SORCERER'S WRATH (Special) **Cooldown: {special_c}; Hit Chance: 25%**",
-        value=str(attacks[4]["THE SORCERER'S WRATH"][evaluation]),
+        name=f"THE SORCERER'S WRATH (Special) **Cooldown: {special_c}; Hit Chance: 35%**",
+        value=str(attacks[4]["THE SORCERER'S WRATH"]),
         inline=False)
       embed.add_field( # Field that shows the weak avalon blessing attack for that class and damage according the value of that user's evaluation.
         name=f"TRUE BIDEN BLAST!!! (Avalon's Blessing) **Cooldown: {avalonbless_c}; Hit Chance: 1%**",
-        value=str(attacks[4]["TRUE BIDEN BLAST!!!"][evaluation]),
+        value=str(attacks[4]["TRUE BIDEN BLAST!!!"]),
         inline=False)        
       embed.set_thumbnail(url="https://i.imgur.com/aIikkUR.png")
     else:
@@ -697,19 +553,19 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         inline=True)
       embed.add_field( # Field that shows the weak attack for that class and damage according the value of that user's evaluation.
         name="Zap (Weak) **No Cooldown; Hit Chance: 99.9%**",
-        value=str(attacks[3]["Zap"][evaluation]),
+        value=str(attacks[3]["Zap"]),
         inline=True)
       embed.add_field( # Field that shows the normal attack for that class and damage according the value of that user's evaluation.
         name=f"Fireball (Normal) **Cooldown: {normal_c}; Hit Chance: 80%**",
-        value=str(attacks[3]["Fireball"][evaluation]),
+        value=str(attacks[3]["Fireball"]),
         inline=False)
       embed.add_field( # Field that shows the special attack for that class and damage according the value of that user's evaluation.
-        name=f"Arcane Mania (Special) **Cooldown: {special_c}; Hit Chance: 50%**",
-        value=str(attacks[3]["Arcane Mania"][evaluation]),
+        name=f"Arcane Mania (Special) **Cooldown: {special_c}; Hit Chance: 60%**",
+        value=str(attacks[3]["Arcane Mania"]),
         inline=False)
       embed.add_field( # Field that shows the weak avalon blessing attack for that class and damage according the value of that user's evaluation.
-        name=f"Biden Blast (Avalon's Blessing) **Cooldown: {avalonbless_c}; Hit Chance: 25%**",
-        value=str(attacks[3]["Biden Blast"][evaluation]),
+        name=f"Biden Blast (Avalon's Blessing) **Cooldown: {avalonbless_c}; Hit Chance: 35%**",
+        value=str(attacks[3]["Biden Blast"]),
         inline=False)
       embed.set_thumbnail(url="https://i.imgur.com/0DpJe0b.png")  # Shows image of mage.
   elif switch == True:
@@ -723,20 +579,20 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         value=str(hp),
         inline=True)
       embed.add_field( # Field that shows the weak attack for that class and damage according the value of that user's evaluation.
-        name="THUNDERBOLT (Weak) **No Cooldown; Hit Chance: 50%**",
-        value=str(attacks[4]["THUNDERBOLT"][evaluation]),
+        name="THUNDERBOLT (Weak) **No Cooldown; Hit Chance: 70%**",
+        value=str(attacks[4]["THUNDERBOLT"]),
         inline=True)
       embed.add_field( # Field that shows the normal attack for that class and damage according the value of that user's evaluation.
-        name=f"SUPER FIREBALL (Normal) **Cooldown: {normal_c}; Hit Chance: 40%**",
-        value=str(attacks[4]["SUPER FIREBALL"][evaluation]),
+        name=f"SUPER FIREBALL (Normal) **Cooldown: {normal_c}; Hit Chance: 60%**",
+        value=str(attacks[4]["SUPER FIREBALL"]),
         inline=False)
       embed.add_field( # Field that shows the special attack for that class and damage according the value of that user's evaluation.
-        name=f"THE SORCERER'S WRATH (Special) **Cooldown: {special_c}; Hit Chance: 25%**",
-        value=str(attacks[4]["THE SORCERER'S WRATH"][evaluation]),
+        name=f"THE SORCERER'S WRATH (Special) **Cooldown: {special_c}; Hit Chance: 35%**",
+        value=str(attacks[4]["THE SORCERER'S WRATH"]),
         inline=False)
       embed.add_field( # Field that shows the weak avalon blessing attack for that class and damage according the value of that user's evaluation.
         name=f"TRUE BIDEN BLAST!!! (Avalon's Blessing) **Cooldown: {avalonbless_c}; Hit Chance: 1%**",
-        value=str(attacks[4]["TRUE BIDEN BLAST!!!"][evaluation]),
+        value=str(attacks[4]["TRUE BIDEN BLAST!!!"]),
         inline=False)        
       embed.set_thumbnail(url="https://i.imgur.com/aIikkUR.png")
     else:
@@ -750,23 +606,24 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
         inline=True)
       embed.add_field( # Field that shows the weak attack for that class and damage according the value of that user's evaluation.
         name="Zap (Weak) **No Cooldown; Hit Chance: 99.9%**",
-        value=str(attacks[3]["Zap"][evaluation]),
+        value=str(attacks[3]["Zap"]),
         inline=True)
       embed.add_field( # Field that shows the normal attack for that class and damage according the value of that user's evaluation.
         name=f"Fireball (Normal) **Cooldown: {normal_c}; Hit Chance: 80%**",
-        value=str(attacks[3]["Fireball"][evaluation]),
+        value=str(attacks[3]["Fireball"]),
         inline=False)
       embed.add_field( # Field that shows the special attack for that class and damage according the value of that user's evaluation.
-        name=f"Arcane Mania (Special) **Cooldown: {special_c}; Hit Chance: 50%**",
-        value=str(attacks[3]["Arcane Mania"][evaluation]),
+        name=f"Arcane Mania (Special) **Cooldown: {special_c}; Hit Chance: 60%**",
+        value=str(attacks[3]["Arcane Mania"]),
         inline=False)
       embed.add_field( # Field that shows the weak avalon blessing attack for that class and damage according the value of that user's evaluation.
-        name=f"Biden Blast (Avalon's Blessing) **Cooldown: {avalonbless_c}; Hit Chance: 25%**",
-        value=str(attacks[3]["Biden Blast"][evaluation]),
+        name=f"Biden Blast (Avalon's Blessing) **Cooldown: {avalonbless_c}; Hit Chance: 35%**",
+        value=str(attacks[3]["Biden Blast"]),
         inline=False)
       embed.set_thumbnail(url="https://i.imgur.com/0DpJe0b.png")  # Shows image of mage.
 
   if switch == False: # If it's the starter's turn, send the embed in their dm.
+    await asyncio.sleep(2)
     message = await interaction.followup.send(embed=embed, view=view)
     await view.wait()
     if view.value is None:
@@ -775,6 +632,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       return False
     await message.delete()
     if battle_screen != None:
+      await asyncio.sleep(1)
       await battle_screen.delete()
 
     async with db_pool.acquire() as cursor:
@@ -813,6 +671,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
           await cursor.execute(f'UPDATE cooldowns SET ab_cooldown = {(avalonbless_c - 1)} WHERE user_id = {interaction.user.id}')
       return move_final
   elif switch == True: # If it's the reciever's turn, send the embed in their dm.
+    await asyncio.sleep(2)
     message = await interaction.followup.send(embed=embed, view=view)
     await view.wait()
     if view.value is None:
@@ -821,6 +680,7 @@ async def battle_embd(interaction: Interaction, member: nextcord.Member, switch,
       return False
     await message.delete()
     if battle_screen != None:
+      await asyncio.sleep(1)
       await battle_screen.delete()
     async with db_pool.acquire() as cursor:
 
