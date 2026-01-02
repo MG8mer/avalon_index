@@ -41,7 +41,6 @@ import help_pageTWO
 import help_pageTHREE
 import help_pageFOUR
 import help_pageFIVE
-import help_pageSIX
 import about_battling
 import about_levelling
 import start_page
@@ -389,14 +388,10 @@ async def seelvlroles(interaction: Interaction):
   if role_levels == []:
     embed_description = "No level roles to show."
   else:
-      while i < len(role_levels_formatted):
-        role = nextcord.utils.get(interaction.guild.roles, id=role_levels_formatted[i][0])
-        if role is None:
-          async with db_pool.acquire() as cursor:
-            await cursor.execute("DELETE FROM level_roles WHERE role_id = $1",role_levels_formatted[i][0])
-        else:
-          embed_description = embed_description + "Level " + str(role_levels_formatted[i][1]) + ": " + str(role.mention) + "\n"
-        i += 1
+    while i < len(role_levels_formatted):
+      role = nextcord.utils.get(interaction.guild.roles, id=role_levels_formatted[i][0])
+      embed_description = embed_description + "Level " + str(role_levels_formatted[i][1]) + ": " + str(role.mention) + "\n"
+      i += 1
 
   embed = nextcord.Embed(
     title=f"Level Roles for {interaction.guild}",
